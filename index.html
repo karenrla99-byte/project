@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>동네 사람들의 직업에 어울리는 물건 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#2b3a4a; --line:#8e9aa6; --accent:#ff8a3d; --accent-d:#e06a1b; --green:#3fb56b; --blue:#3a8ee6;
+  --card:#ffffff; --bg:#fff7e6;
+  --emoji:"Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+  font-family:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation}
+.emo{font-family:var(--emoji);line-height:1}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+
+/* ---------- screens ---------- */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:64px 16px 34px}
+.screen.on{display:flex}
+
+/* ---------- common UI ---------- */
+.top-btn{position:fixed;top:10px;z-index:50;width:52px;height:52px;border-radius:16px;background:#fff;
+  box-shadow:0 3px 0 rgba(0,0,0,.18);font-size:26px;display:flex;align-items:center;justify-content:center}
+#btnFull{left:10px} #btnSet{right:10px}
+.top-btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.big-btn{min-width:210px;min-height:68px;padding:10px 28px;border-radius:22px;font-size:clamp(22px,3.4vmin,32px);
+  background:var(--accent);color:#fff;box-shadow:0 5px 0 var(--accent-d);display:inline-flex;align-items:center;justify-content:center;gap:10px}
+.big-btn.alt{background:var(--blue);box-shadow:0 5px 0 #2a6dba}
+.big-btn.green{background:var(--green);box-shadow:0 5px 0 #2d8f52}
+.big-btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.25)}
+#footer{position:fixed;left:0;right:0;bottom:0;z-index:40;text-align:center;font-size:13px;padding:6px 8px;
+  color:#5d6b78;background:rgba(255,255,255,.7);pointer-events:none}
+#footer a{pointer-events:none;color:inherit;text-decoration:none}
+#footer a[href]{pointer-events:auto;color:#c2185b;text-decoration:underline;padding:6px 4px}
+
+/* ---------- S1 town ---------- */
+#s1{padding:0}
+#town{position:absolute;inset:0;overflow:hidden;
+  background:linear-gradient(#7ec8ff 0%,#c8ebff 38%,#9fe08a 38.1%,#6cc65a 100%)}
+#road{position:absolute;left:0;right:0;top:60%;height:20%;background:#6b7480;border-top:6px solid #8a929c;border-bottom:6px solid #8a929c}
+#road::after{content:"";position:absolute;left:0;right:0;top:50%;height:6px;transform:translateY(-50%);
+  background:repeating-linear-gradient(90deg,#fff 0 40px,transparent 40px 80px)}
+.deco,.hot{position:absolute;transform:translate(-50%,-50%);font-family:var(--emoji);line-height:1;
+  font-size:calc(var(--sz)*.14vmin)}
+.deco{pointer-events:none}
+.hot{background:none;padding:0;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25));animation:bob 1.8s ease-in-out infinite;
+  min-width:44px;min-height:44px}
+.hot .base{display:block;font-size:1.35em}
+.hot .fg{position:absolute;right:-.25em;bottom:-.1em;font-size:.95em}
+.hot.solo .fg{position:static}
+.hot .star{position:absolute;left:-.2em;top:-.3em;font-size:.6em}
+.hot:active{transform:translate(-50%,-50%) scale(.94)}
+.hot:nth-child(odd){animation-delay:.4s}
+@keyframes bob{0%,100%{margin-top:0}50%{margin-top:-10px}}
+#townTitle{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.9);
+  border-radius:22px;padding:8px 22px;font-size:clamp(20px,3.4vmin,30px);box-shadow:0 3px 0 rgba(0,0,0,.15);white-space:nowrap}
+#townCount{position:absolute;top:70px;left:50%;transform:translateX(-50%);font-size:18px;background:rgba(255,255,255,.8);border-radius:14px;padding:2px 14px}
+
+/* ---------- S2 intro ---------- */
+#s2{justify-content:center;gap:2vmin;text-align:center}
+#s2 .icon{font-size:24vmin;filter:drop-shadow(0 8px 6px rgba(0,0,0,.2))}
+#s2 .name{font-size:11vmin;display:flex;align-items:center;gap:16px;color:var(--accent-d)}
+#s2 .speak{width:68px;height:68px;border-radius:50%;background:var(--blue);color:#fff;font-size:34px;box-shadow:0 4px 0 #2a6dba}
+#s2 .intro{font-size:clamp(24px,5vmin,44px);max-width:90vw}
+#s2 .place{font-size:clamp(20px,3.6vmin,32px);background:#fff;border-radius:20px;padding:6px 24px;box-shadow:0 3px 0 rgba(0,0,0,.12)}
+#s2 .btns,#s4 .btns{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;margin-top:2vmin}
+
+/* ---------- S3 game ---------- */
+#s3{padding-top:12px}
+#s3 .head{width:100%;display:flex;align-items:center;justify-content:center;gap:14px;padding:0 66px;min-height:56px;position:relative;z-index:5}
+#s3 .back{position:absolute;left:72px;top:6px;min-height:44px;padding:4px 16px;border-radius:14px;background:#fff;box-shadow:0 3px 0 rgba(0,0,0,.15);font-size:18px}
+#s3 .ttl{font-size:clamp(20px,3.4vmin,30px);text-align:center;line-height:1.2}
+#s3 .prog{font-size:clamp(18px,2.8vmin,26px);color:var(--accent-d);text-align:center}
+#s3 .dots{letter-spacing:6px}
+#play{flex:1;width:100%;min-height:0;display:flex;gap:10px;align-items:center;justify-content:center}
+@media (orientation:portrait){ #play{flex-direction:column} }
+.stage-wrap{flex:1.2;min-width:0;min-height:0;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+.stage{position:relative;container-type:inline-size;aspect-ratio:1/1.1;width:min(92%,calc((100dvh - 150px)/1.1));max-height:100%}
+@media (orientation:portrait){ .stage{width:min(80vw,calc((100dvh - 150px - 30vh)/1.1))} }
+.stage.small{width:min(70vw,calc((100dvh - 330px)/1.1))}
+.shadow{position:absolute;left:50%;bottom:-1%;width:62%;height:5%;transform:translateX(-50%);background:rgba(0,0,0,.12);border-radius:50%}
+.sil-body{position:absolute;left:50%;top:40%;width:52%;height:60%;transform:translateX(-50%);background:#fff;
+  border:1cqw solid var(--line);border-bottom:0;border-radius:42% 42% 0 0/32% 32% 0 0}
+.sil-head{position:absolute;left:50%;top:22%;width:25%;aspect-ratio:1;transform:translate(-50%,-50%);background:#fff;
+  border:1cqw solid var(--line);border-radius:50%}
+.badge{position:absolute;left:0;top:0;width:19cqw;height:19cqw;border-radius:50%;background:#fff;border:.8cqw solid var(--accent);
+  display:flex;align-items:center;justify-content:center;font-size:12cqw;box-shadow:0 3px 0 rgba(0,0,0,.15);z-index:3;font-family:var(--emoji)}
+.slot-hint{position:absolute;transform:translate(-50%,-50%);border:.8cqw dashed #f2a65a;border-radius:50%;
+  background:rgba(255,200,120,.18);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{background:rgba(255,200,120,.4)}}
+.placed{position:absolute;transform:translate(-50%,-50%);font-family:var(--emoji);line-height:1;z-index:2;
+  filter:drop-shadow(0 .6cqw .5cqw rgba(0,0,0,.25))}
+.placed.pop{animation:pop .5s ease-out}
+@keyframes pop{0%{transform:translate(-50%,-50%) scale(.2)}60%{transform:translate(-50%,-50%) scale(1.3)}100%{transform:translate(-50%,-50%) scale(1)}}
+.spark{position:absolute;pointer-events:none;font-family:var(--emoji);transform:translate(-50%,-50%);animation:spark .9s ease-out forwards;z-index:6}
+@keyframes spark{to{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1.4)}}
+.dbg{position:absolute;transform:translate(-50%,-50%);width:6cqw;height:6cqw;border-radius:50%;background:rgba(255,0,0,.35);
+  color:#900;font:700 2.2cqw/1 monospace;display:flex;align-items:center;justify-content:center;text-align:center;z-index:9}
+
+#tray{flex:1;display:flex;flex-wrap:wrap;gap:12px;align-content:center;justify-content:center;padding:10px;
+  background:rgba(255,255,255,.75);border-radius:26px;box-shadow:inset 0 0 0 3px #ffd9a8;min-width:0}
+@media (orientation:landscape){ #tray{max-width:44%;align-self:center;max-height:100%} }
+@media (orientation:portrait){ #tray{width:100%;max-height:34vh;flex:none} }
+.ti{width:clamp(70px,16vmin,120px);height:clamp(70px,16vmin,120px);border-radius:22px;background:#fff;
+  box-shadow:0 4px 0 rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center;
+  font-family:var(--emoji);font-size:clamp(42px,10vmin,76px);touch-action:none;position:relative}
+.ti.hint{animation:hintb .7s ease-in-out infinite;box-shadow:0 0 0 5px #ffd34d,0 0 18px 8px #ffe98a}
+@keyframes hintb{50%{transform:scale(1.14)}}
+.ti.shake{animation:shake .5s}
+@keyframes shake{20%{transform:translateX(-10px) rotate(-6deg)}40%{transform:translateX(10px) rotate(6deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.ti.drag-src{opacity:.35}
+.ghost{position:fixed;z-index:100;pointer-events:none;transform:translate(-50%,-60%) scale(1.25);font-family:var(--emoji);
+  font-size:clamp(50px,12vmin,90px);filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))}
+
+/* ---------- S4 done ---------- */
+#s4{justify-content:center;gap:2vmin;text-align:center}
+#s4 .stage{width:min(60vw,calc((100dvh - 330px)/1.1))}
+#s4 h1{margin:0;font-size:clamp(34px,8vmin,70px);color:var(--accent-d)}
+.fall{position:fixed;top:-60px;pointer-events:none;z-index:90;font-family:var(--emoji);animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+
+/* ---------- modals ---------- */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
+.modal.on{display:flex}
+.panel{background:#fff;border-radius:28px;padding:22px 26px;width:min(620px,100%);max-height:94vh;overflow:auto;box-shadow:0 8px 0 rgba(0,0,0,.2)}
+.panel h2{margin:0 0 12px;font-size:30px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px dashed #eee;font-size:22px}
+.seg{display:flex;gap:8px}
+.seg button{min-height:52px;min-width:84px;padding:6px 14px;border-radius:16px;background:#eceff3;font-size:20px}
+.seg button.sel{background:var(--green);color:#fff}
+#finale .panel{text-align:center}
+#finale .big{font-size:20vmin}
+#finale h1{margin:6px 0 14px;font-size:clamp(28px,6vmin,52px);color:var(--accent-d)}
+</style>
+</head>
+<body>
+
+<!-- ============ 데이터: 직업을 추가할 때는 여기만 고치면 됩니다 ============ -->
+<script id="data" type="application/json">
+{
+  "slots": {
+    "head":       { "x": 50, "y": 10, "scale": 0.5 },
+    "face":       { "x": 50, "y": 22, "scale": 0.4 },
+    "body":       { "x": 50, "y": 52, "scale": 0.9 },
+    "left-hand":  { "x": 22, "y": 60, "scale": 0.5 },
+    "right-hand": { "x": 78, "y": 60, "scale": 0.5 },
+    "back":       { "x": 85, "y": 35, "scale": 0.6 },
+    "side":       { "x": 90, "y": 80, "scale": 0.7 }
+  },
+  "items": [
+    { "id": "vest",         "name": "형광조끼",   "emoji": "🦺", "usableAsDistractor": false },
+    { "id": "broom",        "name": "빗자루",     "emoji": "🧹", "usableAsDistractor": true },
+    { "id": "bin",          "name": "쓰레기통",   "emoji": "🗑️", "usableAsDistractor": true },
+    { "id": "scissors",     "name": "가위",       "emoji": "✂️", "usableAsDistractor": false },
+    { "id": "mirror",       "name": "거울",       "emoji": "🪞", "usableAsDistractor": false },
+    { "id": "comb",         "name": "빗",         "emoji": "🪮", "usableAsDistractor": true },
+    { "id": "gloves",       "name": "장갑",       "emoji": "🧤", "usableAsDistractor": false },
+    { "id": "sunglasses",   "name": "선글라스",   "emoji": "🕶️", "usableAsDistractor": true },
+    { "id": "busstop",      "name": "버스 정류장", "emoji": "🚏", "usableAsDistractor": true },
+    { "id": "extinguisher", "name": "소화기",     "emoji": "🧯", "usableAsDistractor": false },
+    { "id": "firetruck",    "name": "소방차",     "emoji": "🚒", "usableAsDistractor": true },
+    { "id": "ladder",       "name": "사다리",     "emoji": "🪜", "usableAsDistractor": true },
+    { "id": "pot",          "name": "냄비",       "emoji": "🍲", "usableAsDistractor": true },
+    { "id": "pan",          "name": "프라이팬",   "emoji": "🍳", "usableAsDistractor": true },
+    { "id": "salt",         "name": "소금",       "emoji": "🧂", "usableAsDistractor": true },
+    { "id": "patrolcar",    "name": "순찰차",     "emoji": "🚓", "usableAsDistractor": true },
+    { "id": "siren",        "name": "경광등",     "emoji": "🚨", "usableAsDistractor": false },
+    { "id": "radio",        "name": "무전기",     "emoji": "📻", "usableAsDistractor": false },
+    { "id": "gown",         "name": "의사 가운",  "emoji": "🥼", "usableAsDistractor": true },
+    { "id": "stethoscope",  "name": "청진기",     "emoji": "🩺", "usableAsDistractor": true },
+    { "id": "syringe",      "name": "주사기",     "emoji": "💉", "usableAsDistractor": true }
+  ],
+  "jobs": [
+    { "id": "cleaner", "name": "환경미화원", "intro": "동네를 깨끗하게 치워요.", "place": "길", "icon": "🚛",
+      "hotspot": { "emoji": "🚛", "x": 70, "y": 71, "size": 76 },
+      "items": [ { "id": "vest", "slot": "body" }, { "id": "broom", "slot": "right-hand" }, { "id": "bin", "slot": "side" } ] },
+    { "id": "hairdresser", "name": "미용사", "intro": "머리를 예쁘게 잘라 줘요.", "place": "미용실", "icon": "💈",
+      "hotspot": { "emoji": "💈", "x": 27, "y": 40, "size": 66, "base": "🏠" },
+      "items": [ { "id": "scissors", "slot": "right-hand" }, { "id": "mirror", "slot": "left-hand" },
+                 { "id": "comb", "slot": "body", "scale": 0.45, "offset": { "x": 8, "y": 8 } } ] },
+    { "id": "busdriver", "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
+      "hotspot": { "emoji": "🚌", "x": 28, "y": 71, "size": 78 },
+      "items": [ { "id": "gloves", "slot": "right-hand" }, { "id": "sunglasses", "slot": "face" }, { "id": "busstop", "slot": "side" } ] },
+    { "id": "firefighter", "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
+      "hotspot": { "emoji": "🚒", "x": 10, "y": 40, "size": 70, "base": "🏢" },
+      "items": [ { "id": "extinguisher", "slot": "right-hand" }, { "id": "firetruck", "slot": "side" }, { "id": "ladder", "slot": "back" } ] },
+    { "id": "cook", "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
+      "hotspot": { "emoji": "🍢", "x": 44, "y": 40, "size": 62, "base": "🏪" },
+      "items": [ { "id": "pot", "slot": "left-hand" }, { "id": "pan", "slot": "right-hand" }, { "id": "salt", "slot": "side" } ] },
+    { "id": "police", "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
+      "hotspot": { "emoji": "🚓", "x": 62, "y": 40, "size": 66, "base": "🏢" },
+      "items": [ { "id": "patrolcar", "slot": "side" }, { "id": "siren", "slot": "back" }, { "id": "radio", "slot": "right-hand" } ] },
+    { "id": "doctor", "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
+      "hotspot": { "emoji": "🏥", "x": 88, "y": 40, "size": 82 },
+      "items": [ { "id": "gown", "slot": "body" }, { "id": "stethoscope", "slot": "left-hand" }, { "id": "syringe", "slot": "right-hand" } ] }
+  ],
+  "townDecor": [
+    { "emoji": "☀️", "x": 90, "y": 12, "size": 64 },
+    { "emoji": "☁️", "x": 14, "y": 14, "size": 60 },
+    { "emoji": "☁️", "x": 70, "y": 8,  "size": 48 },
+    { "emoji": "🏫", "x": 76, "y": 40, "size": 66 },
+    { "emoji": "🏠", "x": 36, "y": 52, "size": 40 },
+    { "emoji": "🌳", "x": 4,  "y": 54, "size": 50 },
+    { "emoji": "🌳", "x": 52, "y": 54, "size": 44 },
+    { "emoji": "🌳", "x": 96, "y": 56, "size": 50 },
+    { "emoji": "🚦", "x": 48, "y": 62, "size": 44 },
+    { "emoji": "🏤", "x": 20, "y": 90, "size": 60 },
+    { "emoji": "🌷", "x": 50, "y": 90, "size": 36 },
+    { "emoji": "🌳", "x": 80, "y": 90, "size": 56 }
+  ]
+}
+</script>
+
+<!-- ============ S1 우리 동네 ============ -->
+<section id="s1" class="screen">
+  <div id="town"><div id="road"></div></div>
+  <div id="townTitle">우리 동네 사람들을 만나요</div>
+  <div id="townCount"></div>
+</section>
+
+<!-- ============ S2 직업 소개 ============ -->
+<section id="s2" class="screen">
+  <div class="icon emo" id="s2Icon"></div>
+  <div class="name"><span id="s2Name"></span><button class="speak" id="s2Speak" aria-label="소리 듣기">🔊</button></div>
+  <div class="intro" id="s2Intro"></div>
+  <div class="place" id="s2Place"></div>
+  <div class="btns">
+    <button class="big-btn" id="s2Go">🔎 어울리는 물건 찾기</button>
+    <button class="big-btn alt" id="s2Home">🏘️ 동네로</button>
+  </div>
+</section>
+
+<!-- ============ S3 물건 연결 게임 ============ -->
+<section id="s3" class="screen">
+  <div class="head">
+    <button class="back" id="s3Back">← 동네로</button>
+    <div>
+      <div class="ttl" id="s3Title"></div>
+      <div class="prog" id="s3Prog"></div>
+    </div>
+  </div>
+  <div id="play">
+    <div class="stage-wrap"><div class="stage" id="s3Stage"></div></div>
+    <div id="tray"></div>
+  </div>
+</section>
+
+<!-- ============ S4 완성 ============ -->
+<section id="s4" class="screen">
+  <h1 id="s4Title"></h1>
+  <div class="stage" id="s4Stage"></div>
+  <div class="btns">
+    <button class="big-btn green" id="s4Home">🏘️ 동네로 돌아가기</button>
+    <button class="big-btn alt" id="s4Again">🔁 다시 하기</button>
+  </div>
+</section>
+
+<!-- ============ 공통 UI ============ -->
+<button class="top-btn emo" id="btnFull" aria-label="전체화면">⛶</button>
+<button class="top-btn emo" id="btnSet" aria-label="설정">⚙️</button>
+<div id="footer">© 2026 특수교사 은티 · <a id="insta" target="_blank" rel="noopener">@special_eun_t</a> · 무단 복제·배포 금지</div>
+
+<div class="modal" id="settings">
+  <div class="panel">
+    <h2>⚙️ 설정</h2>
+    <div class="row"><span>읽어주기</span><div class="seg" data-key="speech"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>효과음</span><div class="seg" data-key="sfx"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>조작 방식</span><div class="seg" data-key="mode"><button data-v="drag">끌어서 놓기</button><button data-v="tap">누르기</button></div></div>
+    <div class="row"><span>힌트</span><div class="seg" data-key="hint"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>물건 수</span><div class="seg" data-key="level"><button data-v="easy">쉬움 (6개)</button><button data-v="normal">보통 (9개)</button></div></div>
+    <div style="text-align:center;margin-top:16px"><button class="big-btn green" id="setClose">닫기</button></div>
+  </div>
+</div>
+
+<div class="modal" id="finale">
+  <div class="panel">
+    <div class="big emo">🎉🏘️🎉</div>
+    <h1>동네 사람들을 모두 만났어요!</h1>
+    <button class="big-btn" id="finaleClose">멋져요! 👏</button>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const DEBUG = /[?&]debug\b/.test(location.search);
+const INSTA = 'https://www.instagram.com/special_eun_t';
+const $ = id => document.getElementById(id);
+const ITEM = Object.fromEntries(DATA.items.map(i => [i.id, i]));
+const JOB = Object.fromEntries(DATA.jobs.map(j => [j.id, j]));
+
+/* ---------- 설정 (기기에 저장) ---------- */
+const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy' };
+let cfg = { ...defaults };
+try { Object.assign(cfg, JSON.parse(localStorage.getItem('dongne-cfg') || '{}')); } catch(e){}
+const saveCfg = () => { try { localStorage.setItem('dongne-cfg', JSON.stringify(cfg)); } catch(e){} };
+
+/* ---------- 상태 (완성 기록은 접속 중에만 유지) ---------- */
+const done = new Set();
+let finaleShown = false;
+let cur = null;          // 현재 직업
+let placed = new Set();  // 입힌 물건 id
+let wrong = 0;           // 연속 오답 수
+let locked = false;
+
+/* ---------- 소리 ---------- */
+let actx = null;
+function tone(freq, t0, dur, type='sine', vol=.18){
+  if(!cfg.sfx) return;
+  try{
+    actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    const t = actx.currentTime + t0;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+.02); g.gain.exponentialRampToValueAtTime(.001, t+dur);
+    o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t+dur+.05);
+  }catch(e){}
+}
+const sfx = {
+  tap:  () => tone(520, 0, .12, 'triangle'),
+  good: () => { tone(660,0,.18); tone(880,.1,.25); },
+  cheer:() => [523,659,784,1047,784,1047].forEach((f,i)=>tone(f,i*.13,.3,'triangle',.2))
+};
+function speak(text, force){
+  if(!force && !cfg.speech) return;
+  try{
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR'; u.rate = .85; u.pitch = 1.1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- 화면 전환 ---------- */
+function show(id){
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+  // 인스타 링크는 첫 화면에서만 작동
+  const a = $('insta');
+  if(id === 's1'){ a.href = INSTA; } else { a.removeAttribute('href'); }
+}
+
+/* ---------- S1 동네 ---------- */
+function buildTown(){
+  const town = $('town');
+  town.querySelectorAll('.deco,.hot').forEach(n => n.remove());
+  DATA.townDecor.forEach(d => {
+    const e = document.createElement('div');
+    e.className = 'deco'; e.textContent = d.emoji;
+    e.style.cssText = `left:${d.x}%;top:${d.y}%;--sz:${d.size}`;
+    town.appendChild(e);
+  });
+  DATA.jobs.forEach(j => {
+    const h = j.hotspot;
+    const b = document.createElement('button');
+    b.className = 'hot' + (h.base ? '' : ' solo');
+    b.style.cssText = `left:${h.x}%;top:${h.y}%;--sz:${h.size}`;
+    b.setAttribute('aria-label', j.name);
+    b.innerHTML = (h.base ? `<span class="base">${h.base}</span><span class="fg">${h.emoji}</span>` : `<span class="fg">${h.emoji}</span>`) +
+                  (done.has(j.id) ? '<span class="star">⭐</span>' : '');
+    b.addEventListener('click', () => { sfx.tap(); openJob(j.id); });
+    town.appendChild(b);
+  });
+  $('townCount').textContent = `⭐ ${done.size} / ${DATA.jobs.length}`;
+}
+function goTown(){
+  buildTown(); show('s1');
+  if(done.size === DATA.jobs.length && !finaleShown){
+    finaleShown = true;
+    setTimeout(() => { $('finale').classList.add('on'); sfx.cheer(); confetti(); speak('동네 사람들을 모두 만났어요!'); }, 400);
+  }
+}
+
+/* ---------- S2 소개 ---------- */
+function openJob(id){
+  cur = JOB[id];
+  $('s2Icon').textContent = cur.icon;
+  $('s2Name').textContent = cur.name;
+  $('s2Intro').textContent = cur.intro;
+  $('s2Place').textContent = `📍 일하는 곳: ${cur.place}`;
+  show('s2');
+  speak(`${cur.name}. ${cur.intro}`);
+}
+
+/* ---------- 인물 + 물건 그리기 ---------- */
+function slotPos(entry){
+  const s = DATA.slots[entry.slot], o = entry.offset || {};
+  return { x: s.x + (o.x||0), y: s.y + (o.y||0), scale: entry.scale || s.scale };
+}
+function placedEl(entry){
+  const it = ITEM[entry.id], p = slotPos(entry);
+  const e = document.createElement('div');
+  e.className = 'placed'; e.textContent = it.emoji; e.dataset.id = entry.id;
+  e.style.cssText = `left:${p.x}%;top:${p.y}%;font-size:${p.scale*30}cqw`;
+  return e;
+}
+function figure(stage, withBadge){
+  stage.innerHTML = '<div class="shadow"></div><div class="sil-body"></div><div class="sil-head"></div>' +
+    (withBadge ? `<div class="badge">${cur.icon}</div>` : '');
+  if(DEBUG){
+    Object.entries(DATA.slots).forEach(([n,s]) => {
+      const d = document.createElement('div');
+      d.className = 'dbg'; d.style.cssText = `left:${s.x}%;top:${s.y}%`; d.textContent = n;
+      stage.appendChild(d);
+    });
+  }
+}
+
+/* ---------- S3 게임 ---------- */
+function startGame(){
+  placed = new Set(); wrong = 0; locked = false;
+  $('s3Title').textContent = `${cur.name}에게 어울리는 물건을 찾아요`;
+  const stage = $('s3Stage');
+  figure(stage, true);
+  if(cfg.hint){
+    cur.items.forEach(e => {
+      const p = slotPos(e), h = document.createElement('div');
+      h.className = 'slot-hint'; h.dataset.slot = e.id;
+      const w = p.scale * 30;
+      h.style.cssText = `left:${p.x}%;top:${p.y}%;width:${w}cqw;height:${w}cqw`;
+      stage.appendChild(h);
+    });
+  }
+  buildTray(); updateProgress(); show('s3');
+  speak('어울리는 물건을 찾아 보세요');
+}
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function buildTray(){
+  const own = cur.items.map(e => e.id);
+  const pool = DATA.items.filter(i => i.usableAsDistractor && !own.includes(i.id)).map(i => i.id);
+  const nWrong = cfg.level === 'easy' ? 3 : 6;
+  const ids = shuffle([...own, ...shuffle(pool).slice(0, nWrong)]);
+  const tray = $('tray'); tray.innerHTML = '';
+  ids.forEach(id => {
+    const it = ITEM[id], el = document.createElement('div');
+    el.className = 'ti'; el.textContent = it.emoji; el.dataset.id = id; el.setAttribute('aria-label', it.name);
+    el.addEventListener('pointerdown', ev => onDown(ev, el));
+    tray.appendChild(el);
+  });
+}
+function updateProgress(){
+  const n = placed.size, t = cur.items.length;
+  $('s3Prog').innerHTML = `${t}개 중 ${n}개 입혔어요 <span class="dots emo">${'⭐'.repeat(n)}${'▫️'.repeat(t-n)}</span>`;
+}
+function sparkle(stage, x, y){
+  for(let i=0;i<7;i++){
+    const s = document.createElement('div');
+    s.className = 'spark'; s.textContent = i%2 ? '✨' : '⭐';
+    s.style.cssText = `left:${x}%;top:${y}%;font-size:6cqw;--dx:${(Math.random()-.5)*30}cqw;--dy:${(Math.random()-.5)*30}cqw`;
+    stage.appendChild(s); setTimeout(() => s.remove(), 1000);
+  }
+}
+function tryItem(id, el){
+  if(locked || placed.has(id)) return;
+  const entry = cur.items.find(e => e.id === id);
+  if(entry){
+    placed.add(id); wrong = 0;
+    const stage = $('s3Stage');
+    const h = stage.querySelector(`.slot-hint[data-slot="${id}"]`); if(h) h.remove();
+    const pe = placedEl(entry); pe.classList.add('pop'); stage.appendChild(pe);
+    const p = slotPos(entry); sparkle(stage, p.x, p.y);
+    el.remove();
+    tray_clearHint();
+    sfx.good(); speak(ITEM[id].name);
+    updateProgress();
+    if(placed.size === cur.items.length){
+      locked = true;
+      setTimeout(finish, 1700);
+    }
+  } else {
+    wrong++;
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    if(cfg.hint && wrong >= 2){
+      document.querySelectorAll('#tray .ti').forEach(t => {
+        if(cur.items.some(e => e.id === t.dataset.id)) t.classList.add('hint');
+      });
+    }
+  }
+}
+function tray_clearHint(){ document.querySelectorAll('#tray .ti.hint').forEach(t => t.classList.remove('hint')); }
+
+/* ---------- 끌기 / 누르기 ---------- */
+function onDown(ev, el){
+  if(locked) return;
+  ev.preventDefault();
+  const id = el.dataset.id;
+  if(cfg.mode === 'tap'){ sfx.tap(); tryItem(id, el); return; }
+  const sx = ev.clientX, sy = ev.clientY; let moved = false;
+  const ghost = document.createElement('div');
+  ghost.className = 'ghost'; ghost.textContent = ITEM[id].emoji;
+  const place = e => { ghost.style.left = e.clientX+'px'; ghost.style.top = e.clientY+'px'; };
+  place(ev);
+  try{ el.setPointerCapture(ev.pointerId); }catch(e){}
+  const move = e => {
+    if(!moved && Math.hypot(e.clientX-sx, e.clientY-sy) > 10){ moved = true; document.body.appendChild(ghost); el.classList.add('drag-src'); }
+    if(moved) place(e);
+  };
+  const up = e => {
+    el.removeEventListener('pointermove', move);
+    el.removeEventListener('pointerup', up);
+    el.removeEventListener('pointercancel', up);
+    ghost.remove(); el.classList.remove('drag-src');
+    if(!moved){ sfx.tap(); speak(ITEM[id].name); return; }   // 살짝 누르면 이름만 읽어줌
+    const r = $('s3Stage').getBoundingClientRect(), m = 20;
+    if(e.type !== 'pointercancel' && e.clientX > r.left-m && e.clientX < r.right+m && e.clientY > r.top-m && e.clientY < r.bottom+m){
+      tryItem(id, el);
+    }
+  };
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointercancel', up);
+}
+
+/* ---------- S4 완성 ---------- */
+function finish(){
+  done.add(cur.id);
+  $('s4Title').textContent = `${cur.name} 완성!`;
+  const stage = $('s4Stage');
+  figure(stage, true);
+  cur.items.forEach(e => stage.appendChild(placedEl(e)));
+  show('s4');
+  sfx.cheer(); confetti();
+  speak(`${cur.name} 완성! 잘했어요!`);
+}
+function confetti(){
+  const set = ['✨','⭐','🎉','🎈','🌟'];
+  for(let i=0;i<28;i++){
+    const f = document.createElement('div');
+    f.className = 'fall'; f.textContent = set[i % set.length];
+    f.style.cssText = `left:${Math.random()*100}vw;font-size:${24+Math.random()*28}px;animation-duration:${2.2+Math.random()*2}s;animation-delay:${Math.random()*.8}s`;
+    document.body.appendChild(f); setTimeout(() => f.remove(), 5500);
+  }
+}
+
+/* ---------- 설정 UI ---------- */
+function syncSettings(){
+  document.querySelectorAll('#settings .seg').forEach(seg => {
+    const key = seg.dataset.key;
+    seg.querySelectorAll('button').forEach(b => b.classList.toggle('sel', String(cfg[key]) === b.dataset.v));
+  });
+}
+document.querySelectorAll('#settings .seg button').forEach(b => b.addEventListener('click', () => {
+  const key = b.parentElement.dataset.key, v = b.dataset.v;
+  cfg[key] = (v === 'true') ? true : (v === 'false') ? false : v;
+  saveCfg(); syncSettings(); sfx.tap();
+}));
+$('btnSet').addEventListener('click', () => { syncSettings(); $('settings').classList.add('on'); });
+$('setClose').addEventListener('click', () => $('settings').classList.remove('on'));
+$('finaleClose').addEventListener('click', () => $('finale').classList.remove('on'));
+
+/* ---------- 전체화면 ---------- */
+const root = document.documentElement;
+const canFull = !!(root.requestFullscreen || root.webkitRequestFullscreen);
+if(!canFull) $('btnFull').style.display = 'none';
+$('btnFull').addEventListener('click', () => {
+  const on = document.fullscreenElement || document.webkitFullscreenElement;
+  try{
+    if(on){ (document.exitFullscreen || document.webkitExitFullscreen).call(document); }
+    else { (root.requestFullscreen || root.webkitRequestFullscreen).call(root); }
+  }catch(e){}
+});
+
+/* ---------- 버튼 연결 ---------- */
+$('s2Speak').addEventListener('click', () => speak(`${cur.name}. ${cur.intro}`, true));
+$('s2Go').addEventListener('click', () => { sfx.tap(); startGame(); });
+$('s2Home').addEventListener('click', () => { sfx.tap(); goTown(); });
+$('s3Back').addEventListener('click', () => { sfx.tap(); goTown(); });
+$('s4Home').addEventListener('click', () => { sfx.tap(); goTown(); });
+$('s4Again').addEventListener('click', () => { sfx.tap(); startGame(); });
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+goTown();
+})();
+</script>
+</body>
+</html>
