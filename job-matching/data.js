@@ -1,14 +1,13 @@
 // 직업/물건 데이터: 직업을 추가할 때는 이 파일만 고치면 됩니다.
 window.DATA = {
-  "slots": {
-    "head":       { "x": 50, "y": 10, "scale": 0.5 },
-    "face":       { "x": 50, "y": 30, "scale": 0.4 },
-    "body":       { "x": 50, "y": 52, "scale": 0.9 },
-    "left-hand":  { "x": 29, "y": 66, "scale": 0.5 },
-    "right-hand": { "x": 71, "y": 66, "scale": 0.5 },
-    "back":       { "x": 85, "y": 35, "scale": 0.6 },
-    "side":       { "x": 90, "y": 80, "scale": 0.7 }
-  },
+  "around": [
+    { "x": 86, "y": 32, "scale": 0.7 },
+    { "x": 13, "y": 48, "scale": 0.7 },
+    { "x": 86, "y": 68, "scale": 0.7 },
+    { "x": 13, "y": 22, "scale": 0.7 },
+    { "x": 13, "y": 76, "scale": 0.7 },
+    { "x": 87, "y": 10, "scale": 0.7 }
+  ],
   "items": [
     { "id": "vest", "en": { "name": "Safety vest" },         "name": "형광조끼",   "emoji": "🦺", "usableAsDistractor": false },
     { "id": "broom", "en": { "name": "Broom" },        "name": "빗자루",     "emoji": "🧹", "usableAsDistractor": true },
@@ -33,28 +32,27 @@ window.DATA = {
     { "id": "syringe", "en": { "name": "Syringe" },      "name": "주사기",     "emoji": "💉", "usableAsDistractor": true }
   ],
   "jobs": [
-    { "id": "cleaner", "person": "images/cleaner.png", "en": { "name": "Street Cleaner", "intro": "Cleans up the town.", "place": "street" }, "decor": ["🍂","🌳"], "name": "환경미화원", "intro": "동네를 깨끗하게 치워요.", "place": "길", "icon": "🚛",
+    { "id": "cleaner", "person": "images/cleaner.png", "en": { "name": "Street Cleaner", "intro": "Cleans up the town.", "place": "street" }, "name": "환경미화원", "intro": "동네를 깨끗하게 치워요.", "place": "길", "icon": "🚛",
       "hotspot": { "emoji": "🚛", "x": 70, "y": 71, "size": 76 },
-      "items": [ { "id": "vest", "slot": "body" }, { "id": "broom", "slot": "right-hand" }, { "id": "bin", "slot": "side" } ] },
-    { "id": "hairdresser", "person": "images/hairdresser.png", "en": { "name": "Hairdresser", "intro": "Cuts and styles hair.", "place": "hair salon" }, "decor": ["🎀","🌸"], "name": "미용사", "intro": "머리를 예쁘게 잘라 줘요.", "place": "미용실", "icon": "💈",
+      "items": [ { "id": "vest" }, { "id": "broom" }, { "id": "bin" } ] },
+    { "id": "hairdresser", "person": "images/hairdresser.png", "en": { "name": "Hairdresser", "intro": "Cuts and styles hair.", "place": "hair salon" }, "name": "미용사", "intro": "머리를 예쁘게 잘라 줘요.", "place": "미용실", "icon": "💈",
       "hotspot": { "emoji": "💈", "x": 27, "y": 40, "size": 66, "base": "🏠" },
-      "items": [ { "id": "scissors", "slot": "right-hand" }, { "id": "mirror", "slot": "left-hand" },
-                 { "id": "comb", "slot": "body", "scale": 0.45, "offset": { "x": 8, "y": 8 } } ] },
-    { "id": "busdriver", "person": "images/busdriver.png", "en": { "name": "Bus Driver", "intro": "Drives the bus and carries people.", "place": "bus" }, "decor": ["🚦","🛣️"], "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
+      "items": [ { "id": "scissors" }, { "id": "mirror" }, { "id": "comb" } ] },
+    { "id": "busdriver", "person": "images/busdriver.png", "en": { "name": "Bus Driver", "intro": "Drives the bus and carries people.", "place": "bus" }, "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
       "hotspot": { "emoji": "🚌", "x": 28, "y": 71, "size": 78 },
-      "items": [ { "id": "gloves", "slot": "right-hand" }, { "id": "sunglasses", "slot": "face" }, { "id": "busstop", "slot": "side" } ] },
-    { "id": "firefighter", "person": "images/firefighter.png", "en": { "name": "Firefighter", "intro": "Puts out fires and helps people.", "place": "fire station" }, "decor": ["🔥","💧"], "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
+      "items": [ { "id": "gloves" }, { "id": "sunglasses" }, { "id": "busstop" } ] },
+    { "id": "firefighter", "person": "images/firefighter.png", "en": { "name": "Firefighter", "intro": "Puts out fires and helps people.", "place": "fire station" }, "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
       "hotspot": { "emoji": "🚒", "x": 10, "y": 40, "size": 70, "base": "🏢" },
-      "items": [ { "id": "extinguisher", "slot": "right-hand" }, { "id": "firetruck", "slot": "side" }, { "id": "ladder", "slot": "back" } ] },
-    { "id": "cook", "person": "images/cook.png", "en": { "name": "Cook", "intro": "Makes yummy food.", "place": "snack shop" }, "decor": ["🥕","🍅"], "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
+      "items": [ { "id": "extinguisher" }, { "id": "firetruck" }, { "id": "ladder" } ] },
+    { "id": "cook", "person": "images/cook.png", "en": { "name": "Cook", "intro": "Makes yummy food.", "place": "snack shop" }, "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
       "hotspot": { "emoji": "🍢", "x": 44, "y": 40, "size": 62, "base": "🏪" },
-      "items": [ { "id": "pot", "slot": "left-hand" }, { "id": "pan", "slot": "right-hand" }, { "id": "salt", "slot": "side" } ] },
-    { "id": "police", "person": "images/police.png", "en": { "name": "Police Officer", "intro": "Keeps the town safe.", "place": "police station" }, "decor": ["🛑","⭐"], "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
+      "items": [ { "id": "pot" }, { "id": "pan" }, { "id": "salt" } ] },
+    { "id": "police", "person": "images/police.png", "en": { "name": "Police Officer", "intro": "Keeps the town safe.", "place": "police station" }, "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
       "hotspot": { "emoji": "🚓", "x": 62, "y": 40, "size": 66, "base": "🏢" },
-      "items": [ { "id": "patrolcar", "slot": "side" }, { "id": "siren", "slot": "back" }, { "id": "radio", "slot": "right-hand" } ] },
-    { "id": "doctor", "person": "images/doctor.png", "en": { "name": "Doctor", "intro": "Helps sick people get better.", "place": "hospital" }, "decor": ["❤️","🩹"], "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
+      "items": [ { "id": "patrolcar" }, { "id": "siren" }, { "id": "radio" } ] },
+    { "id": "doctor", "person": "images/doctor.png", "en": { "name": "Doctor", "intro": "Helps sick people get better.", "place": "hospital" }, "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
       "hotspot": { "emoji": "🏥", "x": 88, "y": 40, "size": 82 },
-      "items": [ { "id": "gown", "slot": "body" }, { "id": "stethoscope", "slot": "left-hand" }, { "id": "syringe", "slot": "right-hand" } ] }
+      "items": [ { "id": "gown" }, { "id": "stethoscope" }, { "id": "syringe" } ] }
   ],
   "townDecor": [
     { "emoji": "☀️", "x": 90, "y": 12, "size": 64 },

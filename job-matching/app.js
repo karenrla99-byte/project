@@ -21,21 +21,21 @@ const saveCfg = () => { try { localStorage.setItem('dongne-cfg', JSON.stringify(
 const STR = {
   ko:{ townTitle:'우리 동네 사람들을 만나요', s2Go:'🔎 어울리는 물건 찾기', home:'🏘️ 동네로', home2:'← 동네로', print:'🖨️ 색칠 도안 인쇄',
     back:'🏘️ 동네로 돌아가기', again:'🔁 다시 하기', psName:'이름: ______________', psDate:'날짜: ____월 ____일',
-    psL1:'① 색칠해 보세요', psL2:'② 따라 써 보세요', setTitle:'⚙️ 설정', lblSpeech:'읽어주기', lblSfx:'효과음', lblMode:'조작 방식',
+    setTitle:'⚙️ 설정', lblSpeech:'읽어주기', lblSfx:'효과음', lblMode:'조작 방식',
     lblHint:'힌트', lblLevel:'물건 수', lblLang:'언어', on:'켜기', off:'끄기', drag:'끌어서 놓기', tap:'누르기',
     easy:'쉬움 (6개)', normal:'보통 (9개)', close:'닫기', finaleTitle:'동네 사람들을 모두 만났어요!', finaleClose:'멋져요! 👏',
     title:'동네 사람들의 직업에 어울리는 물건 찾기',
     place:p=>`📍 일하는 곳: ${p}`, s3Title:n=>`${n}에게 어울리는 물건을 찾아요`, s3Say:'어울리는 물건을 찾아 보세요',
-    prog:(n,t)=>`${t}개 중 ${n}개 입혔어요`, done:n=>`${n} 완성!`, doneSay:n=>`${n} 완성! 잘했어요!`, psTitle:n=>`${n} 색칠하기`,
+    prog:(n,t)=>`${t}개 중 ${n}개 입혔어요`, done:n=>`${n} 완성!`, doneSay:n=>`${n} 완성! 잘했어요!`,
     finaleSay:'동네 사람들을 모두 만났어요!', speechLang:'ko-KR' },
   en:{ townTitle:'Meet the people in our town', s2Go:'🔎 Find the matching items', home:'🏘️ Town', home2:'← Town', print:'🖨️ Print coloring page',
     back:'🏘️ Back to town', again:'🔁 Play again', psName:'Name: ______________', psDate:'Date: ____ / ____ / ____',
-    psL1:'① Color the picture', psL2:'② Trace the words', setTitle:'⚙️ Settings', lblSpeech:'Read aloud', lblSfx:'Sound effects', lblMode:'Controls',
+    setTitle:'⚙️ Settings', lblSpeech:'Read aloud', lblSfx:'Sound effects', lblMode:'Controls',
     lblHint:'Hints', lblLevel:'Items', lblLang:'Language', on:'On', off:'Off', drag:'Drag', tap:'Tap',
     easy:'Easy (6 items)', normal:'Normal (9 items)', close:'Close', finaleTitle:'You met everyone in town!', finaleClose:'Great job! 👏',
     title:'Find the Items for Each Job',
     place:p=>`📍 Works at: ${p}`, s3Title:n=>`What does the ${n} use?`, s3Say:'Find the matching items',
-    prog:(n,t)=>`${n} of ${t} items found`, done:n=>`${n} complete!`, doneSay:n=>`${n} complete! Great job!`, psTitle:n=>`Color the ${n}`,
+    prog:(n,t)=>`${n} of ${t} items found`, done:n=>`${n} complete!`, doneSay:n=>`${n} complete! Great job!`,
     finaleSay:'You met everyone in town!', speechLang:'en-US' }
 };
 const S = () => STR[cfg.lang] || STR.en;
@@ -139,9 +139,10 @@ function openJob(id){
 }
 
 /* ---------- 인물 + 물건 그리기 ---------- */
-function slotPos(entry){
-  const s = DATA.slots[entry.slot], o = entry.offset || {};
-  return { x: s.x + (o.x||0), y: s.y + (o.y||0), scale: entry.scale || s.scale };
+// 물건은 인물 주변의 정해진 자리(data.js의 around)에 순서대로 놓임
+function slotPos(entry, job = cur){
+  const i = job.items.indexOf(entry), s = DATA.around[i % DATA.around.length];
+  return { x: s.x, y: s.y, scale: entry.scale || s.scale };
 }
 function placedEl(entry){
   const it = ITEM[entry.id], p = slotPos(entry);
@@ -155,7 +156,7 @@ function figure(stage, withBadge){
     (PERSON[cur.id] ? `<img class="person" src="${PERSON[cur.id]}" alt="">` : '<div class="sil-body"></div><div class="sil-head"></div>') +
     (withBadge ? `<div class="badge">${cur.icon}</div>` : '');
   if(DEBUG){
-    Object.entries(DATA.slots).forEach(([n,s]) => {
+    DATA.around.forEach((s,n) => {
       const d = document.createElement('div');
       d.className = 'dbg'; d.style.cssText = `left:${s.x}%;top:${s.y}%`; d.textContent = n;
       stage.appendChild(d);
@@ -269,80 +270,38 @@ function onDown(ev, el){
 }
 
 /* ---------- 그림 합성 (색 그림 / 색칠 도안) ---------- */
-const CW = 1100, CH = 1200, SX = 150, SY = 150, SW = 800, SH = 880;
-const DECOR_SPOTS = [[100,90,120],[1000,90,120],[550,70,100],[90,400,100],[1020,320,100],[70,640,110],[1030,600,100],[80,1110,120],[1020,1110,120],[550,1130,100]];
-const GENERIC_DECOR = ['☀️','☁️','🌷','⭐','🌳','☁️','🌼','⭐'];
+const CW = 1600, CH = 1760, SX = 0, SY = 0, SW = 1600, SH = 1760;   // 인물 그림 영역 = 캔버스 전체 (2배 해상도)
 const mk = () => { const c = document.createElement('canvas'); c.width = CW; c.height = CH; return c; };
 function glyph(ctx, emoji, x, y, size){
   ctx.font = `${size}px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, x, y);
 }
-function emojiLayer(ctx, job){
-  // 인물 주변 꾸밈
-  const dec = [...(job.decor||[]), ...GENERIC_DECOR];
-  DECOR_SPOTS.forEach((d,i) => glyph(ctx, dec[i % dec.length], d[0], d[1], d[2]));
-  // 물건
+function itemsLayer(ctx, job){   // 어울리는 물건만, 인물 주변에 (색칠하지 않는 색 그림)
   job.items.forEach(e => {
-    const p = slotPos(e);
-    glyph(ctx, ITEM[e.id].emoji, SX + p.x/100*SW, SY + p.y/100*SH, p.scale*.30*SW);
+    const p = slotPos(e, job);
+    glyph(ctx, ITEM[e.id].emoji, p.x/100*SW, p.y/100*SH, p.scale*.30*SW);
   });
-  glyph(ctx, job.icon, SX + .095*SW, SY + .095*SW, .12*SW);
 }
-function silhouette(ctx, color, w){
+function silhouette(ctx, color, w){   // 인물 그림 파일이 없는 직업용 임시 모양
   ctx.fillStyle = '#fff'; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = 'round';
-  const bx = SX + .24*SW, bw = .52*SW, by = SY + .40*SH, bh = .60*SH, r = .30*bw;
-  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, [r, r, 0, 0]); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.arc(SX + .5*SW, SY + .22*SH, .125*SW, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-}
-function frame(ctx, color, w){   // 직업 배지 테두리 + 바닥 그림자 선
-  ctx.strokeStyle = color; ctx.lineWidth = w;
-  ctx.beginPath(); ctx.arc(SX + .095*SW, SY + .095*SW, .095*SW, 0, Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(SX + .5*SW, SY + SH + 10, .31*SW, 18, 0, 0, Math.PI*2); ctx.stroke();
-}
-function toLineArt(src){
-  const w = CW, h = CH, d = src.getContext('2d').getImageData(0,0,w,h).data;
-  const q = new Float32Array(w*h);
-  for(let i=0;i<w*h;i++){ const L = .299*d[i*4] + .587*d[i*4+1] + .114*d[i*4+2]; q[i] = Math.round(L/45); }
-  const edge = new Uint8Array(w*h);
-  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
-    const i = y*w+x;
-    const gx = -q[i-w-1] - 2*q[i-1] - q[i+w-1] + q[i-w+1] + 2*q[i+1] + q[i+w+1];
-    const gy = -q[i-w-1] - 2*q[i-w] - q[i-w+1] + q[i+w-1] + 2*q[i+w] + q[i+w+1];
-    if(Math.abs(gx) + Math.abs(gy) >= 3) edge[i] = 1;
-  }
-  const out = mk(), oc = out.getContext('2d'), od = oc.createImageData(w,h);
-  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
-    const i = y*w+x;
-    const on = edge[i] || edge[i-1] || edge[i+1] || edge[i-w] || edge[i+w];   // 선을 살짝 굵게
-    od.data[i*4] = od.data[i*4+1] = od.data[i*4+2] = 20; od.data[i*4+3] = on ? 255 : 0;   // 선만 남기고 나머지는 투명
-  }
-  oc.putImageData(od, 0, 0);
-  return out;
+  const bx = .24*SW, bw = .52*SW, by = .40*SH, bh = .60*SH, r = .30*bw;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh - w, [r, r, 0, 0]); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(.5*SW, .22*SH, .125*SW, 0, Math.PI*2); ctx.fill(); ctx.stroke();
 }
 // 그림 = 아래층(인물) + 위층(물건·꾸밈). 파일 열기(file://)에서도 동작하도록 인물 이미지는 캔버스에 합치지 않음
 async function compose(job, lineArt){
   try{ await document.fonts.load('100px "Noto Color Emoji"', '🧯'); }catch(e){}
-  let base = PERSON[job.id], full = false;
+  let base = PERSON[job.id];
   if(!base){
-    const bc = mk(); silhouette(bc.getContext('2d'), lineArt ? '#000' : '#8e9aa6', lineArt ? 7 : 8);
-    base = bc.toDataURL('image/png'); full = true;
+    const bc = mk(); silhouette(bc.getContext('2d'), lineArt ? '#000' : '#8e9aa6', lineArt ? 12 : 14);
+    base = bc.toDataURL('image/png');
   }
-  const layer = mk(), lc = layer.getContext('2d');
-  if(lineArt){
-    lc.fillStyle = '#fff'; lc.fillRect(0,0,CW,CH);
-    emojiLayer(lc, job);
-    const out = toLineArt(layer);
-    frame(out.getContext('2d'), '#000', 6);
-    return { base, full, layer: out.toDataURL('image/png') };
-  }
-  emojiLayer(lc, job); frame(lc, '#8e9aa6', 8);
-  return { base, full, layer: layer.toDataURL('image/png') };
+  const layer = mk(); itemsLayer(layer.getContext('2d'), job);
+  return { base, layer: layer.toDataURL('image/png') };
 }
 async function renderPic(el, pic, lineArt){
   el.classList.toggle('line', !!lineArt);
-  const b = pic.full ? 'left:0;top:0;width:100%;height:100%'
-    : `left:${SX/CW*100}%;top:${SY/CH*100}%;width:${SW/CW*100}%;height:${SH/CH*100}%`;
-  el.innerHTML = `<img src="${pic.base}" style="${b}" alt=""><img src="${pic.layer}" style="left:0;top:0;width:100%;height:100%" alt="">`;
+  el.innerHTML = `<img src="${pic.base}" alt=""><img src="${pic.layer}" alt="">`;
   await Promise.all([...el.querySelectorAll('img')].map(i => i.decode().catch(() => {})));
 }
 
@@ -357,13 +316,7 @@ async function finish(){
 }
 async function printSheet(){
   const pic = await compose(cur, true);
-  $('psTitle').textContent = S().psTitle(loc(cur).name);
-  const rows = $('psRows'); rows.innerHTML = '';
-  [[loc(cur).name,''], ...cur.items.map(e => [loc(ITEM[e.id]).name,' sm'])].forEach(([t,cls]) => {
-    const r = document.createElement('div'); r.className = 'ps-row' + cls;
-    r.innerHTML = `<span>${t}</span>`.repeat(t.length > 10 ? 2 : 3);
-    rows.appendChild(r);
-  });
+  $('psName').textContent = loc(cur).name;
   await renderPic($('psPic'), pic, true);
   window.print();
 }
