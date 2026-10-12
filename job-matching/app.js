@@ -7,9 +7,8 @@ const ITEM = Object.fromEntries(DATA.items.map(i => [i.id, i]));
 const JOB = Object.fromEntries(DATA.jobs.map(j => [j.id, j]));
 
 /* ---------- 인물 그림: images/person.png 가 있으면 사용, 없으면 코드로 그린 임시 모양 ---------- */
-const PERSON_SRC = 'images/person.png';
-let PERSON_OK = false;
-{ const pr = new Image(); pr.onload = () => { PERSON_OK = true; }; pr.src = PERSON_SRC; }
+const PERSON = {};   // 직업 id -> 불러온 인물 그림 경로 (data.js의 person)
+DATA.jobs.forEach(j => { if(j.person){ const pr = new Image(); pr.onload = () => { PERSON[j.id] = j.person; }; pr.src = j.person; } });
 
 /* ---------- 설정 (기기에 저장) ---------- */
 const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy', lang:'ko' };
@@ -153,7 +152,7 @@ function placedEl(entry){
 }
 function figure(stage, withBadge){
   stage.innerHTML = '<div class="shadow"></div>' +
-    (PERSON_OK ? `<img class="person" src="${PERSON_SRC}" alt="">` : '<div class="sil-body"></div><div class="sil-head"></div>') +
+    (PERSON[cur.id] ? `<img class="person" src="${PERSON[cur.id]}" alt="">` : '<div class="sil-body"></div><div class="sil-head"></div>') +
     (withBadge ? `<div class="badge">${cur.icon}</div>` : '');
   if(DEBUG){
     Object.entries(DATA.slots).forEach(([n,s]) => {
@@ -323,8 +322,8 @@ function toLineArt(src){
 // 그림 = 아래층(인물) + 위층(물건·꾸밈). 파일 열기(file://)에서도 동작하도록 인물 이미지는 캔버스에 합치지 않음
 async function compose(job, lineArt){
   try{ await document.fonts.load('100px "Noto Color Emoji"', '🧯'); }catch(e){}
-  let base = PERSON_SRC, full = false;
-  if(!PERSON_OK){
+  let base = PERSON[job.id], full = false;
+  if(!base){
     const bc = mk(); silhouette(bc.getContext('2d'), lineArt ? '#000' : '#8e9aa6', lineArt ? 7 : 8);
     base = bc.toDataURL('image/png'); full = true;
   }
