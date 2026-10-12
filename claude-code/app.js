@@ -7,10 +7,41 @@ const ITEM = Object.fromEntries(DATA.items.map(i => [i.id, i]));
 const JOB = Object.fromEntries(DATA.jobs.map(j => [j.id, j]));
 
 /* ---------- 설정 (기기에 저장) ---------- */
-const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy' };
+const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy', lang:'en' };
 let cfg = { ...defaults };
 try { Object.assign(cfg, JSON.parse(localStorage.getItem('dongne-cfg') || '{}')); } catch(e){}
 const saveCfg = () => { try { localStorage.setItem('dongne-cfg', JSON.stringify(cfg)); } catch(e){} };
+{ const q = /[?&]lang=(ko|en)/.exec(location.search); if(q) cfg.lang = q[1]; }
+
+/* ---------- 언어 (ko / en) ---------- */
+const STR = {
+  ko:{ townTitle:'우리 동네 사람들을 만나요', s2Go:'🔎 어울리는 물건 찾기', home:'🏘️ 동네로', home2:'← 동네로', print:'🖨️ 색칠 도안 인쇄',
+    back:'🏘️ 동네로 돌아가기', again:'🔁 다시 하기', psName:'이름: ______________', psDate:'날짜: ____월 ____일',
+    psL1:'① 색칠해 보세요', psL2:'② 따라 써 보세요', setTitle:'⚙️ 설정', lblSpeech:'읽어주기', lblSfx:'효과음', lblMode:'조작 방식',
+    lblHint:'힌트', lblLevel:'물건 수', lblLang:'언어', on:'켜기', off:'끄기', drag:'끌어서 놓기', tap:'누르기',
+    easy:'쉬움 (6개)', normal:'보통 (9개)', close:'닫기', finaleTitle:'동네 사람들을 모두 만났어요!', finaleClose:'멋져요! 👏',
+    title:'동네 사람들의 직업에 어울리는 물건 찾기',
+    place:p=>`📍 일하는 곳: ${p}`, s3Title:n=>`${n}에게 어울리는 물건을 찾아요`, s3Say:'어울리는 물건을 찾아 보세요',
+    prog:(n,t)=>`${t}개 중 ${n}개 입혔어요`, done:n=>`${n} 완성!`, doneSay:n=>`${n} 완성! 잘했어요!`, psTitle:n=>`${n} 색칠하기`,
+    finaleSay:'동네 사람들을 모두 만났어요!', speechLang:'ko-KR' },
+  en:{ townTitle:'Meet the people in our town', s2Go:'🔎 Find the matching items', home:'🏘️ Town', home2:'← Town', print:'🖨️ Print coloring page',
+    back:'🏘️ Back to town', again:'🔁 Play again', psName:'Name: ______________', psDate:'Date: ____ / ____ / ____',
+    psL1:'① Color the picture', psL2:'② Trace the words', setTitle:'⚙️ Settings', lblSpeech:'Read aloud', lblSfx:'Sound effects', lblMode:'Controls',
+    lblHint:'Hints', lblLevel:'Items', lblLang:'Language', on:'On', off:'Off', drag:'Drag', tap:'Tap',
+    easy:'Easy (6 items)', normal:'Normal (9 items)', close:'Close', finaleTitle:'You met everyone in town!', finaleClose:'Great job! 👏',
+    title:'Find the Items for Each Job',
+    place:p=>`📍 Works at: ${p}`, s3Title:n=>`What does the ${n} use?`, s3Say:'Find the matching items',
+    prog:(n,t)=>`${n} of ${t} items found`, done:n=>`${n} complete!`, doneSay:n=>`${n} complete! Great job!`, psTitle:n=>`Color the ${n}`,
+    finaleSay:'You met everyone in town!', speechLang:'en-US' }
+};
+const S = () => STR[cfg.lang] || STR.en;
+// 직업/물건 이름을 현재 언어로 (data.js의 en 항목)
+const loc = o => (cfg.lang === 'en' && o.en) ? { ...o, ...o.en } : o;
+function applyLang(){
+  document.documentElement.lang = cfg.lang;
+  document.title = S().title;
+  document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = S()[e.dataset.i18n]; });
+}
 
 /* ---------- 상태 (완성 기록은 접속 중에만 유지) ---------- */
 const done = new Set();
@@ -44,7 +75,7 @@ function speak(text, force){
     if(!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR'; u.rate = .85; u.pitch = 1.1;
+    u.lang = S().speechLang; u.rate = .85; u.pitch = 1.1;
     speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -72,7 +103,7 @@ function buildTown(){
     const b = document.createElement('button');
     b.className = 'hot' + (h.base ? '' : ' solo');
     b.style.cssText = `left:${h.x}%;top:${h.y}%;--sz:${h.size}`;
-    b.setAttribute('aria-label', j.name);
+    b.setAttribute('aria-label', loc(j).name);
     b.innerHTML = (h.base ? `<span class="base">${h.base}</span><span class="fg">${h.emoji}</span>` : `<span class="fg">${h.emoji}</span>`) +
                   (done.has(j.id) ? '<span class="star">⭐</span>' : '');
     b.addEventListener('click', () => { sfx.tap(); openJob(j.id); });
@@ -84,19 +115,23 @@ function goTown(){
   buildTown(); show('s1');
   if(done.size === DATA.jobs.length && !finaleShown){
     finaleShown = true;
-    setTimeout(() => { $('finale').classList.add('on'); sfx.cheer(); confetti(); speak('동네 사람들을 모두 만났어요!'); }, 400);
+    setTimeout(() => { $('finale').classList.add('on'); sfx.cheer(); confetti(); speak(S().finaleSay); }, 400);
   }
 }
 
 /* ---------- S2 소개 ---------- */
+function showIntro(){
+  const c = loc(cur);
+  $('s2Icon').textContent = cur.icon;
+  $('s2Name').textContent = c.name;
+  $('s2Intro').textContent = c.intro;
+  $('s2Place').textContent = S().place(c.place);
+}
 function openJob(id){
   cur = JOB[id];
-  $('s2Icon').textContent = cur.icon;
-  $('s2Name').textContent = cur.name;
-  $('s2Intro').textContent = cur.intro;
-  $('s2Place').textContent = `📍 일하는 곳: ${cur.place}`;
+  showIntro();
   show('s2');
-  speak(`${cur.name}. ${cur.intro}`);
+  speak(`${loc(cur).name}. ${loc(cur).intro}`);
 }
 
 /* ---------- 인물 + 물건 그리기 ---------- */
@@ -126,7 +161,7 @@ function figure(stage, withBadge){
 /* ---------- S3 게임 ---------- */
 function startGame(){
   placed = new Set(); wrong = 0; locked = false;
-  $('s3Title').textContent = `${cur.name}에게 어울리는 물건을 찾아요`;
+  $('s3Title').textContent = S().s3Title(loc(cur).name);
   const stage = $('s3Stage');
   figure(stage, true);
   if(cfg.hint){
@@ -139,7 +174,7 @@ function startGame(){
     });
   }
   buildTray(); updateProgress(); show('s3');
-  speak('어울리는 물건을 찾아 보세요');
+  speak(S().s3Say);
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function buildTray(){
@@ -157,7 +192,7 @@ function buildTray(){
 }
 function updateProgress(){
   const n = placed.size, t = cur.items.length;
-  $('s3Prog').innerHTML = `${t}개 중 ${n}개 입혔어요 <span class="dots emo">${'⭐'.repeat(n)}${'▫️'.repeat(t-n)}</span>`;
+  $('s3Prog').innerHTML = `${S().prog(n,t)} <span class="dots emo">${'⭐'.repeat(n)}${'▫️'.repeat(t-n)}</span>`;
 }
 function sparkle(stage, x, y){
   for(let i=0;i<7;i++){
@@ -178,7 +213,7 @@ function tryItem(id, el){
     const p = slotPos(entry); sparkle(stage, p.x, p.y);
     el.remove();
     tray_clearHint();
-    sfx.good(); speak(ITEM[id].name);
+    sfx.good(); speak(loc(ITEM[id]).name);
     updateProgress();
     if(placed.size === cur.items.length){
       locked = true;
@@ -217,7 +252,7 @@ function onDown(ev, el){
     el.removeEventListener('pointerup', up);
     el.removeEventListener('pointercancel', up);
     ghost.remove(); el.classList.remove('drag-src');
-    if(!moved){ sfx.tap(); speak(ITEM[id].name); return; }   // 살짝 누르면 이름만 읽어줌
+    if(!moved){ sfx.tap(); speak(loc(ITEM[id]).name); return; }   // 살짝 누르면 이름만 읽어줌
     const r = $('s3Stage').getBoundingClientRect(), m = 20;
     if(e.type !== 'pointercancel' && e.clientX > r.left-m && e.clientX < r.right+m && e.clientY > r.top-m && e.clientY < r.bottom+m){
       tryItem(id, el);
@@ -300,20 +335,20 @@ async function compose(job, lineArt){
 /* ---------- S4 완성 ---------- */
 async function finish(){
   done.add(cur.id);
-  $('s4Title').textContent = `${cur.name} 완성!`;
+  $('s4Title').textContent = S().done(loc(cur).name);
   const c = await compose(cur, false);
   $('s4Img').src = c.toDataURL('image/png');
   show('s4');
   sfx.cheer(); confetti();
-  speak(`${cur.name} 완성! 잘했어요!`);
+  speak(S().doneSay(loc(cur).name));
 }
 async function printSheet(){
   const c = await compose(cur, true);
-  $('psTitle').textContent = `${cur.name} 색칠하기`;
+  $('psTitle').textContent = S().psTitle(loc(cur).name);
   const rows = $('psRows'); rows.innerHTML = '';
-  [[cur.name,''], ...cur.items.map(e => [ITEM[e.id].name,' sm'])].forEach(([t,cls]) => {
+  [[loc(cur).name,''], ...cur.items.map(e => [loc(ITEM[e.id]).name,' sm'])].forEach(([t,cls]) => {
     const r = document.createElement('div'); r.className = 'ps-row' + cls;
-    r.innerHTML = `<span>${t}</span><span>${t}</span><span>${t}</span>`;
+    r.innerHTML = `<span>${t}</span>`.repeat(t.length > 10 ? 2 : 3);
     rows.appendChild(r);
   });
   const img = $('psImg');
@@ -342,6 +377,7 @@ document.querySelectorAll('#settings .seg button').forEach(b => b.addEventListen
   const key = b.parentElement.dataset.key, v = b.dataset.v;
   cfg[key] = (v === 'true') ? true : (v === 'false') ? false : v;
   saveCfg(); syncSettings(); sfx.tap();
+  if(key === 'lang') refreshLang();
 }));
 $('btnSet').addEventListener('click', () => { syncSettings(); $('settings').classList.add('on'); });
 $('setClose').addEventListener('click', () => $('settings').classList.remove('on'));
@@ -360,7 +396,7 @@ $('btnFull').addEventListener('click', () => {
 });
 
 /* ---------- 버튼 연결 ---------- */
-$('s2Speak').addEventListener('click', () => speak(`${cur.name}. ${cur.intro}`, true));
+$('s2Speak').addEventListener('click', () => speak(`${loc(cur).name}. ${loc(cur).intro}`, true));
 $('s2Go').addEventListener('click', () => { sfx.tap(); startGame(); });
 $('s2Home').addEventListener('click', () => { sfx.tap(); goTown(); });
 $('s3Back').addEventListener('click', () => { sfx.tap(); goTown(); });
@@ -369,5 +405,13 @@ $('s4Home').addEventListener('click', () => { sfx.tap(); goTown(); });
 $('s4Again').addEventListener('click', () => { sfx.tap(); startGame(); });
 document.addEventListener('contextmenu', e => e.preventDefault());
 
+function refreshLang(){
+  applyLang();
+  const on = document.querySelector('.screen.on').id;
+  if(on === 's2') showIntro();
+  if(on === 's3'){ $('s3Title').textContent = S().s3Title(loc(cur).name); updateProgress(); }
+  if(on === 's4') $('s4Title').textContent = S().done(loc(cur).name);
+}
+applyLang();
 goTown();
 })();
