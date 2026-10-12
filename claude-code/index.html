@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>동네 사람들의 직업에 어울리는 물건 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<script src="data.js"></script>
+
+<!-- ============ S1 우리 동네 ============ -->
+<section id="s1" class="screen">
+  <div id="town"><div id="road"></div></div>
+  <div id="townTitle">우리 동네 사람들을 만나요</div>
+  <div id="townCount"></div>
+</section>
+
+<!-- ============ S2 직업 소개 ============ -->
+<section id="s2" class="screen">
+  <div class="icon emo" id="s2Icon"></div>
+  <div class="name"><span id="s2Name"></span><button class="speak" id="s2Speak" aria-label="소리 듣기">🔊</button></div>
+  <div class="intro" id="s2Intro"></div>
+  <div class="place" id="s2Place"></div>
+  <div class="btns">
+    <button class="big-btn" id="s2Go">🔎 어울리는 물건 찾기</button>
+    <button class="big-btn alt" id="s2Home">🏘️ 동네로</button>
+  </div>
+</section>
+
+<!-- ============ S3 물건 연결 게임 ============ -->
+<section id="s3" class="screen">
+  <div class="head">
+    <button class="back" id="s3Back">← 동네로</button>
+    <div>
+      <div class="ttl" id="s3Title"></div>
+      <div class="prog" id="s3Prog"></div>
+    </div>
+  </div>
+  <div id="play">
+    <div class="stage-wrap"><div class="stage" id="s3Stage"></div></div>
+    <div id="tray"></div>
+  </div>
+</section>
+
+<!-- ============ S4 완성 ============ -->
+<section id="s4" class="screen">
+  <h1 id="s4Title"></h1>
+  <img id="s4Img" alt="완성한 그림">
+  <div class="btns">
+    <button class="big-btn" id="s4Print">🖨️ 색칠 도안 인쇄</button>
+    <button class="big-btn green" id="s4Home">🏘️ 동네로 돌아가기</button>
+    <button class="big-btn alt" id="s4Again">🔁 다시 하기</button>
+  </div>
+</section>
+
+<!-- ============ 인쇄용 학습지 (화면에는 안 보임) ============ -->
+<div id="printSheet">
+  <div class="ps-top"><span>이름: ______________</span><span>날짜: ____월 ____일</span></div>
+  <h1 id="psTitle"></h1>
+  <div class="ps-label">① 색칠해 보세요</div>
+  <img id="psImg" alt="색칠 도안">
+  <div class="ps-label">② 따라 써 보세요</div>
+  <div id="psRows"></div>
+  <div class="ps-foot">© 2026 특수교사 은티 · @special_eun_t · 무단 복제·배포 금지</div>
+</div>
+
+<!-- ============ 공통 UI ============ -->
+<button class="top-btn emo" id="btnFull" aria-label="전체화면">⛶</button>
+<button class="top-btn emo" id="btnSet" aria-label="설정">⚙️</button>
+<div id="footer">© 2026 특수교사 은티 · <a id="insta" target="_blank" rel="noopener">@special_eun_t</a> · 무단 복제·배포 금지</div>
+
+<div class="modal" id="settings">
+  <div class="panel">
+    <h2>⚙️ 설정</h2>
+    <div class="row"><span>읽어주기</span><div class="seg" data-key="speech"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>효과음</span><div class="seg" data-key="sfx"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>조작 방식</span><div class="seg" data-key="mode"><button data-v="drag">끌어서 놓기</button><button data-v="tap">누르기</button></div></div>
+    <div class="row"><span>힌트</span><div class="seg" data-key="hint"><button data-v="true">켜기</button><button data-v="false">끄기</button></div></div>
+    <div class="row"><span>물건 수</span><div class="seg" data-key="level"><button data-v="easy">쉬움 (6개)</button><button data-v="normal">보통 (9개)</button></div></div>
+    <div style="text-align:center;margin-top:16px"><button class="big-btn green" id="setClose">닫기</button></div>
+  </div>
+</div>
+
+<div class="modal" id="finale">
+  <div class="panel">
+    <div class="big emo">🎉🏘️🎉</div>
+    <h1>동네 사람들을 모두 만났어요!</h1>
+    <button class="big-btn" id="finaleClose">멋져요! 👏</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
