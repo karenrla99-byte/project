@@ -74,6 +74,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 .stage{position:relative;container-type:inline-size;aspect-ratio:1/1.1;width:min(92%,calc((100dvh - 150px)/1.1));max-height:100%}
 @media (orientation:portrait){ .stage{width:min(80vw,calc((100dvh - 150px - 30vh)/1.1))} }
 .stage.small{width:min(70vw,calc((100dvh - 330px)/1.1))}
+.person{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .shadow{position:absolute;left:50%;bottom:-1%;width:62%;height:5%;transform:translateX(-50%);background:rgba(0,0,0,.12);border-radius:50%}
 .sil-body{position:absolute;left:50%;top:40%;width:52%;height:60%;transform:translateX(-50%);background:#fff;
   border:1cqw solid var(--line);border-bottom:0;border-radius:42% 42% 0 0/32% 32% 0 0}
@@ -110,8 +111,10 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 
 /* ---------- S4 done ---------- */
 #s4{justify-content:center;gap:2vmin;text-align:center}
-#s4Img{width:auto;height:auto;max-width:min(92vw,calc((100dvh - 320px)*.9167));max-height:calc(100dvh - 320px);
-  background:#fff;border-radius:24px;box-shadow:0 5px 0 rgba(0,0,0,.15);animation:pop4 .6s ease-out}
+.pic{position:relative;aspect-ratio:1100/1200;overflow:hidden;background:linear-gradient(#e9f6ff 90%,#fff 90%)}
+.pic.line{background:#fff}
+.pic img{position:absolute;display:block}
+#s4Img{width:min(92vw,calc((100dvh - 320px)*.9167));border-radius:24px;box-shadow:0 5px 0 rgba(0,0,0,.15);animation:pop4 .6s ease-out}
 @keyframes pop4{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 #s4 h1{margin:0;font-size:clamp(34px,8vmin,70px);color:var(--accent-d)}
 .fall{position:fixed;top:-60px;pointer-events:none;z-index:90;font-family:var(--emoji);animation:fall linear forwards}
@@ -127,7 +130,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
   .ps-top{display:flex;justify-content:space-between;font-size:13pt;margin-bottom:2mm}
   #printSheet h1{margin:0 0 1mm;text-align:center;font-size:24pt;font-weight:400}
   .ps-label{font-size:12pt;color:#555;margin:1mm 0}
-  #psImg{display:block;margin:0 auto;height:148mm;width:auto}
+  #psPic{height:148mm;margin:0 auto}
   .ps-row{display:flex;align-items:baseline;gap:7mm;border-bottom:1.2pt solid #999;height:15mm;margin-top:1.5mm;white-space:nowrap;overflow:hidden}
   .ps-row span{font-size:30pt;line-height:15mm;color:#fff;-webkit-text-stroke:.8pt #555}
   .ps-row.sm span{font-size:24pt}

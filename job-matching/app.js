@@ -6,6 +6,11 @@ const $ = id => document.getElementById(id);
 const ITEM = Object.fromEntries(DATA.items.map(i => [i.id, i]));
 const JOB = Object.fromEntries(DATA.jobs.map(j => [j.id, j]));
 
+/* ---------- 인물 그림: images/person.png 가 있으면 사용, 없으면 코드로 그린 임시 모양 ---------- */
+const PERSON_SRC = 'images/person.png';
+let PERSON_OK = false;
+{ const pr = new Image(); pr.onload = () => { PERSON_OK = true; }; pr.src = PERSON_SRC; }
+
 /* ---------- 설정 (기기에 저장) ---------- */
 const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy', lang:'ko' };
 let cfg = { ...defaults };
@@ -147,7 +152,8 @@ function placedEl(entry){
   return e;
 }
 function figure(stage, withBadge){
-  stage.innerHTML = '<div class="shadow"></div><div class="sil-body"></div><div class="sil-head"></div>' +
+  stage.innerHTML = '<div class="shadow"></div>' +
+    (PERSON_OK ? `<img class="person" src="${PERSON_SRC}" alt="">` : '<div class="sil-body"></div><div class="sil-head"></div>') +
     (withBadge ? `<div class="badge">${cur.icon}</div>` : '');
   if(DEBUG){
     Object.entries(DATA.slots).forEach(([n,s]) => {
@@ -288,6 +294,9 @@ function silhouette(ctx, color, w){
   const bx = SX + .24*SW, bw = .52*SW, by = SY + .40*SH, bh = .60*SH, r = .30*bw;
   ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, [r, r, 0, 0]); ctx.fill(); ctx.stroke();
   ctx.beginPath(); ctx.arc(SX + .5*SW, SY + .22*SH, .125*SW, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+}
+function frame(ctx, color, w){   // 직업 배지 테두리 + 바닥 그림자 선
+  ctx.strokeStyle = color; ctx.lineWidth = w;
   ctx.beginPath(); ctx.arc(SX + .095*SW, SY + .095*SW, .095*SW, 0, Math.PI*2); ctx.stroke();
   ctx.beginPath(); ctx.ellipse(SX + .5*SW, SY + SH + 10, .31*SW, 18, 0, 0, Math.PI*2); ctx.stroke();
 }
@@ -306,44 +315,49 @@ function toLineArt(src){
   for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
     const i = y*w+x;
     const on = edge[i] || edge[i-1] || edge[i+1] || edge[i-w] || edge[i+w];   // 선을 살짝 굵게
-    const v = on ? 20 : 255;
-    od.data[i*4] = od.data[i*4+1] = od.data[i*4+2] = v; od.data[i*4+3] = 255;
+    od.data[i*4] = od.data[i*4+1] = od.data[i*4+2] = 20; od.data[i*4+3] = on ? 255 : 0;   // 선만 남기고 나머지는 투명
   }
   oc.putImageData(od, 0, 0);
   return out;
 }
+// 그림 = 아래층(인물) + 위층(물건·꾸밈). 파일 열기(file://)에서도 동작하도록 인물 이미지는 캔버스에 합치지 않음
 async function compose(job, lineArt){
   try{ await document.fonts.load('100px "Noto Color Emoji"', '🧯'); }catch(e){}
-  const c = mk(), ctx = c.getContext('2d');
-  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,CW,CH);
-  if(!lineArt){
-    ctx.fillStyle = '#e9f6ff'; ctx.fillRect(0,0,CW,CH*.9);
-    silhouette(ctx, '#8e9aa6', 8);
-    emojiLayer(ctx, job);
-    return c;
+  let base = PERSON_SRC, full = false;
+  if(!PERSON_OK){
+    const bc = mk(); silhouette(bc.getContext('2d'), lineArt ? '#000' : '#8e9aa6', lineArt ? 7 : 8);
+    base = bc.toDataURL('image/png'); full = true;
   }
-  silhouette(ctx, '#000', 7);
   const layer = mk(), lc = layer.getContext('2d');
-  lc.fillStyle = '#fff'; lc.fillRect(0,0,CW,CH);
-  emojiLayer(lc, job);
-  ctx.globalCompositeOperation = 'multiply';
-  ctx.drawImage(toLineArt(layer), 0, 0);
-  ctx.globalCompositeOperation = 'source-over';
-  return c;
+  if(lineArt){
+    lc.fillStyle = '#fff'; lc.fillRect(0,0,CW,CH);
+    emojiLayer(lc, job);
+    const out = toLineArt(layer);
+    frame(out.getContext('2d'), '#000', 6);
+    return { base, full, layer: out.toDataURL('image/png') };
+  }
+  emojiLayer(lc, job); frame(lc, '#8e9aa6', 8);
+  return { base, full, layer: layer.toDataURL('image/png') };
+}
+async function renderPic(el, pic, lineArt){
+  el.classList.toggle('line', !!lineArt);
+  const b = pic.full ? 'left:0;top:0;width:100%;height:100%'
+    : `left:${SX/CW*100}%;top:${SY/CH*100}%;width:${SW/CW*100}%;height:${SH/CH*100}%`;
+  el.innerHTML = `<img src="${pic.base}" style="${b}" alt=""><img src="${pic.layer}" style="left:0;top:0;width:100%;height:100%" alt="">`;
+  await Promise.all([...el.querySelectorAll('img')].map(i => i.decode().catch(() => {})));
 }
 
 /* ---------- S4 완성 ---------- */
 async function finish(){
   done.add(cur.id);
   $('s4Title').textContent = S().done(loc(cur).name);
-  const c = await compose(cur, false);
-  $('s4Img').src = c.toDataURL('image/png');
+  await renderPic($('s4Img'), await compose(cur, false), false);
   show('s4');
   sfx.cheer(); confetti();
   speak(S().doneSay(loc(cur).name));
 }
 async function printSheet(){
-  const c = await compose(cur, true);
+  const pic = await compose(cur, true);
   $('psTitle').textContent = S().psTitle(loc(cur).name);
   const rows = $('psRows'); rows.innerHTML = '';
   [[loc(cur).name,''], ...cur.items.map(e => [loc(ITEM[e.id]).name,' sm'])].forEach(([t,cls]) => {
@@ -351,8 +365,7 @@ async function printSheet(){
     r.innerHTML = `<span>${t}</span>`.repeat(t.length > 10 ? 2 : 3);
     rows.appendChild(r);
   });
-  const img = $('psImg');
-  await new Promise(res => { img.onload = res; img.src = c.toDataURL('image/png'); });
+  await renderPic($('psPic'), pic, true);
   window.print();
 }
 
