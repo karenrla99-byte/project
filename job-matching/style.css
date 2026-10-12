@@ -123,15 +123,20 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 /* ---------- 인쇄 ---------- */
 #printSheet{display:none}
 @media print{
-  @page{size:A4;margin:10mm}
+  @page{size:A4;margin:8mm}
   html,body{height:auto;overflow:visible;background:#fff}
   body>*:not(#printSheet){display:none!important}
-  #printSheet{display:block;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .ps-top{display:flex;justify-content:space-between;font-size:13pt;margin-bottom:2mm}
-  #psPic{height:185mm;margin:0 auto}
-  #psName{text-align:center;font-size:66pt;line-height:1.1;margin-top:2mm;padding-bottom:1mm;border-bottom:1.2pt solid #999;
-    color:#fff;-webkit-text-stroke:1.2pt #555;letter-spacing:3pt}
-  .ps-foot{margin-top:3mm;text-align:center;font-size:9pt;color:#666}
+  #printSheet{display:flex;flex-direction:column;justify-content:space-between;height:278mm;overflow:hidden;color:#000;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ps-top{display:flex;align-items:flex-end;gap:10mm;font-size:16pt}
+  .ps-name{flex:1;display:flex;align-items:flex-end;gap:3mm}
+  .ps-name b{font-weight:400}
+  .ps-name i{flex:1;border-bottom:1.3pt solid #000;height:1.1em}
+  #psDate{white-space:nowrap}
+  #psPic{height:210mm;margin:0 auto}
+  #psJob{text-align:center;font-size:76pt;line-height:1.1;padding-bottom:1mm;border-bottom:1.3pt solid #999;
+    color:#fff;-webkit-text-stroke:1.3pt #555;letter-spacing:3pt}
+  .ps-foot{text-align:center;font-size:9pt;color:#666}
 }
 
 /* ---------- modals ---------- */

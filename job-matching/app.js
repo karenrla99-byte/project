@@ -20,7 +20,7 @@ const saveCfg = () => { try { localStorage.setItem('dongne-cfg', JSON.stringify(
 /* ---------- 언어 (ko / en) ---------- */
 const STR = {
   ko:{ townTitle:'우리 동네 사람들을 만나요', s2Go:'🔎 어울리는 물건 찾기', home:'🏘️ 동네로', home2:'← 동네로', print:'🖨️ 색칠 도안 인쇄',
-    back:'🏘️ 동네로 돌아가기', again:'🔁 다시 하기', psName:'이름: ______________', psDate:'날짜: ____월 ____일',
+    back:'🏘️ 동네로 돌아가기', again:'🔁 다시 하기', psName:'이름:', psDate:'날짜:',
     setTitle:'⚙️ 설정', lblSpeech:'읽어주기', lblSfx:'효과음', lblMode:'조작 방식',
     lblHint:'힌트', lblLevel:'물건 수', lblLang:'언어', on:'켜기', off:'끄기', drag:'끌어서 놓기', tap:'누르기',
     easy:'쉬움 (6개)', normal:'보통 (9개)', close:'닫기', finaleTitle:'동네 사람들을 모두 만났어요!', finaleClose:'멋져요! 👏',
@@ -29,7 +29,7 @@ const STR = {
     prog:(n,t)=>`${t}개 중 ${n}개 입혔어요`, done:n=>`${n} 완성!`, doneSay:n=>`${n} 완성! 잘했어요!`,
     finaleSay:'동네 사람들을 모두 만났어요!', speechLang:'ko-KR' },
   en:{ townTitle:'Meet the people in our town', s2Go:'🔎 Find the matching items', home:'🏘️ Town', home2:'← Town', print:'🖨️ Print coloring page',
-    back:'🏘️ Back to town', again:'🔁 Play again', psName:'Name: ______________', psDate:'Date: ____ / ____ / ____',
+    back:'🏘️ Back to town', again:'🔁 Play again', psName:'Name:', psDate:'Date:',
     setTitle:'⚙️ Settings', lblSpeech:'Read aloud', lblSfx:'Sound effects', lblMode:'Controls',
     lblHint:'Hints', lblLevel:'Items', lblLang:'Language', on:'On', off:'Off', drag:'Drag', tap:'Tap',
     easy:'Easy (6 items)', normal:'Normal (9 items)', close:'Close', finaleTitle:'You met everyone in town!', finaleClose:'Great job! 👏',
@@ -316,7 +316,8 @@ async function finish(){
 }
 async function printSheet(){
   const pic = await compose(cur, true);
-  $('psName').textContent = loc(cur).name;
+  $('psJob').textContent = loc(cur).name;
+  $('psDate').textContent = `${S().psDate} ${new Date().toLocaleDateString(cfg.lang === 'ko' ? 'ko-KR' : 'en-US', { year:'numeric', month:'long', day:'numeric' })}`;
   await renderPic($('psPic'), pic, true);
   window.print();
 }
