@@ -49,7 +49,7 @@ window.DATA = {
     { "id": "cook", "person": "images/cook.png", "en": { "name": "Cook", "intro": "Makes yummy food.", "place": "snack shop" }, "decor": ["🥕","🍅"], "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
       "hotspot": { "emoji": "🍢", "x": 44, "y": 40, "size": 62, "base": "🏪" },
       "items": [ { "id": "pot", "slot": "left-hand" }, { "id": "pan", "slot": "right-hand" }, { "id": "salt", "slot": "side" } ] },
-    { "id": "police", "en": { "name": "Police Officer", "intro": "Keeps the town safe.", "place": "police station" }, "decor": ["🛑","⭐"], "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
+    { "id": "police", "person": "images/police.png", "en": { "name": "Police Officer", "intro": "Keeps the town safe.", "place": "police station" }, "decor": ["🛑","⭐"], "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
       "hotspot": { "emoji": "🚓", "x": 62, "y": 40, "size": 66, "base": "🏢" },
       "items": [ { "id": "patrolcar", "slot": "side" }, { "id": "siren", "slot": "back" }, { "id": "radio", "slot": "right-hand" } ] },
     { "id": "doctor", "person": "images/doctor.png", "en": { "name": "Doctor", "intro": "Helps sick people get better.", "place": "hospital" }, "decor": ["❤️","🩹"], "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
