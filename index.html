@@ -120,10 +120,29 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 
 /* ---------- S4 done ---------- */
 #s4{justify-content:center;gap:2vmin;text-align:center}
-#s4 .stage{width:min(60vw,calc((100dvh - 330px)/1.1))}
+#s4Img{width:auto;height:auto;max-width:min(92vw,calc((100dvh - 320px)*.9167));max-height:calc(100dvh - 320px);
+  background:#fff;border-radius:24px;box-shadow:0 5px 0 rgba(0,0,0,.15);animation:pop4 .6s ease-out}
+@keyframes pop4{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 #s4 h1{margin:0;font-size:clamp(34px,8vmin,70px);color:var(--accent-d)}
 .fall{position:fixed;top:-60px;pointer-events:none;z-index:90;font-family:var(--emoji);animation:fall linear forwards}
 @keyframes fall{to{transform:translateY(115vh) rotate(360deg)}}
+
+/* ---------- 인쇄 ---------- */
+#printSheet{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  html,body{height:auto;overflow:visible;background:#fff}
+  body>*:not(#printSheet){display:none!important}
+  #printSheet{display:block;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ps-top{display:flex;justify-content:space-between;font-size:13pt;margin-bottom:2mm}
+  #printSheet h1{margin:0 0 1mm;text-align:center;font-size:24pt;font-weight:400}
+  .ps-label{font-size:12pt;color:#555;margin:1mm 0}
+  #psImg{display:block;margin:0 auto;height:148mm;width:auto}
+  .ps-row{display:flex;align-items:baseline;gap:7mm;border-bottom:1.2pt solid #999;height:15mm;margin-top:1.5mm;white-space:nowrap;overflow:hidden}
+  .ps-row span{font-size:30pt;line-height:15mm;color:#fff;-webkit-text-stroke:.8pt #555}
+  .ps-row.sm span{font-size:24pt}
+  .ps-foot{margin-top:3mm;text-align:center;font-size:9pt;color:#666}
+}
 
 /* ---------- modals ---------- */
 .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px}
@@ -177,26 +196,26 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
     { "id": "syringe",      "name": "주사기",     "emoji": "💉", "usableAsDistractor": true }
   ],
   "jobs": [
-    { "id": "cleaner", "name": "환경미화원", "intro": "동네를 깨끗하게 치워요.", "place": "길", "icon": "🚛",
+    { "id": "cleaner", "decor": ["🍂","🌳"], "name": "환경미화원", "intro": "동네를 깨끗하게 치워요.", "place": "길", "icon": "🚛",
       "hotspot": { "emoji": "🚛", "x": 70, "y": 71, "size": 76 },
       "items": [ { "id": "vest", "slot": "body" }, { "id": "broom", "slot": "right-hand" }, { "id": "bin", "slot": "side" } ] },
-    { "id": "hairdresser", "name": "미용사", "intro": "머리를 예쁘게 잘라 줘요.", "place": "미용실", "icon": "💈",
+    { "id": "hairdresser", "decor": ["🎀","🌸"], "name": "미용사", "intro": "머리를 예쁘게 잘라 줘요.", "place": "미용실", "icon": "💈",
       "hotspot": { "emoji": "💈", "x": 27, "y": 40, "size": 66, "base": "🏠" },
       "items": [ { "id": "scissors", "slot": "right-hand" }, { "id": "mirror", "slot": "left-hand" },
                  { "id": "comb", "slot": "body", "scale": 0.45, "offset": { "x": 8, "y": 8 } } ] },
-    { "id": "busdriver", "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
+    { "id": "busdriver", "decor": ["🚦","🛣️"], "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
       "hotspot": { "emoji": "🚌", "x": 28, "y": 71, "size": 78 },
       "items": [ { "id": "gloves", "slot": "right-hand" }, { "id": "sunglasses", "slot": "face" }, { "id": "busstop", "slot": "side" } ] },
-    { "id": "firefighter", "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
+    { "id": "firefighter", "decor": ["🔥","💧"], "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
       "hotspot": { "emoji": "🚒", "x": 10, "y": 40, "size": 70, "base": "🏢" },
       "items": [ { "id": "extinguisher", "slot": "right-hand" }, { "id": "firetruck", "slot": "side" }, { "id": "ladder", "slot": "back" } ] },
-    { "id": "cook", "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
+    { "id": "cook", "decor": ["🥕","🍅"], "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
       "hotspot": { "emoji": "🍢", "x": 44, "y": 40, "size": 62, "base": "🏪" },
       "items": [ { "id": "pot", "slot": "left-hand" }, { "id": "pan", "slot": "right-hand" }, { "id": "salt", "slot": "side" } ] },
-    { "id": "police", "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
+    { "id": "police", "decor": ["🛑","⭐"], "name": "경찰관", "intro": "동네를 지키고 사람들을 안전하게 해 줘요.", "place": "경찰서", "icon": "👮",
       "hotspot": { "emoji": "🚓", "x": 62, "y": 40, "size": 66, "base": "🏢" },
       "items": [ { "id": "patrolcar", "slot": "side" }, { "id": "siren", "slot": "back" }, { "id": "radio", "slot": "right-hand" } ] },
-    { "id": "doctor", "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
+    { "id": "doctor", "decor": ["❤️","🩹"], "name": "의사", "intro": "아픈 사람을 치료해 줘요.", "place": "병원", "icon": "🧑‍⚕️",
       "hotspot": { "emoji": "🏥", "x": 88, "y": 40, "size": 82 },
       "items": [ { "id": "gown", "slot": "body" }, { "id": "stethoscope", "slot": "left-hand" }, { "id": "syringe", "slot": "right-hand" } ] }
   ],
@@ -254,12 +273,24 @@ button{font:inherit;color:inherit;cursor:pointer;border:0}
 <!-- ============ S4 완성 ============ -->
 <section id="s4" class="screen">
   <h1 id="s4Title"></h1>
-  <div class="stage" id="s4Stage"></div>
+  <img id="s4Img" alt="완성한 그림">
   <div class="btns">
+    <button class="big-btn" id="s4Print">🖨️ 색칠 도안 인쇄</button>
     <button class="big-btn green" id="s4Home">🏘️ 동네로 돌아가기</button>
     <button class="big-btn alt" id="s4Again">🔁 다시 하기</button>
   </div>
 </section>
+
+<!-- ============ 인쇄용 학습지 (화면에는 안 보임) ============ -->
+<div id="printSheet">
+  <div class="ps-top"><span>이름: ______________</span><span>날짜: ____월 ____일</span></div>
+  <h1 id="psTitle"></h1>
+  <div class="ps-label">① 색칠해 보세요</div>
+  <img id="psImg" alt="색칠 도안">
+  <div class="ps-label">② 따라 써 보세요</div>
+  <div id="psRows"></div>
+  <div class="ps-foot">© 2026 특수교사 은티 · @special_eun_t · 무단 복제·배포 금지</div>
+</div>
 
 <!-- ============ 공통 UI ============ -->
 <button class="top-btn emo" id="btnFull" aria-label="전체화면">⛶</button>
@@ -518,17 +549,99 @@ function onDown(ev, el){
   el.addEventListener('pointercancel', up);
 }
 
+/* ---------- 그림 합성 (색 그림 / 색칠 도안) ---------- */
+const CW = 1100, CH = 1200, SX = 150, SY = 150, SW = 800, SH = 880;
+const DECOR_SPOTS = [[100,90,120],[1000,90,120],[550,70,100],[90,400,100],[1020,320,100],[70,640,110],[1030,600,100],[80,1110,120],[1020,1110,120],[550,1130,100]];
+const GENERIC_DECOR = ['☀️','☁️','🌷','⭐','🌳','☁️','🌼','⭐'];
+const mk = () => { const c = document.createElement('canvas'); c.width = CW; c.height = CH; return c; };
+function glyph(ctx, emoji, x, y, size){
+  ctx.font = `${size}px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(emoji, x, y);
+}
+function emojiLayer(ctx, job){
+  // 인물 주변 꾸밈
+  const dec = [...(job.decor||[]), ...GENERIC_DECOR];
+  DECOR_SPOTS.forEach((d,i) => glyph(ctx, dec[i % dec.length], d[0], d[1], d[2]));
+  // 물건
+  job.items.forEach(e => {
+    const p = slotPos(e);
+    glyph(ctx, ITEM[e.id].emoji, SX + p.x/100*SW, SY + p.y/100*SH, p.scale*.30*SW);
+  });
+  glyph(ctx, job.icon, SX + .095*SW, SY + .095*SW, .12*SW);
+}
+function silhouette(ctx, color, w){
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = color; ctx.lineWidth = w; ctx.lineJoin = 'round';
+  const bx = SX + .24*SW, bw = .52*SW, by = SY + .40*SH, bh = .60*SH, r = .30*bw;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, [r, r, 0, 0]); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(SX + .5*SW, SY + .22*SH, .125*SW, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+  ctx.beginPath(); ctx.arc(SX + .095*SW, SY + .095*SW, .095*SW, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(SX + .5*SW, SY + SH + 10, .31*SW, 18, 0, 0, Math.PI*2); ctx.stroke();
+}
+function toLineArt(src){
+  const w = CW, h = CH, d = src.getContext('2d').getImageData(0,0,w,h).data;
+  const q = new Float32Array(w*h);
+  for(let i=0;i<w*h;i++){ const L = .299*d[i*4] + .587*d[i*4+1] + .114*d[i*4+2]; q[i] = Math.round(L/45); }
+  const edge = new Uint8Array(w*h);
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+    const i = y*w+x;
+    const gx = -q[i-w-1] - 2*q[i-1] - q[i+w-1] + q[i-w+1] + 2*q[i+1] + q[i+w+1];
+    const gy = -q[i-w-1] - 2*q[i-w] - q[i-w+1] + q[i+w-1] + 2*q[i+w] + q[i+w+1];
+    if(Math.abs(gx) + Math.abs(gy) >= 3) edge[i] = 1;
+  }
+  const out = mk(), oc = out.getContext('2d'), od = oc.createImageData(w,h);
+  for(let y=1;y<h-1;y++) for(let x=1;x<w-1;x++){
+    const i = y*w+x;
+    const on = edge[i] || edge[i-1] || edge[i+1] || edge[i-w] || edge[i+w];   // 선을 살짝 굵게
+    const v = on ? 20 : 255;
+    od.data[i*4] = od.data[i*4+1] = od.data[i*4+2] = v; od.data[i*4+3] = 255;
+  }
+  oc.putImageData(od, 0, 0);
+  return out;
+}
+async function compose(job, lineArt){
+  try{ await document.fonts.load('100px "Noto Color Emoji"', '🧯'); }catch(e){}
+  const c = mk(), ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0,0,CW,CH);
+  if(!lineArt){
+    ctx.fillStyle = '#e9f6ff'; ctx.fillRect(0,0,CW,CH*.9);
+    silhouette(ctx, '#8e9aa6', 8);
+    emojiLayer(ctx, job);
+    return c;
+  }
+  silhouette(ctx, '#000', 7);
+  const layer = mk(), lc = layer.getContext('2d');
+  lc.fillStyle = '#fff'; lc.fillRect(0,0,CW,CH);
+  emojiLayer(lc, job);
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.drawImage(toLineArt(layer), 0, 0);
+  ctx.globalCompositeOperation = 'source-over';
+  return c;
+}
+
 /* ---------- S4 완성 ---------- */
-function finish(){
+async function finish(){
   done.add(cur.id);
   $('s4Title').textContent = `${cur.name} 완성!`;
-  const stage = $('s4Stage');
-  figure(stage, true);
-  cur.items.forEach(e => stage.appendChild(placedEl(e)));
+  const c = await compose(cur, false);
+  $('s4Img').src = c.toDataURL('image/png');
   show('s4');
   sfx.cheer(); confetti();
   speak(`${cur.name} 완성! 잘했어요!`);
 }
+async function printSheet(){
+  const c = await compose(cur, true);
+  $('psTitle').textContent = `${cur.name} 색칠하기`;
+  const rows = $('psRows'); rows.innerHTML = '';
+  [[cur.name,''], ...cur.items.map(e => [ITEM[e.id].name,' sm'])].forEach(([t,cls]) => {
+    const r = document.createElement('div'); r.className = 'ps-row' + cls;
+    r.innerHTML = `<span>${t}</span><span>${t}</span><span>${t}</span>`;
+    rows.appendChild(r);
+  });
+  const img = $('psImg');
+  await new Promise(res => { img.onload = res; img.src = c.toDataURL('image/png'); });
+  window.print();
+}
+
 function confetti(){
   const set = ['✨','⭐','🎉','🎈','🌟'];
   for(let i=0;i<28;i++){
@@ -572,6 +685,7 @@ $('s2Speak').addEventListener('click', () => speak(`${cur.name}. ${cur.intro}`, 
 $('s2Go').addEventListener('click', () => { sfx.tap(); startGame(); });
 $('s2Home').addEventListener('click', () => { sfx.tap(); goTown(); });
 $('s3Back').addEventListener('click', () => { sfx.tap(); goTown(); });
+$('s4Print').addEventListener('click', () => { sfx.tap(); printSheet(); });
 $('s4Home').addEventListener('click', () => { sfx.tap(); goTown(); });
 $('s4Again').addEventListener('click', () => { sfx.tap(); startGame(); });
 document.addEventListener('contextmenu', e => e.preventDefault());
