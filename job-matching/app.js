@@ -7,7 +7,7 @@ const ITEM = Object.fromEntries(DATA.items.map(i => [i.id, i]));
 const JOB = Object.fromEntries(DATA.jobs.map(j => [j.id, j]));
 
 /* ---------- 설정 (기기에 저장) ---------- */
-const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy', lang:'en' };
+const defaults = { speech:true, sfx:true, mode:'drag', hint:true, level:'easy', lang:'ko' };
 let cfg = { ...defaults };
 try { Object.assign(cfg, JSON.parse(localStorage.getItem('dongne-cfg') || '{}')); } catch(e){}
 const saveCfg = () => { try { localStorage.setItem('dongne-cfg', JSON.stringify(cfg)); } catch(e){} };
