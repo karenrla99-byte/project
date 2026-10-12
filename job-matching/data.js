@@ -43,7 +43,7 @@ window.DATA = {
     { "id": "busdriver", "person": "images/busdriver.png", "en": { "name": "Bus Driver", "intro": "Drives the bus and carries people.", "place": "bus" }, "decor": ["🚦","🛣️"], "name": "버스기사", "intro": "버스를 운전해서 사람들을 태워 줘요.", "place": "버스", "icon": "🚌",
       "hotspot": { "emoji": "🚌", "x": 28, "y": 71, "size": 78 },
       "items": [ { "id": "gloves", "slot": "right-hand" }, { "id": "sunglasses", "slot": "face" }, { "id": "busstop", "slot": "side" } ] },
-    { "id": "firefighter", "en": { "name": "Firefighter", "intro": "Puts out fires and helps people.", "place": "fire station" }, "decor": ["🔥","💧"], "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
+    { "id": "firefighter", "person": "images/firefighter.png", "en": { "name": "Firefighter", "intro": "Puts out fires and helps people.", "place": "fire station" }, "decor": ["🔥","💧"], "name": "소방관", "intro": "불을 끄고 사람들을 도와줘요.", "place": "소방서", "icon": "🧑‍🚒",
       "hotspot": { "emoji": "🚒", "x": 10, "y": 40, "size": 70, "base": "🏢" },
       "items": [ { "id": "extinguisher", "slot": "right-hand" }, { "id": "firetruck", "slot": "side" }, { "id": "ladder", "slot": "back" } ] },
     { "id": "cook", "person": "images/cook.png", "en": { "name": "Cook", "intro": "Makes yummy food.", "place": "snack shop" }, "decor": ["🥕","🍅"], "name": "요리사", "intro": "맛있는 음식을 만들어요.", "place": "분식집", "icon": "🧑‍🍳",
