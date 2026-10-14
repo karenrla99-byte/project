@@ -22,7 +22,6 @@ button{font:inherit;color:inherit;margin:0;padding:0;border:0;background:none;cu
 #stage.hc{--c-text:#FFFFFF;--c-bg:#000000;--c-line:#FFFFFF;--c-inner:#000000;--c-btn:#000000;--c-btnsh:#000000;--c-dim:rgba(0,0,0,.82);
   --c-tagbg:#FFFFFF;--c-tagfg:#000000;--c-hint:#000000;--c-portrait:#000000;--c-sel:#FFD84D;--c-selline:#FFD84D;--c-muted:#000000;--c-mutedfg:#B8B8B8;--c-foot:#000000;--c-footfg:#FFFFFF;--c-sub:#FFFFFF;--c-field:#000000;--c-hover:#222222}
 #stage.reduce *,#stage.reduce *::before,#stage.reduce *::after{animation:none!important;transition:none!important}
-@media (prefers-reduced-motion:reduce){#stage *{animation:none!important;transition:none!important}}
 
 .screen{position:absolute;inset:0;overflow:hidden}
 .abs{position:absolute}
@@ -323,6 +322,7 @@ body.touch #hud-keys{display:none}
 #stage,.screen,#viewport{overflow:hidden;overflow:clip}
 .wcard.sel{transform:none;box-shadow:0 0 0 4px #FFD84D,0 6px 0 rgba(27,42,91,.3)}
 .wcard.sel::after{top:-18px}
+#foot.night2{background:#0B1230}
 
 </style>
 </head>
@@ -350,6 +350,7 @@ body.touch #hud-keys{display:none}
       <div id="t-start-wrap"><button id="t-start" type="button"><span id="t-start-lbl">▶ 시작하기</span><i></i></button></div>
       <button id="t-reset" type="button" class="btn" style="height:44px;font-size:24px" hidden>처음부터 다시</button>
     </div>
+    <button id="t-sound" type="button" class="btn abs" style="left:20px;bottom:44px;height:48px;animation:cd-bob 1.6s ease-in-out infinite" hidden>♪ 음악 켜기</button>
   </section>
 
   <!-- 로딩 화면 -->
@@ -460,6 +461,22 @@ body.touch #hud-keys{display:none}
     <button id="w-exit" type="button" class="btn abs" style="left:92px;top:20px;height:56px">◀ 마을로</button>
     <div id="w-slots" class="abs panel" style="left:40px;top:92px;width:676px;height:588px;padding:16px;display:flex;flex-direction:column;gap:10px;overflow:auto"></div>
     <div id="w-cards" class="abs panel" style="left:740px;top:92px;width:500px;height:588px;padding:16px;display:flex;flex-direction:column;gap:14px"></div>
+  </section>
+
+  <!-- 면허증 -->
+  <section id="sc-lic" class="screen" hidden aria-label="면허증">
+    <img id="lic-bg" class="abs" style="left:0;top:0" width="1280" height="720" alt="">
+    <div id="lic-main"></div>
+    <button id="lic-exit" type="button" class="btn sq abs" style="left:20px;top:92px" title="마을로" aria-label="마을로">◀</button>
+  </section>
+
+  <!-- 마무리 -->
+  <section id="sc-end" class="screen" hidden aria-label="마무리">
+    <img id="end-bg" class="abs" style="left:0;top:0" width="1280" height="720" alt="">
+    <div class="abs" style="left:0;right:0;top:120px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center"><div id="end-msg" style="max-width:960px;font-size:36px;font-weight:700;line-height:1.5;color:#FFFFFF;text-wrap:balance"></div><div style="font-size:12px;color:#8F9CC4">CANE DO는 지팡이와 함께 CAN DO, 해낸다는 뜻이에요.</div></div>
+    <div class="abs" style="left:0;right:0;top:330px;display:flex;flex-direction:column;align-items:center;gap:16px"><div style="font-size:72px;font-weight:700;color:#FFFFFF;letter-spacing:4px;text-shadow:4px 0 #3D5AA8,-4px 0 #3D5AA8,0 4px #3D5AA8,0 -4px #3D5AA8,4px 4px #3D5AA8,-4px 4px #3D5AA8,4px -4px #3D5AA8,-4px -4px #3D5AA8,0 10px #0B1230">CANE DO</div><div style="font-size:24px;color:#FFFDF2">흰지팡이와 배우는 배려 방법 알기</div></div>
+    <img id="end-me" class="abs" style="left:560px;top:564px" width="64" height="64" alt="나"><img id="end-fr" class="abs" style="left:624px;top:564px" width="92" height="64" alt="흰지팡이를 든 친구">
+    <div class="abs" style="right:40px;top:604px;display:flex;gap:12px"><button id="end-lic" type="button" class="btn">면허증 다시 보기</button><button id="end-village" type="button" class="btn primary" style="padding:0 20px">마을로</button></div>
   </section>
 
   <!-- 마을 -->
@@ -785,11 +802,11 @@ const store = {
   del(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 };
 const SKEY = 'canedo-settings-v1', PKEY = 'canedo-save-v1';
-const DEF_SET = { lvl: 1, size: 1, fx: 0, hc: 1, tts: 0, motion: 1, spd: 1, sfx: 0, bgm: 0, mic: 0 };
-const firstRun = !store.get(SKEY);
+const DEF_SET = { lvl: 1, size: 1, fx: 0, hc: 1, tts: 0, motion: 1, spd: 1, sfx: 0, bgm: 0, mic: 0, ver: 2 };
 let set = Object.assign({}, DEF_SET, store.get(SKEY) || {});
-try { if (firstRun && matchMedia('(prefers-reduced-motion: reduce)').matches) set.motion = 0; } catch (e) {}
-const newSave = () => ({ v: 1, name: '', ch: 0, done: {}, stars: [], bonus: 0, starred: {}, wrong: 0, hints: 0, qp: {}, npc: {}, meal: { found: [], refs: [] }, x: null });
+/* 예전 버전이 컴퓨터의 '움직임 줄이기'를 따라 자동으로 켜 둔 것을 한 번 되돌려요 (ver 2) */
+if (set.ver !== 2) { set.motion = 1; set.ver = 2; store.set(SKEY, set); }
+const newSave = () => ({ v: 1, name: '', ch: 0, done: {}, stars: [], bonus: 0, starred: {}, wrong: 0, hints: 0, qp: {}, npc: {}, meal: { found: [], refs: [] }, lic: null, finished: false, x: null });
 let save = Object.assign(newSave(), store.get(PKEY) || {});
 const persistSet = () => store.set(SKEY, set);
 const persist = () => store.set(PKEY, save);
@@ -851,7 +868,7 @@ const SONGS = {
 const parseTrack = s => { const out = []; s.replace(/\|/g, ' ').trim().split(/\s+/).forEach(t => { if (t === '-') { if (out.length) out[out.length - 1].len++; else out.push({ m: null, len: 1 }); } else if (t === '.') out.push({ m: null, len: 1 }); else out.push({ m: midiOf(t), len: 1 }); }); return out; };
 Object.values(SONGS).forEach(sg => { sg.melT = parseTrack(sg.mel); sg.bassT = parseTrack(sg.bass); });
 let bgmName = '', bgmGain = null, bgmTimer = null, bgmNextT = 0, bgmStep = 0, bgmWant = '';
-function ensureAudio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; }
+function ensureAudio() { try { if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); ac.onstatechange = () => { soundBtn(); bgmUpdate(); }; } if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; }
 function bgmNote(t, m, len, spb, type, vol) {
   const o = ac.createOscillator(), g2 = ac.createGain(), dur = len * spb * .92;
   o.type = type; o.frequency.setValueAtTime(hz(m), t);
@@ -885,7 +902,7 @@ function bgmWantedName() {
   return '';
 }
 function bgmUpdate() {
-  const want = bgmWantedName(); bgmWant = want;
+  const want = bgmWantedName(); bgmWant = want; soundBtn();
   if (!ac) return;                                  // 아직 소리를 켜지 못했어요 (첫 누르기 뒤에 시작)
   if (!bgmGain) { bgmGain = ac.createGain(); bgmGain.gain.value = 0; bgmGain.connect(ac.destination); }
   const quiet = ovStack.some(o => o.el.id === 'ov-quiz' || o.el.id === 'ov-msg');
@@ -932,7 +949,7 @@ function applySettings() {
 }
 
 /* ───────── 화면 전환 ───────── */
-const SC = { title: $('#sc-title'), loading: $('#sc-loading'), name: $('#sc-name'), village: $('#sc-village'), meal: $('#sc-meal'), guide: $('#sc-guide'), walk: $('#sc-walk') };
+const SC = { title: $('#sc-title'), loading: $('#sc-loading'), name: $('#sc-name'), village: $('#sc-village'), lic: $('#sc-lic'), end: $('#sc-end'), meal: $('#sc-meal'), guide: $('#sc-guide'), walk: $('#sc-walk') };
 let cur = 'title';
 const ovStack = [];
 function show(name) {
@@ -940,15 +957,17 @@ function show(name) {
   Object.keys(SC).forEach(k => { SC[k].hidden = k !== name; });
   chrome(); bgmUpdate();
 }
+function soundBtn() { const b = $('#t-sound'); if (b) b.hidden = !(cur === 'title' && on('bgm') && !(ac && ac.state === 'running')); }
 function chrome() {
   const top = ovStack.length ? ovStack[ovStack.length - 1] : null;
   const foot = $('#foot');
-  foot.className = (cur === 'village' && !top) ? 'plain' : (cur === 'loading' ? 'night' : '');
+  foot.className = (cur === 'village' && !top) ? 'plain' : (['loading', 'lic', 'end'].includes(cur) ? 'night' : '');
   const link = cur === 'title' && !top;
   foot.classList.toggle('link', link); $('#ig').tabIndex = link ? 0 : -1;
   $('#btn-full').hidden = cur === 'loading' || !(document.fullscreenEnabled || document.webkitFullscreenEnabled);
   $('#btn-set').hidden = cur === 'loading';
   $('#btn-set').classList.toggle('on', ovStack.some(o => o.el.id === 'ov-settings'));
+  soundBtn();
 }
 
 /* 겹친 창 관리 */
@@ -990,7 +1009,7 @@ const stopX = i => X0 + i * STOP_GAP;
 const gateReq = i => (i <= 7 ? i : 8);                 // i번 정류장 앞 문: 이 번호의 퀘스트를 깨야 열려요
 const gateOpen = i => i === 0 || !!save.done[gateReq(i)];
 const gateLeft = i => stopX(i) - 112;
-const isDone = i => (i < 8 ? !!save.done[i + 1] : false);
+const isDone = i => (i < 8 ? !!save.done[i + 1] : i === 9 ? !!(save.lic && save.lic.done) : false);
 const currentQuest = () => { for (let q = 1; q <= 8; q++) if (!save.done[q]) return q; return 9; };
 
 /* 발판·별 배치 (3가지 모양을 돌려가며) */
@@ -1187,7 +1206,7 @@ function refreshWorld() {
     else nodes.push(`<div class="nd" title="${q} 잠김">${q}</div>`);
   }
   nodes.push(`<div class="nd opt" title="점자 가게 (선택)">점자</div>`);
-  nodes.push(`<div class="nd" title="해내다 광장">끝</div>`);
+  nodes.push(save.lic && save.lic.done ? `<div class="nd done" title="해내다 광장 완료"><img src="${A.ic.check}" width="24" height="24" alt="완료"></div>` : `<div class="nd" title="해내다 광장">끝</div>`);
   $('#hud-nodes').innerHTML = nodes.join('');
   $('#hud-nodes').setAttribute('aria-label', cq > 8 ? '필수 퀘스트를 모두 깼어요' : `지금은 ${cq}번 퀘스트`);
   updateStars();
@@ -1301,6 +1320,7 @@ function enter(i) {
   const st = STOPS[i];
   if (!gateOpen(i)) { toast(`${gateReq(i)}번을 깨면 열려요.`); return; }
   sfx.door(); persistPos();
+  if (i === 9) { openLicense(); return; }
   if (st.quest === 3) { openMeal(); return; }
   if (st.quest >= 5 && st.quest <= 7) { openGuide(st.quest); return; }
   if (st.quest === 8) { openWalk(); return; }
@@ -1948,6 +1968,187 @@ $('#w-slots').addEventListener('drop', e => { const s = e.target.closest('.wslot
 $('#w-exit').addEventListener('click', () => { W = null; gotoVillage(); });
 
 
+
+/* ───────────────────────────────────────────
+   해내다 광장 : 면허증(CANE DO) 쓰기 · 이미지 저장 · 마무리 화면
+   ─────────────────────────────────────────── */
+/* 문구는 퀴즈_해설_검토본.md 6번 그대로 (쉬운 글 보기) */
+const LIC_OPTS = [
+  ['보이는 정도는 사람마다 달라요.', '흰지팡이는 길을 살피는 도구예요.', '도움은 먼저 물어봐요. 설명은 구체적으로 해요.', '안내견이 길을 안내하는 중에는 부르거나 만지지 않아요.'],
+  ['도와주고 싶으면 먼저 물어볼게요.', '길을 알려 줄 때 방향과 걸음 수를 말할게요.', '떠날 때 "나 갈게" 하고 말할게요.', '점자블록 위에 물건을 두지 않을게요.']
+];
+const END_MSG = { b: '시각장애가 있는 친구도 우리와 같은 일상을 살아가요. 필요한 도움은 그 친구에게 먼저 물어봐요.', e: '시각장애가 있는 친구도 우리와 같이 살아요. 도움은 먼저 물어봐요.' };
+const GRADE_NAME = ['새싹', '든든', '빛나는'];
+/* 등급 기준은 제가 정한 초안이에요 (확인 필요): 틀린 횟수 + 힌트 횟수가 적을수록 높아요 */
+const gradeOf = () => { const s = (save.wrong || 0) + (save.hints || 0); return s <= 6 ? 2 : s <= 15 ? 1 : 0; };
+const gradeIcon = i => [A.sprout.u, A.shield.u, A.star.u][i];
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}. ${d.getMonth() + 1}. ${d.getDate()}.`; };
+const brCells = () => [...(save.brName || '')].map(ch => CS_.dots(ch).map(d => d.on));
+const brHTML = (dot, gap, pad, bw) => brCells().map(c => `<div style="display:grid;grid-template-columns:${dot}px ${dot}px;gap:${gap}px;padding:${pad}px;background:#FFFFFF;border:${bw}px solid #1B2A5B">${c.map(on => `<div style="width:${dot}px;height:${dot}px;border-radius:50%;background:${on ? '#1B2A5B' : '#E1E3EA'}"></div>`).join('')}</div>`).join('');
+const QCOL = i => CS_.PD[i][3];
+let L = null;
+function openLicense() {
+  const done = !!(save.lic && save.lic.done);
+  L = { stage: done ? 'done' : 'write', learned: (save.lic && save.lic.learned) || '', act: (save.lic && save.lic.act) || '' };
+  $('#lic-bg').src = A.nightBg; show('lic'); renderLic();
+  live('해내다 광장. 면허증을 만들어요.');
+}
+function licBadges(done, w, h, fs) {
+  const hasBr = !!save.brName;
+  return CS_.PD.slice(0, hasBr ? 9 : 8).map(([num, name, , color], i) => `<div title="${name}" style="width:${i === 8 ? w + 16 : w}px;height:${h}px;background:${done || save.done[i + 1] ? color : '#FFFDF2'};border:4px solid #1B2A5B;display:grid;place-items:center;font-size:${fs}px;font-weight:700;color:${done || save.done[i + 1] ? '#FFFFFF' : '#1B2A5B'}">${i === 8 ? '점자' : num}</div>`).join('');
+}
+function renderLic() {
+  const easy = set.lvl === 0, g = gradeOf(), main = $('#lic-main'), hasBr = !!save.brName;
+  if (L.stage === 'write') {
+    const gr = GRADE_NAME.map((t, i) => { const cur = i === g; return `<div style="height:44px;background:${cur ? '#FFFFFF' : 'var(--c-bg)'};color:${cur ? '#1B2A5B' : 'var(--c-text)'};border:4px solid ${cur ? '#1B2A5B' : '#AEB4C4'};box-shadow:${cur ? 'inset 0 0 0 3px #FFD84D' : 'none'};padding:0 10px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:${cur ? 700 : 400};opacity:${cur ? 1 : .75}"><img src="${gradeIcon(i)}" width="24" height="24" alt="">${t}</div>`; }).join('');
+    const line = (label, key, idx) => {
+      const v = L[key], fs = v.length <= 20 ? 24 : v.length <= 30 ? 18 : 12;
+      const field = easy
+        ? `<div style="min-height:44px;background:#FFFFFF;color:${v ? '#1B2A5B' : '#6B7390'};border:4px solid #1B2A5B;box-shadow:${idx === 0 && !v ? '0 0 0 4px #FFD84D' : 'none'};padding:0 12px;display:flex;align-items:center;font-size:${v ? fs : 18}px" data-field="${key}">${esc(v || '아래 보기에서 골라요')}</div>`
+        : `<input type="text" data-in="${key}" value="${esc(v)}" maxlength="40" placeholder="한 줄로 써 보세요" aria-label="${label}" style="height:44px;width:100%;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);padding:0 12px;font:inherit;font-size:24px;border-radius:0">`;
+      const chips = easy ? `<div style="display:flex;gap:6px;padding-left:94px;flex-wrap:wrap">${LIC_OPTS[idx].map((t, oi) => `<button type="button" data-opt="${idx}:${oi}" style="min-height:32px;background:${v === t ? '#FFD84D' : '#FFFFFF'};color:#1B2A5B;border:2px solid #1B2A5B;box-shadow:${v === t ? 'none' : 'inset 0 -2px 0 #EDE6CF'};padding:2px 8px;font-size:12px;text-align:left">${esc(t)}</button>`).join('')}</div>` : '';
+      return `<div style="display:flex;flex-direction:column;gap:6px"><div style="display:grid;grid-template-columns:84px minmax(0,1fr);gap:10px;align-items:center"><span style="font-size:12px;font-weight:700">${label}</span>${field}</div>${chips}</div>`;
+    };
+    main.innerHTML = `<div class="win abs" style="left:180px;top:52px;width:920px;height:568px;display:flex;flex-direction:column;padding:0;overflow:hidden">
+      <div style="height:84px;flex:none;background:#1B2A5B;color:#FFFDF2;display:flex;align-items:center;justify-content:space-between;padding:0 24px"><div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:36px;font-weight:700;color:#FFFFFF;letter-spacing:3px;text-shadow:3px 0 #3D5AA8,-3px 0 #3D5AA8,0 3px #3D5AA8,0 -3px #3D5AA8">CANE DO</div><div style="font-size:24px;letter-spacing:6px;transform:translateY(-10%)">면허증</div></div><div style="display:flex;align-items:center;gap:10px;font-size:12px"><img src="${A.ic.cane}" width="39" height="36" alt="">CANE DO, CAN DO</div></div>
+      <div style="flex:1;display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:18px 24px;min-height:0;overflow:auto">
+        <div style="display:flex;flex-direction:column;gap:10px"><div style="height:164px;background:#BFE6F7;border:4px solid #1B2A5B;display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:20px;background:#6CC070;border-top:4px solid #1B2A5B"></div><img src="${(A.chars[save.ch] || A.chars[0]).a.u}" width="128" height="128" style="position:relative;margin-bottom:12px" alt="내 캐릭터"></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px">이름</span><span style="font-size:24px;font-weight:700">${esc(save.name)}</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">점자 이름</span>${hasBr ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${brHTML(6, 3, 4, 2)}</div>` : '<div style="border:2px dashed #AEB4C4;padding:6px 8px;font-size:12px;line-height:1.5;opacity:.8">점자 가게에 들르면<br>점자 이름이 생겨요</div>'}</div></div>
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div style="display:flex;gap:16px;align-items:stretch"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">등급</span><div style="display:flex;gap:6px">${gr}</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">모은 별</span><div style="height:44px;display:flex;align-items:center;gap:6px;font-size:24px;font-weight:700"><img src="${A.star.u}" width="33" height="33" alt="">${totalStars()}</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto"><span style="font-size:12px">날짜</span><div style="height:44px;display:flex;align-items:center;font-size:24px">${todayStr()}</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">퀘스트 배지</span><div style="display:flex;gap:6px">${licBadges(false, 40, 40, 12)}</div></div>
+          ${line('알게 된 것', 'learned', 0)}${line('실천할 것', 'act', 1)}
+        </div></div></div>
+      <div style="position:absolute;left:180px;width:920px;top:632px;height:52px;display:flex;justify-content:flex-end;gap:12px"><button type="button" class="btn" data-a="speak">${on('tts') ? `<img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기` : ''}</button><button type="button" class="btn primary" data-a="make" style="padding:0 22px">면허증 완성 ▶</button></div>`;
+    if (!on('tts')) $('[data-a=speak]', main).remove();
+  } else {
+    const dq = CS_.PD.slice(0, hasBr ? 9 : 8).map(([num, name, , color], i) => `<div title="${name}" style="width:${i === 8 ? 56 : 40}px;height:40px;background:${color};border:4px solid #1B2A5B;display:grid;place-items:center;font-size:12px;font-weight:700;color:#FFFFFF">${i === 8 ? '점자' : num}</div>`).join('');
+    const lic = save.lic;
+    main.innerHTML = `<div class="win abs" style="left:96px;top:60px;width:816px;height:612px;display:flex;flex-direction:column;padding:0;overflow:hidden">
+      <div style="height:100px;flex:none;background:#1B2A5B;color:#FFFDF2;display:flex;align-items:center;justify-content:space-between;padding:0 28px"><div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:36px;font-weight:700;color:#FFFFFF;letter-spacing:3px;text-shadow:3px 0 #3D5AA8,-3px 0 #3D5AA8,0 3px #3D5AA8,0 -3px #3D5AA8">CANE DO</div><div style="font-size:24px;letter-spacing:8px">면허증</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px"><img src="${A.ic.cane}" width="52" height="48" alt=""><span style="font-size:12px">CANE DO, CAN DO</span></div></div>
+      <div style="flex:1;display:grid;grid-template-columns:208px minmax(0,1fr);gap:28px;padding:20px 28px 12px;min-height:0">
+        <div style="display:flex;flex-direction:column;gap:12px"><div style="height:196px;background:#BFE6F7;border:4px solid #1B2A5B;display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:24px;background:#6CC070;border-top:4px solid #1B2A5B"></div><img src="${(A.chars[save.ch] || A.chars[0]).a.u}" width="144" height="144" style="position:relative;margin-bottom:16px" alt="내 캐릭터"></div><div style="font-size:${save.name.length > 4 ? 24 : 36}px;font-weight:700;text-align:center">${esc(save.name)}</div>${hasBr ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${brHTML(6, 3, 4, 2)}</div>` : ''}</div>
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <div style="display:flex;gap:24px;align-items:flex-end"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">등급</span><div style="height:48px;background:#FFFFFF;color:#1B2A5B;border:4px solid #1B2A5B;box-shadow:inset 0 0 0 4px #FFD84D;padding:0 14px;display:flex;align-items:center;gap:8px;font-size:24px;font-weight:700"><img src="${gradeIcon(g)}" width="24" height="24" alt="">${GRADE_NAME[g]}</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">모은 별</span><div style="height:48px;display:flex;align-items:center;gap:6px;font-size:24px;font-weight:700"><img src="${A.star.u}" width="33" height="33" alt="">${totalStars()}</div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto;align-items:flex-end"><span style="font-size:12px">10월 15일 흰지팡이의 날</span><div style="height:48px;display:flex;align-items:center;font-size:24px">${esc(lic.date)}</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">퀘스트 배지</span><div style="display:flex;gap:6px">${dq}</div></div>
+          <div style="display:flex;flex-direction:column;gap:6px;border-top:2px dashed #C9CCD6;padding-top:10px"><span style="font-size:12px;font-weight:700">알게 된 것</span><div style="font-size:${lic.learned.length > 26 ? 18 : 24}px;line-height:1.5">${esc(lic.learned)}</div></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700">실천할 것</span><div style="font-size:${lic.act.length > 26 ? 18 : 24}px;line-height:1.5">${esc(lic.act)}</div></div>
+        </div></div>
+      <div style="height:32px;flex:none;border-top:2px solid #1B2A5B;display:flex;align-items:center;justify-content:space-between;padding:0 28px;font-size:12px"><span>흰지팡이와 배우는 배려 방법 알기</span><span>© 2026 특수교사 은티</span></div></div>
+      <div class="abs" style="left:936px;top:96px;width:304px;display:flex;flex-direction:column;gap:14px;color:#FFFDF2"><div style="font-size:36px;font-weight:700;color:#FFFFFF">면허증 완성!</div>
+        <button type="button" class="btn primary" data-a="png" style="height:60px;justify-content:center">이미지로 저장 ↓</button>
+        <button type="button" class="btn" data-a="edit" style="justify-content:center">다시 고쳐 쓰기</button>
+        ${on('tts') ? `<button type="button" class="btn" data-a="speak" style="justify-content:center"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : ''}
+        <button type="button" class="btn" data-a="end" style="justify-content:center">마무리로 ▶</button></div>`;
+  }
+  refreshIcons();
+}
+function licText() {
+  const lic = L.stage === 'done' ? save.lic : L;
+  return `CANE DO 면허증. 이름 ${save.name}. 등급 ${GRADE_NAME[gradeOf()]}. 모은 별 ${totalStars()}개. 알게 된 것. ${lic.learned}. 실천할 것. ${lic.act}.`;
+}
+function licMake() {
+  const l = L.learned.trim(), a = L.act.trim();
+  if (!l || !a) { toast('알게 된 것과 실천할 것을 모두 채워 주세요.'); const f = $('[data-in="' + (!l ? 'learned' : 'act') + '"]'); if (f) f.focus(); return; }
+  save.lic = { done: true, learned: l, act: a, date: (save.lic && save.lic.date) || todayStr() }; persist(); sfx.ok();
+  L.stage = 'done'; renderLic(); refreshWorld();
+  live('면허증 완성!'); setTimeout(() => { const b = $('[data-a=png]'); b && b.focus(); }, 60);
+}
+/* 이미지(PNG) 만들기 : 세로 3:4 (900×1200), 시안 CaneLicenseImage와 같은 모양 */
+function loadImg(src) { return new Promise(res => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; }); }
+function wrapLines(x, text, maxW) {
+  const out = []; let line = '';
+  text.split(' ').forEach(w => {
+    const t = line ? line + ' ' + w : w;
+    if (x.measureText(t).width <= maxW) { line = t; return; }
+    if (line) out.push(line);
+    if (x.measureText(w).width <= maxW) { line = w; return; }
+    line = ''; [...w].forEach(ch => { if (x.measureText(line + ch).width > maxW) { out.push(line); line = ch; } else line += ch; });
+  });
+  if (line) out.push(line); return out;
+}
+async function licenseCanvas() {
+  try { await document.fonts.load('700 36px Galmuri11'); await document.fonts.load('24px Galmuri11'); } catch (e) {}
+  const W = 900, H = 1200, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d'); x.imageSmoothingEnabled = false; x.textBaseline = 'alphabetic';
+  const F = (w, s) => `${w} ${s}px Galmuri11, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif`;
+  const NAVY = '#1B2A5B', lic = save.lic, g = gradeOf(), hasBr = !!save.brName;
+  x.fillStyle = NAVY; x.fillRect(0, 0, W, H); x.fillStyle = '#FFFDF2'; x.fillRect(12, 12, W - 24, H - 24);
+  x.strokeStyle = '#FFFFFF'; x.lineWidth = 6; x.strokeRect(15, 15, W - 30, H - 30);
+  x.fillStyle = NAVY; x.fillRect(12, 12, W - 24, 228);
+  x.textAlign = 'center'; x.font = F(700, 72); x.letterSpacing = '6px';
+  x.lineWidth = 8; x.strokeStyle = '#3D5AA8'; x.lineJoin = 'round'; x.strokeText('CANE DO', W / 2 + 3, 138); x.fillStyle = '#FFFFFF'; x.fillText('CANE DO', W / 2 + 3, 138);
+  x.font = F(400, 36); x.letterSpacing = '16px'; x.fillStyle = '#FFFDF2'; x.fillText('면허증', W / 2 + 8, 196); x.letterSpacing = '0px';
+  // 캐릭터 상자
+  const bx = 60, by = 280;
+  x.fillStyle = '#BFE6F7'; x.fillRect(bx, by, 300, 300); x.fillStyle = '#6CC070'; x.fillRect(bx, by + 260, 300, 40); x.fillStyle = NAVY; x.fillRect(bx, by + 260, 300, 6);
+  const me = await loadImg((A.chars[save.ch] || A.chars[0]).a.u); if (me) x.drawImage(me, bx + 46, by + 300 - 24 - 208, 208, 208);
+  x.lineWidth = 6; x.strokeStyle = NAVY; x.strokeRect(bx + 3, by + 3, 294, 294);
+  // 이름·점자·등급·별
+  const rx = 396; x.textAlign = 'left'; x.fillStyle = NAVY;
+  x.font = F(400, 24); x.fillText('이름', rx, 306); x.font = F(700, save.name.length > 5 ? 40 : 48); x.fillText(save.name, rx, 362);
+  let yy = 384;
+  if (hasBr) { let cx = rx; brCells().forEach(cell => { x.fillStyle = '#FFFFFF'; x.fillRect(cx, yy, 43, 58); x.strokeStyle = NAVY; x.lineWidth = 3; x.strokeRect(cx + 1.5, yy + 1.5, 40, 55); cell.forEach((on, i) => { x.fillStyle = on ? NAVY : '#E1E3EA'; x.beginPath(); x.arc(cx + 6 + 5 + (i % 2) * 15 + 3, yy + 6 + 5 + Math.floor(i / 2) * 15 + 3, 5, 0, 7); x.fill(); }); cx += 49; }); yy += 76; }
+  x.fillStyle = '#FFFFFF'; x.fillRect(rx, yy, 190, 64); x.fillStyle = '#FFD84D'; x.fillRect(rx + 6, yy + 6, 178, 52); x.fillStyle = '#FFFFFF'; x.fillRect(rx + 11, yy + 11, 168, 42);
+  x.strokeStyle = NAVY; x.lineWidth = 6; x.strokeRect(rx + 3, yy + 3, 184, 58);
+  const gi = await loadImg(gradeIcon(g)); if (gi) x.drawImage(gi, rx + 16, yy + 14, 36, 36);
+  x.fillStyle = NAVY; x.font = F(700, 36); x.fillText(GRADE_NAME[g], rx + 62, yy + 45);
+  const si = await loadImg(A.star.u); if (si) x.drawImage(si, rx + 214, yy + 10, 44, 44); x.fillText(String(totalStars()), rx + 268, yy + 45);
+  // 퀘스트 배지
+  x.font = F(400, 24); x.fillStyle = NAVY; x.fillText('퀘스트 배지', 60, 624);
+  let bxx = 60; CS_.PD.slice(0, hasBr ? 9 : 8).forEach(([num, , , color], i) => { const w = i === 8 ? 96 : 64; x.fillStyle = color; x.fillRect(bxx, 640, w, 64); x.strokeStyle = NAVY; x.lineWidth = 5; x.strokeRect(bxx + 2.5, 642.5, w - 5, 59); x.fillStyle = '#FFFFFF'; x.textAlign = 'center'; x.font = F(700, 24); x.fillText(i === 8 ? '점자' : num, bxx + w / 2, 681); x.textAlign = 'left'; bxx += w + 10; });
+  // 알게 된 것 · 실천할 것
+  x.strokeStyle = '#C9CCD6'; x.lineWidth = 3; x.setLineDash([9, 6]); x.beginPath(); x.moveTo(60, 744); x.lineTo(W - 60, 744); x.stroke(); x.setLineDash([]);
+  let ty = 782; x.fillStyle = NAVY;
+  [['알게 된 것', lic.learned], ['실천할 것', lic.act]].forEach(([lab, val]) => {
+    x.font = F(700, 24); x.fillText(lab, 60, ty); ty += 44; x.font = F(400, 36);
+    wrapLines(x, val, W - 120).slice(0, 3).forEach(l => { x.fillText(l, 60, ty); ty += 50; }); ty += 22;
+  });
+  // 아래 띠
+  x.fillStyle = NAVY; x.fillRect(12, 1096, W - 24, 4);
+  x.font = F(700, 24); x.fillText('CANE DO, CAN DO', 60, 1138); x.font = F(400, 12); x.fillText('흰지팡이와 배우는 배려 방법 알기', 60, 1164);
+  x.textAlign = 'right'; x.fillText('© 2026 특수교사 은티', W - 60, 1138); x.fillText('@special_eun_t', W - 60, 1164); x.textAlign = 'left';
+  return c;
+}
+async function licSavePng() {
+  if (!(save.lic && save.lic.done)) return;
+  toast('이미지를 만들고 있어요…');
+  try {
+    const c = await licenseCanvas(), d = new Date(), name = `CANE_DO_license_${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}.png`;   // 한글 파일 이름은 일부 브라우저에서 깨져서 영문으로 해요
+    c.toBlob(blob => {
+      if (!blob) { toast('이미지를 만들지 못했어요.'); return; }
+      const url = URL.createObjectURL(blob), a = document.createElement('a');
+      a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000); toast('이미지로 저장했어요. 내려받은 파일을 확인해요.');
+    }, 'image/png');
+  } catch (e) { toast('이 기기에서는 이미지로 저장할 수 없어요.'); }
+}
+$('#lic-main').addEventListener('click', e => {
+  const o = e.target.closest('[data-opt]'); if (o) { const [i, k] = o.dataset.opt.split(':').map(Number); L[i === 0 ? 'learned' : 'act'] = LIC_OPTS[i][k]; sfx.click(); renderLic(); return; }
+  const b = e.target.closest('[data-a]'); if (!b) return; const a = b.dataset.a;
+  if (a === 'make') licMake(); else if (a === 'png') licSavePng();
+  else if (a === 'edit') { L.stage = 'write'; L.learned = save.lic.learned; L.act = save.lic.act; renderLic(); }
+  else if (a === 'speak') speak(licText()); else if (a === 'end') openEnd();
+});
+$('#lic-main').addEventListener('input', e => { const f = e.target.closest('[data-in]'); if (f) L[f.dataset.in] = f.value; });
+$('#lic-main').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('[data-in]')) { e.preventDefault(); licMake(); } });
+$('#lic-exit').addEventListener('click', () => { L = null; gotoVillage(); });
+
+/* 마무리 화면 */
+function openEnd() {
+  save.finished = true; persist();
+  $('#end-bg').src = A.nightBg; $('#end-msg').textContent = T(END_MSG);
+  $('#end-me').src = (A.chars[save.ch] || A.chars[0]).a.u; $('#end-fr').src = A.friendSide.u;
+  show('end'); live(T(END_MSG)); setTimeout(() => $('#end-village').focus(), 80);
+}
+$('#end-lic').addEventListener('click', () => { openLicense(); });
+$('#end-village').addEventListener('click', () => { gotoVillage(); });
+
 /* ───────────────────────────────────────────
    설정 창
    ─────────────────────────────────────────── */
@@ -1968,6 +2169,9 @@ $('#set-rows').addEventListener('click', e => {
   if (cur === 'name') drawName();
   if (kk === 'tts' && !on('tts')) stopSpeak();
   if (cur === 'guide' && typeof guideFxRefresh === 'function') guideFxRefresh();
+  if (cur === 'lic' && L) { const keep = { learned: L.learned, act: L.act }; renderLic(); L.learned = keep.learned; L.act = keep.act; }
+  if (cur === 'end') $('#end-msg').textContent = T(END_MSG);
+  if (cur === 'walk' && W) renderWalk();
 });
 function openSettings() {
   if (topOv() && topOv().id === 'ov-settings') return;
@@ -2012,6 +2216,7 @@ function initTitle() {
   $('#t-reset').hidden = !has;
 }
 function gotoTitle() { stopSpeak(); initTitle(); show('title'); setTimeout(() => $('#t-start').focus(), 50); }
+$('#t-sound').addEventListener('click', () => { ensureAudio(); bgmUpdate(); sfx.click(); });
 $('#t-start').addEventListener('click', () => { sfx.click(); startLoading(); });
 $('#t-reset').addEventListener('click', () => {
   msgBox({ title: '처음부터 다시 할까요?', text: '지금까지 한 것이 모두 지워져요.', buttons: [{ label: '아니요', primary: true }, { label: '네, 처음부터', danger: true, cb: () => { save = newSave(); persist(); resetWorldView(); initTitle(); } }] });
