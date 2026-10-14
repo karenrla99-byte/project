@@ -1060,7 +1060,8 @@ function answer(v) {
   } else {
     Q.wrongPicks.push(v); Q.hadWrong = true; sfx.no();
     if (!Q.replay && !Q.cfg.npcId) { save.wrong++; persist(); }
-    live('아쉬워요. 다시 한 번 골라 봐요.');
+    if (it.hint && !Q.hint) { Q.hint = true; if (!Q.replay) { save.hints++; persist(); } }
+    live('아쉬워요. 다시 한 번 골라 봐요.' + (it.hint ? ' 힌트 ' + T(it.hint) : ''));
   }
   renderQuiz();
 }
