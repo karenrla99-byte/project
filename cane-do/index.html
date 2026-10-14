@@ -319,6 +319,11 @@ body.touch #hud-keys{display:none}
 #g-friend.bang::after{content:'!';position:absolute;left:-4px;top:-6px;width:18px;height:18px;background:#E5484D;color:#fff;border:2px solid #1B2A5B;font-size:12px;line-height:14px;text-align:center;font-weight:700}
 #g-side{gap:8px!important;padding:12px 18px!important}#g-side .gc{font-size:24px}
 
+.wslot,.wcard{flex:none}
+#stage,.screen,#viewport{overflow:hidden;overflow:clip}
+.wcard.sel{transform:none;box-shadow:0 0 0 4px #FFD84D,0 6px 0 rgba(27,42,91,.3)}
+.wcard.sel::after{top:-18px}
+
 </style>
 </head>
 <body>
@@ -912,6 +917,7 @@ function fit() {
   stage.style.transform = `translate(${Math.round((w - 1280 * s) / 2)}px,${Math.round((h - 720 * s) / 2)}px) scale(${s})`;
   $('#rotate').hidden = !(h > w);
 }
+document.addEventListener('scroll', e => { const t = e.target; if (t && t.classList && (t.id === 'stage' || t.classList.contains('screen') || t.id === 'viewport')) { t.scrollTop = 0; t.scrollLeft = 0; } }, true);
 addEventListener('resize', fit); addEventListener('orientationchange', fit);
 
 /* ───────── 설정 적용 ───────── */
@@ -1887,18 +1893,21 @@ function openWalk() {
   W = { replay: !!save.done[8], order, placed: [], sel: null, fails: [0, 0, 0, 0, 0], hint: false, note: '' };
   show('walk'); renderWalk(); live('함께 걷기. 안내하는 순서대로 카드를 놓아요.');
 }
+const wfs = txt => { const base = [12, 18, 24][set.size], n = txt.length; return n <= 45 ? base : n <= 90 ? Math.min(base, 18) : Math.min(base, 12); };   // 글이 길면 글씨를 줄여요
 function renderWalk() {
-  const fs = [12, 18, 24][set.size], me = (A.chars[save.ch] || A.chars[0]).a.u, fr = A.friendSide.u, n = W.placed.length;
+  const sl0 = $('#w-slots').scrollTop, cl0 = ($('#w-cards .wlist') || { scrollTop: 0 }).scrollTop;
+  const me = (A.chars[save.ch] || A.chars[0]).a.u, fr = A.friendSide.u, n = W.placed.length;
   const rows = [0, 1, 2, 3, 4].map(i => {
-    if (i < n) { const sc = WSCENE[i], c = WALKC[W.placed[i]]; return `<div class="wslot" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="sc"><img src="${me}" width="32" height="32" style="left:${sc.a}px" alt=""><img src="${fr}" width="46" height="32" style="left:${sc.b}px" alt="">${sc.mk ? `<div class="mk" style="left:${sc.mx}px">${sc.mk}</div>` : ''}<div class="gr"></div></div><div class="tx">${esc(T(c))}</div><img src="${icon('check')}" width="24" height="24" style="align-self:center" alt="맞았어요"></div>`; }
-    if (i === n) return `<div class="wslot active" data-slot="${i}" tabindex="0" role="button" aria-label="${i + 1}번 칸에 고른 카드 놓기" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">여기를 누르면 고른 카드가 들어가요</div></div>`;
-    return `<div class="wslot empty" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">빈 칸</div></div>`;
+    if (i < n) { const sc = WSCENE[i], c = WALKC[W.placed[i]], fs = wfs(T(c)); return `<div class="wslot" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="sc"><img src="${me}" width="32" height="32" style="left:${sc.a}px" alt=""><img src="${fr}" width="46" height="32" style="left:${sc.b}px" alt="">${sc.mk ? `<div class="mk" style="left:${sc.mx}px">${sc.mk}</div>` : ''}<div class="gr"></div></div><div class="tx">${esc(T(c))}</div><img src="${icon('check')}" width="24" height="24" style="align-self:center" alt="맞았어요"></div>`; }
+    if (i === n) return `<div class="wslot active" data-slot="${i}" tabindex="0" role="button" aria-label="${i + 1}번 칸에 고른 카드 놓기" style="font-size:18px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">여기를 누르면 고른 카드가 들어가요</div></div>`;
+    return `<div class="wslot empty" style="font-size:18px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">빈 칸</div></div>`;
   }).join('');
   $('#w-slots').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:24px;font-weight:700">안내 순서</span><span style="font-size:12px">${n} / 5 맞았어요</span></div>${rows}`;
   const left = W.order.filter(i => !W.placed.includes(i));
-  const cards = left.map(i => `<button type="button" class="wcard${W.sel === i ? ' sel' : ''}" draggable="true" data-i="${i}" style="font-size:${fs}px">${esc(T(WALKC[i]))}</button>`).join('');
+  const cards = left.map(i => `<button type="button" class="wcard${W.sel === i ? ' sel' : ''}" draggable="true" data-i="${i}" style="font-size:${wfs(T(WALKC[i]))}px">${esc(T(WALKC[i]))}</button>`).join('');
   const hint = W.hint || W.note ? `<div style="background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span>${W.note ? `<b>정답을 같이 봐요</b><br>${esc(W.note)}` : `<b>힌트</b><br>${esc(WALKH[n])}`}</span></div>` : '';
-  $('#w-cards').innerHTML = `<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:24px;font-weight:700">남은 카드</span><span style="font-size:12px">끌어 놓거나, 카드를 누른 다음 빈 칸을 눌러요</span></div><div style="display:flex;flex-direction:column;gap:14px;overflow:auto;padding:12px 6px 6px 4px;flex:1;min-height:0">${cards}</div>${hint}<div style="display:flex;gap:12px"><button type="button" class="btn" id="w-hint"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>${on('tts') ? `<button type="button" class="btn" id="w-spk"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : ''}</div>`;
+  $('#w-cards').innerHTML = `<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:24px;font-weight:700">남은 카드</span><span style="font-size:12px">끌어 놓거나, 카드를 누른 다음 빈 칸을 눌러요</span></div><div class="wlist" style="display:flex;flex-direction:column;gap:14px;overflow:auto;padding:22px 8px 8px 6px;flex:1;min-height:0">${cards}</div>${hint}<div style="display:flex;gap:12px"><button type="button" class="btn" id="w-hint"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>${on('tts') ? `<button type="button" class="btn" id="w-spk"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : ''}</div>`;
+  $('#w-slots').scrollTop = sl0; const wl = $('#w-cards .wlist'); if (wl) wl.scrollTop = cl0;
 }
 function walkPlace(i) {
   if (!W || W.placed.length >= 5) return;
@@ -1926,7 +1935,7 @@ function walkFinish() {
 }
 $('#w-cards').addEventListener('click', e => {
   const c = e.target.closest('.wcard');
-  if (c) { sfx.click(); const i = +c.dataset.i; W.sel = W.sel === i ? null : i; renderWalk(); return; }
+  if (c) { sfx.click(); const i = +c.dataset.i; W.sel = W.sel === i ? null : i; $$('#w-cards .wcard').forEach(x => x.classList.toggle('sel', +x.dataset.i === W.sel)); return; }
   if (e.target.closest('#w-hint')) { W.hint = true; W.note = ''; if (!W.replay && !W._hh) { save.hints++; persist(); W._hh = 1; } renderWalk(); live('힌트 ' + WALKH[W.placed.length]); return; }
   if (e.target.closest('#w-spk')) speak(W.order.filter(i => !W.placed.includes(i)).map(i => T(WALKC[i])).join(' '));
 });
