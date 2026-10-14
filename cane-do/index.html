@@ -1688,9 +1688,9 @@ const FXINFO = {
 /* 힌트 문구는 시안의 예시 문구를 바탕으로 제가 쓴 초안이에요 (확인 필요) */
 const GUIDE = {
   5: { map: 1, color: '#2FB3A6', name: '길 안내 코딩', sub: '친구가 깃발까지 갈 수 있게 말로 안내해요', goal: '길 건너 깃발까지', fx: 'blur',
-    checks: [['공사콘 피하기', s => s.maxX >= 5], ['자전거 피하기', s => s.maxX >= 8], ['횡단보도가 있다고 말하기', s => s.said.has('횡단보도')]],
+    checks: [['공사콘 피하기', s => s.maxX >= 4], ['횡단보도가 있다고 말하기', s => s.said.has('횡단보도')], ['깃발까지 가기', s => s.maxX >= 13]],
     need: [['횡단보도', '#']], tell: ['횡단보도', '점자블록'],
-    hints: ['자전거 앞에서 위나 아래로 비켜서 피해 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 오른쪽으로 3걸음, 위로 1걸음 처럼 이어서 써요.'] },
+    hints: ['공사콘 앞에서는 위로 비켜서 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 위로 1걸음, 오른쪽으로 11걸음 처럼 한 줄씩 이어서 써요.'] },
   6: { map: 2, color: '#4C7BE0', name: '문과 계단', sub: '문 · 문턱 · 계단이 있다는 것도 말해 줘요', goal: '계단 지나 깃발까지', fx: 'haze',
     checks: [['문이 있다고 말하기', s => s.said.has('문')], ['문턱이 있다고 말하기', s => s.said.has('문턱')], ['계단이 있다고 말하기', s => s.said.has('계단')]],
     need: [['문', 'D'], ['문턱', 't'], ['계단', 's']], tell: ['문', '문턱', '계단'],
@@ -1700,12 +1700,16 @@ const GUIDE = {
     need: [['창문', 'G']], tell: ['창문', '책상', '가방'],
     hints: ['책상과 의자가 없는 넓은 길로 걸어가면 부딪히지 않아요. 먼저 위로 올라가 봐요.', '아래쪽 빈 길로 쭉 걷다가 위로 올라가요.', '깃발에 도착하기 전에 "앞에 창문이 있어요"라고 말해 줘요.'] }
 };
-const WORDS = ['횡단보도', '점자블록', '문턱', '창문', '계단', '책상', '가방', '화분', '자전거', '공사콘', '소화기', '의자', '쓰레기통', '턱', '문'];
+const WORDS = ['횡단보도', '점자블록', '자전거', '쓰레기통', '공사콘', '소화기', '문턱', '창문', '계단', '책상', '가방', '화분', '의자', '턱', '문'];
 const NUMW = { 한: 1, 하나: 1, 일: 1, 두: 2, 둘: 2, 이: 2, 세: 3, 셋: 3, 삼: 3, 네: 4, 넷: 4, 사: 4, 다섯: 5, 오: 5, 여섯: 6, 육: 6, 일곱: 7, 칠: 7, 여덟: 8, 팔: 8, 아홉: 9, 구: 9, 열: 10, 십: 10 };
 let GS = null;
 
+/* 5번은 명령 5줄이면 풀리도록 새로 만든 지도예요 (공사콘만 위로 비켜 가고, 횡단보도 앞에서 말하기) */
+const MAPS_LOCAL = {
+  1: { t: 'out', rows: ['....p.....p..G', '==========##==', '======b===##==', 'yyyyyyyyyyyy..', 'S..c.........p', '..p......p....'], tags: { '13,0': '도착', '0,4': '출발', '10,1': '횡단보도', '0,3': '점자블록' } }
+};
 function gridOf(mapNo) {
-  const m = CS_.MAPS[mapNo], rows = m.rows.map(r => (r + '.'.repeat(14)).slice(0, 14).split(''));
+  const m = MAPS_LOCAL[mapNo] || CS_.MAPS[mapNo], rows = m.rows.map(r => (r + '.'.repeat(14)).slice(0, 14).split(''));
   let st = [0, 0], goal = [0, 0];
   rows.forEach((r, y) => r.forEach((c, x) => { if (c === 'S') st = [x, y]; if (c === 'G') goal = [x, y]; }));
   return { m, rows, st, goal };
@@ -1716,8 +1720,9 @@ function parseProgram(text) {
   const parts = pre.split(/[,.;\n·]+|\s그리고\s|\s다음에\s/).map(s => s.trim()).filter(Boolean);
   const steps = [];
   for (const p of parts) {
-    const w = WORDS.find(x => p.includes(x));
-    if (w && /있|앞에|조심|알려/.test(p) && !/걸음|칸/.test(p)) { steps.push({ t: 'tell', k: w === '턱' ? '문턱' : w }); continue; }
+    let rest = p; const found = [];
+    WORDS.forEach(w => { if (rest.includes(w)) { found.push(w === '턱' ? '문턱' : w); rest = rest.split(w).join(' '); } });   // 긴 낱말부터 찾아요 (문턱·창문 안의 '문'이 겹치지 않게)
+    if (found.length && !/걸음|칸/.test(p)) { found.forEach(k => steps.push({ t: 'tell', k })); continue; }
     const q = p.replace(/위치/g, '');
     const dir = /위/.test(q) ? 0 : /오른/.test(q) ? 1 : /아래|밑/.test(q) ? 2 : /왼/.test(q) ? 3 : /앞으로|앞/.test(q) ? 'f' : null;
     if (dir === null) return { error: `이 말은 아직 몰라요: "${p}". 위로 / 아래로 / 왼쪽 / 오른쪽 중에서 골라 써요. 예) 오른쪽으로 3걸음` };
