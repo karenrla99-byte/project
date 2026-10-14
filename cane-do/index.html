@@ -871,6 +871,11 @@ const SONGS = {
     bass: 'F3 . C4 . F3 . C4 . | G3 . D4 . G3 . D4 . | A3 . E4 . D3 . A3 . | F3 . C3 . F3 . . . |' +
           'F3 . C4 . F3 . C4 . | Bb2 . F3 . Bb2 . F3 . | C3 . G3 . C3 . G3 . | F3 . C3 . F3 . . . |' }
 };
+SONGS.plaza = { bpm: 148,
+  mel: 'C5 E5 G5 C6 G5 E5 G5 C6 | D5 F5 A5 D6 A5 F5 A5 D6 | E5 G5 B5 E6 B5 G5 B5 E6 | F5 A5 C6 F6 E6 D6 C6 - |' +
+       'G5 B5 D6 G6 D6 B5 D6 G6 | E6 - D6 - C6 - G5 - | A5 C6 E6 A6 G6 E6 C6 E6 | D6 B5 G5 B5 C6 - - . |',
+  bass: 'C3 . G3 . C3 . G3 . | D3 . A3 . D3 . A3 . | E3 . B3 . E3 . B3 . | F3 . C4 . F3 . C4 . |' +
+        'G3 . D4 . G3 . D4 . | C3 . E3 . G3 . C4 . | A2 . E3 . A3 . E3 . | G2 . G3 . C3 . . . |' };
 const parseTrack = s => { const out = []; s.replace(/\|/g, ' ').trim().split(/\s+/).forEach(t => { if (t === '-') { if (out.length) out[out.length - 1].len++; else out.push({ m: null, len: 1 }); } else if (t === '.') out.push({ m: null, len: 1 }); else out.push({ m: midiOf(t), len: 1 }); }); return out; };
 Object.values(SONGS).forEach(sg => { sg.melT = parseTrack(sg.mel); sg.bassT = parseTrack(sg.bass); });
 let bgmName = '', bgmGain = null, bgmTimer = null, bgmNextT = 0, bgmStep = 0, bgmWant = '';
@@ -905,6 +910,7 @@ function bgmWantedName() {
   if (!on('bgm')) return '';
   if (cur === 'title' || cur === 'loading' || cur === 'name') return 'title';
   if (cur === 'village') return 'village';
+  if (cur === 'lic' || cur === 'end') return 'plaza';
   return '';
 }
 function bgmUpdate() {
@@ -912,7 +918,7 @@ function bgmUpdate() {
   if (!ac) return;                                  // 아직 소리를 켜지 못했어요 (첫 누르기 뒤에 시작)
   if (!bgmGain) { bgmGain = ac.createGain(); bgmGain.gain.value = 0; bgmGain.connect(ac.destination); }
   const quiet = ovStack.some(o => o.el.id === 'ov-quiz' || o.el.id === 'ov-msg');
-  const vol = want ? (quiet ? .035 : .09) : 0;
+  const vol = want ? (quiet ? .035 : want === 'plaza' ? .1 : .09) : 0;
   bgmGain.gain.cancelScheduledValues(ac.currentTime); bgmGain.gain.setTargetAtTime(vol, ac.currentTime, .25);
   if (want && want !== bgmName) { bgmName = want; bgmStep = 0; bgmNextT = ac.currentTime + .08; if (!bgmTimer) bgmTimer = setInterval(bgmSchedule, 120); }
   else if (!want && bgmName) { setTimeout(() => { if (!bgmWant) { bgmName = ''; clearInterval(bgmTimer); bgmTimer = null; } }, 600); }
@@ -2020,12 +2026,12 @@ function renderLic() {
       <div style="height:84px;flex:none;background:#1B2A5B;color:#FFFDF2;display:flex;align-items:center;justify-content:space-between;padding:0 24px"><div style="display:flex;flex-direction:column;gap:4px"><div style="font-size:36px;font-weight:700;color:#FFFFFF;letter-spacing:3px;text-shadow:3px 0 #3D5AA8,-3px 0 #3D5AA8,0 3px #3D5AA8,0 -3px #3D5AA8">CANE DO</div><div style="font-size:24px;letter-spacing:6px;transform:translateY(-10%)">면허증</div></div><div style="display:flex;align-items:center;gap:10px;font-size:12px"><img src="${A.ic.cane}" width="39" height="36" alt="">CANE DO, CAN DO</div></div>
       <div style="flex:1;display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding:18px 24px;min-height:0;overflow:auto">
         <div style="display:flex;flex-direction:column;gap:10px"><div style="height:164px;background:#BFE6F7;border:4px solid #1B2A5B;display:flex;align-items:flex-end;justify-content:center;position:relative;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:20px;background:#6CC070;border-top:4px solid #1B2A5B"></div><img src="${(A.chars[save.ch] || A.chars[0]).a.u}" width="128" height="128" style="position:relative;margin-bottom:12px" alt="내 캐릭터"></div>
-          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px">이름</span><span style="font-size:24px;font-weight:700">${esc(save.name)}</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:12px">이름</span><span style="font-size:${save.name.length > 5 ? 18 : 24}px;font-weight:700;overflow-wrap:anywhere">${esc(save.name)}</span></div>
           <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">점자 이름</span>${hasBr ? `<div style="display:flex;gap:4px;flex-wrap:wrap">${brHTML(6, 3, 4, 2)}</div>` : '<div style="border:2px dashed #AEB4C4;padding:6px 8px;font-size:12px;line-height:1.5;opacity:.8">점자 가게에 들르면<br>점자 이름이 생겨요</div>'}</div></div>
         <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
           <div style="display:flex;gap:16px;align-items:stretch"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">등급</span><div style="display:flex;gap:6px">${gr}</div></div>
             <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">모은 별</span><div style="height:44px;display:flex;align-items:center;gap:6px;font-size:24px;font-weight:700"><img src="${A.star.u}" width="33" height="33" alt="">${totalStars()}</div></div>
-            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto"><span style="font-size:12px">날짜</span><div style="height:44px;display:flex;align-items:center;font-size:24px">${todayStr()}</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto"><span style="font-size:12px">날짜</span><div style="height:44px;display:flex;align-items:center;font-size:18px;white-space:nowrap">${todayStr()}</div></div></div>
           <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">퀘스트 배지</span><div style="display:flex;gap:6px">${licBadges(false, 40, 40, 12)}</div></div>
           ${line('알게 된 것', 'learned', 0)}${line('실천할 것', 'act', 1)}
         </div></div></div>
@@ -2041,7 +2047,7 @@ function renderLic() {
         <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
           <div style="display:flex;gap:24px;align-items:flex-end"><div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">등급</span><div style="height:48px;background:#FFFFFF;color:#1B2A5B;border:4px solid #1B2A5B;box-shadow:inset 0 0 0 4px #FFD84D;padding:0 14px;display:flex;align-items:center;gap:8px;font-size:24px;font-weight:700"><img src="${gradeIcon(g)}" width="24" height="24" alt="">${GRADE_NAME[g]}</div></div>
             <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">모은 별</span><div style="height:48px;display:flex;align-items:center;gap:6px;font-size:24px;font-weight:700"><img src="${A.star.u}" width="33" height="33" alt="">${totalStars()}</div></div>
-            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto;align-items:flex-end"><span style="font-size:12px">10월 15일 흰지팡이의 날</span><div style="height:48px;display:flex;align-items:center;font-size:24px">${esc(lic.date)}</div></div></div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-left:auto;align-items:flex-end"><span style="font-size:12px">10월 15일 흰지팡이의 날</span><div style="height:48px;display:flex;align-items:center;font-size:18px;white-space:nowrap">${esc(lic.date)}</div></div></div>
           <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px">퀘스트 배지</span><div style="display:flex;gap:6px">${dq}</div></div>
           <div style="display:flex;flex-direction:column;gap:6px;border-top:2px dashed #C9CCD6;padding-top:10px"><span style="font-size:12px;font-weight:700">알게 된 것</span><div style="font-size:${lic.learned.length > 26 ? 18 : 24}px;line-height:1.5">${esc(lic.learned)}</div></div>
           <div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:12px;font-weight:700">실천할 것</span><div style="font-size:${lic.act.length > 26 ? 18 : 24}px;line-height:1.5">${esc(lic.act)}</div></div>
@@ -2098,7 +2104,10 @@ async function licenseCanvas() {
   x.lineWidth = 6; x.strokeStyle = NAVY; x.strokeRect(bx + 3, by + 3, 294, 294);
   // 이름·점자·등급·별
   const rx = 396; x.textAlign = 'left'; x.fillStyle = NAVY;
-  x.font = F(400, 24); x.fillText('이름', rx, 306); x.font = F(700, save.name.length > 5 ? 40 : 48); x.fillText(save.name, rx, 362);
+  x.font = F(400, 18); const dW = x.measureText(lic.date).width; x.textAlign = 'right'; x.fillText(lic.date, W - 60, 362); x.textAlign = 'left';
+  x.font = F(400, 24); x.fillText('이름', rx, 306);
+  let nfs = 48; for (; nfs > 20; nfs -= 2) { x.font = F(700, nfs); if (x.measureText(save.name).width <= W - 60 - rx - dW - 24) break; }
+  x.font = F(700, nfs); x.fillText(save.name, rx, 362);
   let yy = 384;
   if (hasBr) { let cx = rx; brCells().forEach(cell => { x.fillStyle = '#FFFFFF'; x.fillRect(cx, yy, 43, 58); x.strokeStyle = NAVY; x.lineWidth = 3; x.strokeRect(cx + 1.5, yy + 1.5, 40, 55); cell.forEach((on, i) => { x.fillStyle = on ? NAVY : '#E1E3EA'; x.beginPath(); x.arc(cx + 6 + 5 + (i % 2) * 15 + 3, yy + 6 + 5 + Math.floor(i / 2) * 15 + 3, 5, 0, 7); x.fill(); }); cx += 49; }); yy += 76; }
   x.fillStyle = '#FFFFFF'; x.fillRect(rx, yy, 190, 64); x.fillStyle = '#FFD84D'; x.fillRect(rx + 6, yy + 6, 178, 52); x.fillStyle = '#FFFFFF'; x.fillRect(rx + 11, yy + 11, 168, 42);
@@ -2379,7 +2388,7 @@ try { if (matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 
 
 /* ───────── 시작 ───────── */
 function boot() {
-  fit(); applySettings();
+  fit(); ensureAudio(); applySettings();   // 브라우저가 허락하면 바로 음악이 나와요
   initTitle(); chrome();
   requestAnimationFrame(t => { last = t; frame(t); });
   show('title'); chrome();
