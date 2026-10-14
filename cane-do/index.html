@@ -1193,8 +1193,12 @@ function answer(v) {
   } else {
     Q.wrongPicks.push(v); Q.hadWrong = true; sfx.no();
     if (!Q.replay && !Q.cfg.npcId) { save.wrong++; persist(); }
-    if (it.hint && !Q.hint) { Q.hint = true; if (!Q.replay) { save.hints++; persist(); } }
-    live('아쉬워요. 다시 한 번 골라 봐요.' + (it.hint ? ' 힌트 ' + T(it.hint) : ''));
+    if (Q.wrongPicks.length >= 2) {                // 힌트를 보고도 틀리면 정답을 보여 주고 해설로 넘어가요
+      Q.stage = 'wrong'; live('아쉬워요. 정답을 같이 봐요.');
+    } else {
+      if (it.hint && !Q.hint) { Q.hint = true; if (!Q.replay) { save.hints++; persist(); } }
+      live('아쉬워요. 다시 한 번 골라 봐요.' + (it.hint ? ' 힌트 ' + T(it.hint) : ''));
+    }
   }
   renderQuiz();
 }
@@ -1243,6 +1247,10 @@ const DISH = [
   { n: '국', re: /국/, img: 'soup', col: '4 / span 3', w: 284, h: 136, cx: 450, cy: 184 }
 ];
 const ASK_ORDER = ['계란말이', '시금치', '김치', '국', '밥'];
+const REVEAL = {
+  '시금치': { s: '시금치는 밥 위에 있어요.', ref: '밥' }, '계란말이': { s: '계란말이는 밥에서 1시 방향에 있어요.', ref: '밥' },
+  '김치': { s: '김치는 국 위에 있어요.', ref: '국' }, '국': { s: '국은 밥 오른쪽에 있어요.', ref: '밥' }, '밥': { s: '밥은 국 왼쪽에 있어요.', ref: '국' }
+};
 const MEAL = {
   start: '오늘 반찬은 어디에 있어요?',
   hint1: '「저기」「여기」 대신 기준이 되는 음식과 위치를 함께 말해요.',
@@ -1299,7 +1307,7 @@ function judgeMeal(text) {
 }
 function openMeal() {
   const replay = !!save.done[3];
-  M = { replay, found: replay ? [] : [...save.meal.found], refs: replay ? [] : [...save.meal.refs], hint2: false, fail: false, done: false, bubble: MEAL.start };
+  M = { replay, found: replay ? [] : [...save.meal.found], refs: replay ? [] : [...save.meal.refs], hint2: false, fail: false, fails: 0, reveal: null, done: false, bubble: MEAL.start };
   if (M.found.length) M.bubble = mealProgressText();
   const sp = A;
   $('#m-friend').src = sp.friendSit.u; $('#m-cane').src = sp.caneStick.u;
@@ -1323,7 +1331,8 @@ function renderMeal() {
   const bub = $('#m-bubble'); bub.style.top = M.found.length ? '96px' : '108px'; $('#m-bt').textContent = M.bubble;
   const checks = ['밥', '국', '시금치', '김치', '계란말이'].map(t => { const ok = M.found.includes(t), q = fb && t === ask; return `<div><i class="${ok ? 'ok' : q ? 'ask' : ''}">${ok ? `<img src="${A.ic.check}" width="12" height="12" alt="완료">` : q ? '?' : ''}</i>${t}</div>`; }).join('');
   let top = '';
-  if (M.done) top = `<div class="okb"><img src="${icon('check')}" width="24" height="24" alt="">잘했어요!</div><div class="big">반찬 위치를 모두 말했어요.</div>`;
+  if (M.reveal && !M.done) top = `<div class="okb" style="box-shadow:none"><img src="${icon('hint')}" width="24" height="24" alt="">정답을 같이 봐요</div><div class="big">${M.reveal}</div>`;
+  else if (M.done) top = `<div class="okb"><img src="${icon('check')}" width="24" height="24" alt="">잘했어요!</div><div class="big">반찬 위치를 모두 말했어요.</div>`;
   else if (M.fail) top = `<div class="okb" style="box-shadow:none"><img src="${icon('hint')}" width="24" height="24" alt="">다시 말해 볼까요?</div><div class="hintbox"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 1 / 2</b><br>${MEAL.hint1}</span></div>${M.hint2 ? `<div class="hintbox"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 2 / 2</b><br>${MEAL.hint2}</span></div>` : ''}`;
   else if (fb) top = `<div class="okb"><img src="${icon('check')}" width="24" height="24" alt="">잘했어요!</div><div class="big">기준이 되는 음식과 위치를 함께 말했어요.</div>`;
   else top = `<div style="font-size:24px;font-weight:700">말로 알려 주기</div><div class="big">기준이 되는 음식 + 위치로 말해요.</div><div class="hintbox"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 1 / 2</b><br>${MEAL.hint1}</span></div>${M.hint2 ? `<div class="hintbox"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 2 / 2</b><br>${MEAL.hint2}</span></div>` : ''}`;
@@ -1342,19 +1351,29 @@ function submitMeal() {
   if (!M || M.done) return;
   const text = $('#m-in').value.trim();
   if (!text) { toast('말해 줄 내용을 써 주세요.'); $('#m-in').focus(); return; }
-  const r = judgeMeal(text), before = M.found.length;
+  const r = judgeMeal(text), before = M.found.length; M.reveal = null;
   r.found.forEach(n => { if (!M.found.includes(n)) M.found.push(n); });
   r.refs.forEach(n => { if (!M.refs.includes(n)) M.refs.push(n); });
   if (M.found.length > before) {
-    M.fail = false; sfx.ok();
+    M.fail = false; M.fails = 0; sfx.ok();
     if (M.found.length >= 5) { M.done = true; M.bubble = MEAL.allDone; }
     else M.bubble = mealProgressText();
     if (!M.replay) { save.meal = { found: [...M.found], refs: [...M.refs] }; persist(); }
   } else {
-    M.fail = true; sfx.no();
+    sfx.no(); M.fails++;
     if (!M.replay) { save.wrong++; persist(); }
-    if (!M.hint2) { M.hint2 = true; if (!M.replay) { save.hints++; persist(); } }
-    M.bubble = r.anyMismatch ? MEAL.mismatch : (r.deictic && !r.anyNamed) ? MEAL.deictic : r.anyNamed ? MEAL.noPos : r.deictic ? MEAL.deictic : MEAL.nothing;
+    if (M.fails >= 2) {                            // 힌트를 보고도 다시 틀리면 정답을 같이 보여 줘요
+      const ask = ASK_ORDER.find(n => !M.found.includes(n)), rv = REVEAL[ask];
+      [ask, rv.ref].forEach(n => { if (!M.found.includes(n)) M.found.push(n); });
+      if (!M.refs.includes(rv.ref)) M.refs.push(rv.ref);
+      M.fail = false; M.fails = 0; M.reveal = rv.s;
+      if (M.found.length >= 5) { M.done = true; M.bubble = MEAL.allDone; } else M.bubble = `이렇게 말하면 돼요. ${rv.s} ${mealProgressText()}`;
+      if (!M.replay) { save.meal = { found: [...M.found], refs: [...M.refs] }; persist(); }
+    } else {
+      M.fail = true;
+      if (!M.hint2) { M.hint2 = true; if (!M.replay) { save.hints++; persist(); } }
+      M.bubble = r.anyMismatch ? MEAL.mismatch : (r.deictic && !r.anyNamed) ? MEAL.deictic : r.anyNamed ? MEAL.noPos : r.deictic ? MEAL.deictic : MEAL.nothing;
+    }
   }
   $('#m-in').value = '';
   renderMeal(); live(M.bubble);
