@@ -267,6 +267,56 @@ body.touch #hud-keys{display:none}
 #m-panel .dash{margin-top:auto;border:4px dashed var(--c-line);padding:12px;font-size:24px;line-height:1.5}
 #m-in:focus{box-shadow:0 0 0 4px #FFD84D!important;outline:none}
 
+/* ── 길 안내 ── */
+.glab{font-size:12px;width:64px;flex:none;line-height:1.3}
+.gcell{position:relative;width:48px;height:48px;box-shadow:inset -1px -1px 0 rgba(27,42,91,.14)}
+.gcell>img.ob{position:absolute;left:0;top:0;width:48px;height:48px}
+.gcell .tr{position:absolute;left:16px;top:16px;width:16px;height:16px;background:#FFD84D;border:4px solid #1B2A5B}
+.gcell .tg{position:absolute;left:1px;bottom:1px;z-index:2;font-size:12px;line-height:14px;background:#FFFDF2;color:#1B2A5B;border:2px solid #1B2A5B;padding:0 3px;white-space:nowrap}
+#g-friend{position:absolute;width:48px;height:48px;z-index:2;transition:transform .22s steps(4)}
+#stage.reduce #g-friend{transition:none}
+#g-friend img{position:absolute;left:0;top:-4px;width:48px;height:48px}
+#g-friend .dir{position:absolute;right:-2px;top:-2px;width:18px;height:18px;background:#FFD84D;color:#1B2A5B;border:2px solid #1B2A5B;font-size:12px;line-height:14px;text-align:center}
+.gfx{opacity:0;pointer-events:none;transition:opacity 1s linear}
+.gfx.on{opacity:1}
+#g-side .gc{display:flex;align-items:center;gap:10px;font-size:24px}
+#g-side .gc i{width:28px;height:28px;border:4px solid var(--c-line);display:grid;place-items:center;font-size:12px;font-style:normal;background:var(--c-field)}
+#g-side .gc i.ok{background:#FFFFFF}
+#g-side .gc i.now{background:#FFD84D;color:#1B2A5B}
+#g-side .gc.todo span{opacity:.65}
+.gstep{height:40px;background:var(--c-bg);color:var(--c-text);border:4px solid var(--c-line);padding:0 10px;display:flex;align-items:center;gap:8px;font-size:12px;white-space:nowrap}
+.gstep.cur{background:#FFF6CC;box-shadow:inset 0 0 0 3px #FFD84D;color:#1B2A5B}
+#stage.hc .gstep.cur{background:#FFD84D;color:#000}
+.gstep.stop b{background:#B8323A;color:#fff;padding:0 4px}
+.gstep .st{padding:0 4px;border:2px solid currentColor}
+.gtell{height:44px;padding:0 12px;font-size:24px}
+.gcard{padding:0 14px}
+
+/* ── 함께 걷기 ── */
+.wslot{display:grid;grid-template-columns:44px 96px minmax(0,1fr) 28px;gap:12px;align-items:stretch;min-height:92px;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);padding:0 12px 0 0}
+.wslot .n{background:var(--c-tagbg);color:var(--c-tagfg);display:grid;place-items:center;font-size:24px;font-weight:700}
+.wslot .sc{position:relative;align-self:center;width:96px;height:76px;background:#BFE6F7;border:4px solid #1B2A5B;overflow:hidden}
+.wslot .sc img{position:absolute;top:30px}
+.wslot .sc .gr{position:absolute;left:0;right:0;bottom:0;height:8px;background:#6CC070;border-top:2px solid #1B2A5B}
+.wslot .sc .mk{position:absolute;top:4px;height:20px;background:#FFFDF2;color:#1B2A5B;border:2px solid #1B2A5B;font-size:12px;line-height:16px;padding:0 4px;white-space:nowrap}
+.wslot .tx{align-self:center;line-height:1.45;text-wrap:pretty;padding:8px 0}
+.wslot.empty{border-style:dashed;background:transparent}
+.wslot.empty .n{background:#E1E3EA;color:#6B7390}
+#stage.hc .wslot.empty .n{background:#000;color:#fff}
+.wslot.active{border-color:var(--c-line);background:#FFF6CC;box-shadow:inset 0 0 0 4px #FFD84D;color:#1B2A5B;cursor:pointer}
+#stage.hc .wslot.active{background:#222;color:#fff}
+.wslot.active .n{background:#FFD84D;color:#1B2A5B}
+.wslot.drop{outline:4px dashed #FFD84D}
+.wcard{position:relative;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);box-shadow:inset 0 -6px 0 var(--c-btnsh);padding:14px 16px;line-height:1.5;text-align:left;cursor:grab}
+.wcard.sel{box-shadow:0 0 0 4px #FFD84D,0 10px 0 rgba(27,42,91,.3);transform:translateY(-6px)}
+.wcard.sel::after{content:"골랐어요";position:absolute;right:-4px;top:-20px;background:#FFD84D;color:#1B2A5B;border:4px solid #1B2A5B;font-size:12px;padding:2px 8px}
+.wcard:hover{background:var(--c-hover)}
+.wshake{animation:wshake .3s}
+@keyframes wshake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+#g-prog{max-height:84px;overflow:auto}
+.gstep{height:36px}
+
 </style>
 </head>
 <body>
@@ -352,6 +402,57 @@ body.touch #hud-keys{display:none}
       <button id="m-go" type="submit" class="btn primary" style="height:64px;padding:0 24px">말해 주기 ▶</button>
     </form>
     <button id="m-finish" type="button" class="btn primary abs" style="right:40px;top:616px;height:64px;padding:0 32px" hidden>마치기 ▶</button>
+  </section>
+
+  <!-- 길 안내 (5·6·7) -->
+  <section id="sc-guide" class="screen" hidden aria-label="길 안내">
+    <div class="abs" style="inset:0;background:linear-gradient(#8FD3F4 0 400px,#A3DCF6 400px)" id="g-bg"></div>
+    <div class="abs" style="left:96px;right:96px;top:20px;height:56px;display:flex;justify-content:center;pointer-events:none"><div class="panel" style="height:56px;padding:0 16px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 rgba(27,42,91,.3)"><div id="g-badge" style="width:32px;height:32px;border:4px solid #1B2A5B;display:grid;place-items:center;color:#FFFFFF;font-size:12px;font-weight:700"></div><span id="g-name" style="font-size:24px;font-weight:700"></span><span id="g-sub" style="font-size:12px"></span></div></div>
+    <button id="g-exit" type="button" class="btn abs" style="left:92px;top:20px;height:56px">◀ 마을로</button>
+    <div id="g-map" class="abs" style="left:40px;top:92px;width:672px;height:288px;border:4px solid #1B2A5B;overflow:hidden;background:#E9DFC9">
+      <div id="g-grid" style="display:grid;grid-template-columns:repeat(14,48px);width:672px"></div>
+      <div id="g-fxblur" class="abs gfx" style="inset:0;backdrop-filter:blur(7px) saturate(.6);-webkit-backdrop-filter:blur(7px) saturate(.6);-webkit-mask-image:radial-gradient(ellipse 170px 120px at 50% 50%,#000 40%,transparent 100%);mask-image:radial-gradient(ellipse 170px 120px at 50% 50%,#000 40%,transparent 100%)"></div>
+      <div id="g-fxhaze" class="abs gfx" style="inset:0;background:rgba(255,253,242,.42)"></div>
+      <div id="g-fxtun" class="abs gfx" style="inset:0"></div>
+      <div id="g-bub" class="abs panel" style="max-width:260px;padding:8px 12px;font-size:12px;line-height:1.6;box-shadow:0 4px 0 rgba(27,42,91,.35);z-index:3" hidden></div>
+      <div id="g-fxchip" class="abs panel" style="left:8px;top:8px;padding:6px 8px 6px 12px;display:flex;align-items:center;gap:12px;font-size:12px;z-index:4" hidden><span>시야 효과 · <b id="g-fxname"></b></span><button id="g-fxoff" type="button" class="btn" style="height:28px;font-size:12px;padding:0 8px;border-width:2px">끄기</button></div>
+    </div>
+    <div id="g-side" class="abs panel" style="left:732px;top:92px;width:508px;height:296px;padding:16px 18px;display:flex;flex-direction:column;gap:12px"></div>
+    <div id="g-cmd" class="abs panel" style="left:40px;top:404px;width:1200px;height:276px;padding:14px;display:flex;flex-direction:column;gap:12px">
+      <form id="g-form" style="display:flex;gap:12px;align-items:center;height:56px" autocomplete="off">
+        <span class="glab">명령</span>
+        <input id="g-in" type="text" maxlength="160" aria-label="길 안내 명령" placeholder="예) 앞으로 3걸음, 오른쪽으로 돌아서 2걸음" style="flex:1;min-width:0;height:56px;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);padding:0 14px;font:inherit;font-size:24px;border-radius:0">
+        <button id="g-mic" type="button" class="btn" style="width:56px;height:56px;padding:0" title="음성 입력" aria-label="음성 입력"><img data-ic="mic" width="36" height="36" alt=""></button>
+        <button id="g-clear" type="button" class="btn" style="height:56px;padding:0 16px">지우기</button>
+        <button id="g-run" type="submit" class="btn primary" style="height:56px;padding:0 22px">실행 ▶</button>
+      </form>
+      <div style="display:flex;gap:10px;align-items:center;height:52px"><span class="glab">명령 카드</span><div id="g-cards" style="display:flex;gap:10px;align-items:center"></div>
+        <div style="margin-left:12px;display:flex;align-items:center;gap:6px;font-size:24px"><button id="g-minus" type="button" class="btn sq" style="width:44px;height:44px" aria-label="걸음 줄이기">−</button><span id="g-n" style="min-width:96px;text-align:center">3 걸음</span><button id="g-plus" type="button" class="btn sq" style="width:44px;height:44px" aria-label="걸음 늘리기">+</button></div></div>
+      <div style="display:flex;gap:10px;align-items:center;height:44px"><span class="glab">알려 주기</span><div id="g-tell" style="display:flex;gap:10px"></div></div>
+      <div style="display:flex;gap:8px;align-items:center;min-height:44px;border-top:2px dashed #C9CCD6;padding-top:10px"><span class="glab">순서</span><div id="g-prog" style="display:flex;gap:8px;flex-wrap:wrap"></div></div>
+    </div>
+    <div id="g-card" class="abs" style="inset:0;z-index:20" hidden role="dialog" aria-modal="true" aria-label="시야 효과 안내">
+      <div class="abs" style="inset:0;background:rgba(27,42,91,.45)"></div>
+      <div class="win abs" style="left:280px;top:104px;width:720px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+        <div style="display:flex;align-items:center;gap:10px"><div class="tagchip">시야 효과 안내</div><span style="font-size:12px">길 안내를 시작하기 전에 읽어요</span></div>
+        <div style="display:grid;grid-template-columns:216px minmax(0,1fr);gap:24px;align-items:center">
+          <div id="gc-prev" style="position:relative;width:216px;height:144px;border:4px solid #1B2A5B;overflow:hidden;background:repeating-conic-gradient(#E9DFC9 0 25%,#D9CDB2 0 50%) 0 0/24px 24px"></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div id="gc-name" style="font-size:36px;font-weight:700;line-height:1.3"></div><div id="gc-med" style="font-size:12px"></div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:24px;line-height:1.5"><div>이렇게 보이는 친구도 있어요.</div><div>보이는 정도는 사람마다 달라요.</div><div style="font-size:12px;line-height:1.6">모든 친구가 이렇게 보이는 건 아니에요. 그래서 말로 구체적으로 알려 주면 도움이 돼요.</div></div>
+        <div style="display:flex;gap:12px;align-items:center"><button id="gc-ok" type="button" class="btn primary" style="height:60px;padding:0 28px">알겠어요</button><button id="gc-off" type="button" class="btn" style="height:60px">효과 끄기</button><button id="gc-spk" type="button" class="btn" style="height:60px"><img data-ic="spk" width="24" height="24" alt="">읽어주기</button></div>
+        <div style="font-size:12px;line-height:1.6">효과는 1초 동안 천천히 나타나요. 깜빡이지 않고, 설정에서 언제든 끌 수 있어요.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 함께 걷기 (8) -->
+  <section id="sc-walk" class="screen" hidden aria-label="함께 걷기">
+    <div class="abs" style="inset:0;background:linear-gradient(#8FD3F4 0 360px,#A3DCF6 360px 560px,#1B2A5B 560px 564px,#6CC070 564px 580px,#A86F45 580px)" id="w-bg"></div>
+    <div class="abs" style="left:96px;right:96px;top:20px;height:56px;display:flex;justify-content:center;pointer-events:none"><div class="panel" style="height:56px;padding:0 16px;display:flex;align-items:center;gap:12px;box-shadow:0 6px 0 rgba(27,42,91,.3)"><div style="width:32px;height:32px;background:#B97A4A;border:4px solid #1B2A5B;display:grid;place-items:center;color:#FFFFFF;font-size:12px;font-weight:700">8</div><span style="font-size:24px;font-weight:700">함께 걷기</span><span style="font-size:12px">안내하는 순서대로 카드를 놓아요</span></div></div>
+    <button id="w-exit" type="button" class="btn abs" style="left:92px;top:20px;height:56px">◀ 마을로</button>
+    <div id="w-slots" class="abs panel" style="left:40px;top:92px;width:676px;height:588px;padding:16px;display:flex;flex-direction:column;gap:10px;overflow:auto"></div>
+    <div id="w-cards" class="abs panel" style="left:740px;top:92px;width:500px;height:588px;padding:16px;display:flex;flex-direction:column;gap:14px"></div>
   </section>
 
   <!-- 마을 -->
@@ -449,6 +550,16 @@ body.touch #hud-keys{display:none}
   const S = (gr, pal) => ({ g: gr, pal, u: svg(gr, pal) });
   const base = { K: N, W: '#FFFFFF', C: '#FFFDF2', c: '#EDE6CF', S: '#FFD9B8', p: '#F6A6A0', P: '#3D4E8C', Y: '#FFD84D', y: '#E3B52F', z: '#FFF3B0', R: '#E5484D', r: '#B8323A', G: '#6CC070', g: '#4E9A55', l: '#9EDB8C', D: '#A86F45', d: '#7A4B2C', L: '#BFE6F7', O: '#F59E4B', o: '#C9732F', A: '#C9CCD6', a: '#9AA3B8', B: '#4C6FD8', b: '#3D5AB8', 1: '#E1E3EA', 2: '#C9CCD6', 3: '#AEB4C4', 4: '#8F96A9', 5: '#E6C08F', 6: '#8B5A3C' };
   const PD = [['1', '알쏭달쏭 마을', '퀴즈 · O X 4문제', '#8E6FD8'], ['2', '흰지팡이 가게', '퀴즈 · 4문제', '#E5484D'], ['3', '같이 밥 먹기', '반찬 위치 설명', '#F59E4B'], ['4', '마음 대화 벤치', '퀴즈 · 3문제', '#EF7FA8'], ['5', '길 안내', '길 안내', '#2FB3A6'], ['6', '문과 계단', '길 안내', '#4C7BE0'], ['7', '창문 찾기', '길 안내', '#9CCB3B'], ['8', '함께 걷기', '순서 카드 5장', '#B97A4A'], ['선택', '점자 가게', '선택 · 점자 활동', '#E2B33C'], ['끝', '해내다 광장', '면허증', '#3D4E8C']];
+  const CHO = [['ㄱ', '⠈'], ['ㄴ', '⠉'], ['ㄷ', '⠊'], ['ㄹ', '⠐'], ['ㅁ', '⠑'], ['ㅂ', '⠘'], ['ㅅ', '⠠'], ['ㅈ', '⠨'], ['ㅊ', '⠰'], ['ㅋ', '⠋'], ['ㅌ', '⠓'], ['ㅍ', '⠙'], ['ㅎ', '⠚']];
+  const JUNG = [['ㅏ', '⠣'], ['ㅑ', '⠜'], ['ㅓ', '⠎'], ['ㅕ', '⠱'], ['ㅗ', '⠥'], ['ㅛ', '⠬'], ['ㅜ', '⠍'], ['ㅠ', '⠩'], ['ㅡ', '⠪'], ['ㅣ', '⠕'], ['ㅐ', '⠗'], ['ㅔ', '⠝'], ['ㅚ', '⠽'], ['ㅘ', '⠧'], ['ㅝ', '⠏'], ['ㅢ', '⠺'], ['ㅖ', '⠌']];
+  const JONG = [['ㄱ', '⠁'], ['ㄴ', '⠒'], ['ㄷ', '⠔'], ['ㄹ', '⠂'], ['ㅁ', '⠢'], ['ㅂ', '⠃'], ['ㅅ', '⠄'], ['ㅇ', '⠶'], ['ㅈ', '⠅'], ['ㅊ', '⠆'], ['ㅋ', '⠖'], ['ㅌ', '⠦'], ['ㅍ', '⠲'], ['ㅎ', '⠴']];
+  const MAPS = {
+    1: { t: 'out', rows: ['....p.....p..G', '==========##==', '==========##==', 'yyyyyyybyyyy..', 'S...c........p', '..p......p....'], f: [6, 3, '▶'], w: [[1, 4], [2, 4], [3, 4], [3, 3], [4, 3], [5, 3]], tags: { '13,0': '도착', '0,4': '출발', '10,1': '횡단보도', '0,3': '점자블록' } },
+    2: { t: 'in', rows: ['WWWWWWWWWWWWWW', 'f..e..WfffssfG'.replace('G', 'f'), 'S.....DtffssfG', 'f.h...Wfffssff', 'f.....Wfffffff', 'WWWWWWWWWWWWWW'], f: [5, 2, '▶'], w: [[1, 2], [2, 2], [3, 2], [4, 2]], tags: { '6,2': '문', '7,2': '문턱', '10,1': '계단', '13,2': '도착', '0,2': '출발', '3,1': '소화기' } },
+    3: { t: 'in', rows: ['WWVVWWWVVWWVVW', '...........G..', '.kh.kh.kh.x...', '..............', '.kh.kh.kh..a..', 'S.....e.......'], f: [3, 3, '▶'], w: [[0, 4], [0, 3], [1, 3], [2, 3]], tags: { '11,0': '창문', '11,1': '도착', '0,5': '출발', '11,4': '가방' } }
+  };
+  const dots = ch => { const v = ch.codePointAt(0) - 0x2800; return [1, 4, 2, 5, 3, 6].map(n => { const on = !!((v >> (n - 1)) & 1); return { on, off: !on, n: String(n) }; }); };
+
   function build() {
     const HS = ['................', '.....KKKKKK.....', '....KHHHHHHK....', '...KHHHHHHHHK...', '..KHHHHHHHHHHK..', '..KHSSSSSSSSHK..'];
     const CAP = ['................', '.....KKKKKK.....', '....KTTTTTTK....', '...KTTTYYTTTK...', '..KTTTTTTTTTTK..', '..KKKKKKKKKKKKKK'];
@@ -593,6 +704,22 @@ body.touch #hud-keys{display:none}
     };
     const foods = { spinach: food('spinach', 92, 52, 3), egg: food('egg', 92, 52, 5), kimchi: food('kimchi', 92, 52, 9), rice: food('rice', 144, 68, 11), soup: food('soup', 142, 68, 13) };
 
+    const ob = {};
+    (() => { const b = blank(12, 12); [[2.5, 8.5], [9.5, 8.5]].forEach(([cx, cy]) => { for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) { const d = Math.hypot(x + .5 - cx, y + .5 - cy); if (d <= 2.7 && d >= 1.6) b[y][x] = 'K'; } b[cy | 0][cx | 0] = 'K'; });
+      line(b, 2, 8, 5, 5, 'R'); line(b, 5, 5, 8, 5, 'R'); line(b, 8, 5, 9, 8, 'R'); line(b, 5, 8, 8, 5, 'R'); line(b, 2, 8, 5, 8, 'R'); b[4][4] = 'K'; b[4][5] = 'K'; line(b, 8, 5, 8, 3, 'K'); b[3][9] = 'K'; b[3][10] = 'K'; ob.b = S(b, base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 3, 7, 8, 11, x => x === 8 ? 'd' : 'D'); rect(b, 2, 6, 9, 6, 'd'); disc(b, 6, 3.8, 3.4, (x, y) => (x - 6) + (y - 3.8) > 2 ? 'g' : (x - 6) + (y - 3.8) < -2.5 ? 'l' : 'G'); ob.p = S(ring(b, 'K'), base).u; })();
+    (() => { const b = blank(12, 12); for (let y = 1; y < 10; y++) for (let x = 0; x < 12; x++) if (Math.abs(x + .5 - 6) <= .6 + y * .45) b[y][x] = (y === 4 || y === 5) ? 'C' : 'O'; rect(b, 1, 10, 10, 10, 'o'); ob.c = S(ring(b, 'K'), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 2, 0, 2, 10, 'K'); rect(b, 3, 1, 9, 5, (x, y) => y === 5 ? 'y' : 'Y'); b[2][4] = 'z'; rect(b, 1, 11, 3, 11, 'K'); ob.G = S(ring(b, 'K', ['Y', 'y', 'z']), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 1, 0, 10, 11, 'D'); rect(b, 3, 2, 8, 4, (x, y) => (x === 3 || x === 8 || y === 2 || y === 4) ? 'd' : '.'); rect(b, 3, 7, 8, 9, (x, y) => (x === 3 || x === 8 || y === 7 || y === 9) ? 'd' : '.'); b[6][8] = 'Y'; rect(b, 0, 0, 0, 11, 'K'); rect(b, 11, 0, 11, 11, 'K'); ob.D = S(b, base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 0, 0, 11, 2, '1'); rect(b, 0, 3, 11, 3, 'K'); rect(b, 0, 4, 11, 6, '2'); rect(b, 0, 7, 11, 7, 'K'); rect(b, 0, 8, 11, 10, '3'); rect(b, 0, 11, 11, 11, 'K'); ob.s = S(b, base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 0, 5, 11, 5, 'K'); rect(b, 0, 6, 11, 7, '5'); rect(b, 0, 8, 11, 8, '6'); rect(b, 0, 9, 11, 9, 'K'); ob.t = S(b, base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 1, 1, 10, 9, 'K'); rect(b, 2, 2, 5, 4, 'L'); rect(b, 6, 2, 9, 4, 'L'); rect(b, 2, 6, 5, 8, 'L'); rect(b, 6, 6, 9, 8, 'L'); b[2][2] = 'z'; b[2][6] = 'z'; rect(b, 0, 10, 11, 11, 'D'); ob.V = S(b, { ...base, z: '#EAF7FD' }).u; })();
+    (() => { const b = blank(12, 12); rect(b, 1, 3, 10, 5, 'D'); rect(b, 1, 6, 10, 6, 'd'); rect(b, 2, 7, 2, 10, 'd'); rect(b, 9, 7, 9, 10, 'd'); ob.k = S(ring(b, 'K'), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 3, 1, 8, 4, 'D'); rect(b, 3, 6, 8, 7, 'D'); b[5][3] = 'd'; b[5][8] = 'd'; rect(b, 3, 8, 3, 10, 'd'); rect(b, 8, 8, 8, 10, 'd'); ob.h = S(ring(b, 'K'), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 3, 3, 8, 10, x => (x === 5 || x === 7) ? 'A' : 'a'); rect(b, 2, 2, 9, 2, '4'); ob.x = S(ring(b, 'K'), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 2, 4, 9, 10, 'B'); rect(b, 4, 7, 7, 9, 'b'); [[4, 3], [4, 2], [5, 1], [6, 1], [7, 2], [7, 3]].forEach(([x, y]) => b[y][x] = 'K'); ob.a = S(ring(b, 'K', ['B', 'b']), base).u; })();
+    (() => { const b = blank(12, 12); rect(b, 4, 3, 7, 10, x => x === 7 ? 'r' : 'R'); rect(b, 4, 6, 7, 7, 'C'); rect(b, 4, 1, 6, 2, 'K'); line(b, 7, 2, 9, 4, 'K'); ob.e = S(ring(b, 'K', ['R', 'r', 'C']), base).u; })();
+
     const vbg = full => png(320, 180, x => {
       [[0, 40, '#78C4EC'], [40, 80, '#84CBF0'], [80, 115, '#8FD3F4'], [115, 150, '#A3DCF6']].forEach(([a, b, c]) => { x.fillStyle = c; x.fillRect(0, a, 320, b - a); });
       if (full) [[24, 39], [175, 30], [265, 52]].forEach(([X, Y]) => blit(x, cloud.g, cloud.pal, X, Y));
@@ -612,9 +739,23 @@ body.touch #hud-keys{display:none}
       blit(x, n2.g, n2.pal, 100, 112, 2); blit(x, n1.g, n1.pal, -10, 120, 2); blit(x, n3.g, n3.pal, 220, 124, 2);
       [[156, 157, '#0B1230'], [157, 162, '#2E6B4E'], [162, 163, '#25594A'], [163, 180, '#1F4F3E']].forEach(([a, b, c]) => { x.fillStyle = c; x.fillRect(0, a, 320, b - a); });
     });
-    return { titleBg, friendBody, bomi, chars, friendSide, friendS, friendSit, faceJiho, bomi, faceBomi, faceNari, npcs, caneStick, portals, b1, b2, b3, shop, tree, bush, cloud, gate, star, lamp, flower, sign, ic, sprout, shield, villageBg, nightBg, foods, hill1: hill(44, 16, dayHill), hill2: hill(52, 22, dayHill), hill3: hill(40, 14, dayHill) };
+    return { titleBg, friendBody, bomi, chars, friendSide, friendS, friendSit, faceJiho, bomi, faceBomi, faceNari, npcs, caneStick, portals, b1, b2, b3, shop, tree, bush, cloud, gate, star, lamp, flower, sign, ic, sprout, shield, foods, ob, villageBg, nightBg, hill1: hill(44, 16, dayHill), hill2: hill(52, 22, dayHill), hill3: hill(40, 14, dayHill) };
   }
-  window.CaneSprites = { get() { return window.__caneA || (window.__caneA = build()); }, PD };
+  const BG = {
+    out: c => c === '=' ? '#7C8496' : c === '#' ? 'repeating-linear-gradient(180deg,#FFFDF2 0 6px,#7C8496 6px 12px)' : (c === 'y' || c === 'b') ? 'radial-gradient(circle,#E3B52F 2.5px,transparent 3px) 0 0/12px 12px,#FFD84D' : '#E9DFC9',
+    in: c => (c === 'W' || c === 'V') ? 'linear-gradient(#7C849A 0 8px,#5D6680 8px)' : '#D9B48A'
+  };
+  const LB = { p: '화분', b: '자전거', c: '공사콘', G: '도착 깃발', D: '문', t: '문턱', s: '계단', V: '창문', k: '책상', h: '의자', x: '쓰레기통', a: '가방', e: '소화기' };
+  window.CaneSprites = {
+    get() { return window.__caneA || (window.__caneA = build()); },
+    dots, CHO, JUNG, JONG, PD, MAPS, BG, LB,
+    cells(k) {
+      const A = this.get(), m = MAPS[k], out = [];
+      m.rows.forEach((row, y) => { for (let x = 0; x < 14; x++) { const ch = row[x] || '.', key = x + ',' + y, img = A.ob[ch] || ''; const isF = m.f[0] === x && m.f[1] === y;
+        out.push({ bg: BG[m.t](ch), hasImg: !!img, img, label: LB[ch] || '', walked: m.w.some(([a, b]) => a === x && b === y), isFriend: isF, fimg: A.friendS.u, dir: m.f[2], hasTag: !!m.tags[key], tag: m.tags[key] || '' }); } });
+      return out;
+    }
+  };
 })();
 
 </script>
@@ -637,7 +778,7 @@ const store = {
   del(k) { delete mem[k]; try { localStorage.removeItem(k); } catch (e) {} }
 };
 const SKEY = 'canedo-settings-v1', PKEY = 'canedo-save-v1';
-const DEF_SET = { lvl: 1, size: 1, fx: 0, hc: 1, tts: 0, motion: 1, spd: 1, sfx: 0, mic: 0 };
+const DEF_SET = { lvl: 1, size: 1, fx: 0, hc: 1, tts: 0, motion: 1, spd: 1, sfx: 0, bgm: 0, mic: 0 };
 const firstRun = !store.get(SKEY);
 let set = Object.assign({}, DEF_SET, store.get(SKEY) || {});
 try { if (firstRun && matchMedia('(prefers-reduced-motion: reduce)').matches) set.motion = 0; } catch (e) {}
@@ -682,6 +823,74 @@ const sfx = {
   click() { beep(600, .05, 'square', .03); }
 };
 
+
+/* ───────── 배경음악 : 코드로 만든 오리지널 8비트 곡 (첫 화면·이름·마을) ───────── */
+const NOTE_IDX = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+const midiOf = n => { const m = n.match(/^([A-G])([#b]?)(\d)$/); return (+m[3] + 1) * 12 + NOTE_IDX[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
+const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+/* 한 칸 = 8분음표. '.' 쉼표, '-' 앞 음을 이어서 */
+const SONGS = {
+  title: { bpm: 126,
+    mel: 'E5 G5 C6 G5 E5 G5 D6 - | D5 F5 B5 F5 D5 F5 C6 - | C5 E5 A5 E5 C5 E5 G5 A5 | G5 E5 D5 E5 C5 - . . |' +
+         'E5 G5 C6 G5 E6 D6 C6 - | D5 F5 B5 G5 D6 C6 B5 - | C6 B5 A5 G5 E5 G5 A5 B5 | C6 - E6 - C6 - . . |',
+    bass: 'C3 . G3 . C3 . G3 . | G2 . D3 . G2 . D3 . | A2 . E3 . A2 . E3 . | F2 . G2 . C3 . . . |' +
+          'C3 . G3 . C3 . G3 . | G2 . D3 . G2 . D3 . | F2 . C3 . F2 . C3 . | G2 . G2 . C3 . . . |' },
+  village: { bpm: 112,
+    mel: 'F5 . A5 C6 . A5 F5 . | G5 . Bb5 D6 . Bb5 G5 . | A5 C6 A5 F5 G5 F5 E5 . | F5 - - - . . . . |' +
+         'C6 . A5 F5 . A5 C6 . | D6 . Bb5 G5 . Bb5 D6 . | C6 A5 F5 A5 G5 E5 D5 E5 | F5 - A5 - F5 - . . |',
+    bass: 'F3 . C4 . F3 . C4 . | G3 . D4 . G3 . D4 . | A3 . E4 . D3 . A3 . | F3 . C3 . F3 . . . |' +
+          'F3 . C4 . F3 . C4 . | Bb2 . F3 . Bb2 . F3 . | C3 . G3 . C3 . G3 . | F3 . C3 . F3 . . . |' }
+};
+const parseTrack = s => { const out = []; s.replace(/\|/g, ' ').trim().split(/\s+/).forEach(t => { if (t === '-') { if (out.length) out[out.length - 1].len++; else out.push({ m: null, len: 1 }); } else if (t === '.') out.push({ m: null, len: 1 }); else out.push({ m: midiOf(t), len: 1 }); }); return out; };
+Object.values(SONGS).forEach(sg => { sg.melT = parseTrack(sg.mel); sg.bassT = parseTrack(sg.bass); });
+let bgmName = '', bgmGain = null, bgmTimer = null, bgmNextT = 0, bgmStep = 0, bgmWant = '';
+function ensureAudio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; }
+function bgmNote(t, m, len, spb, type, vol) {
+  const o = ac.createOscillator(), g2 = ac.createGain(), dur = len * spb * .92;
+  o.type = type; o.frequency.setValueAtTime(hz(m), t);
+  g2.gain.setValueAtTime(0.0001, t); g2.gain.exponentialRampToValueAtTime(vol, t + .01); g2.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(.05, dur));
+  o.connect(g2); g2.connect(bgmGain); o.start(t); o.stop(t + dur + .05);
+}
+function bgmTick(t, kick) {
+  const o = ac.createOscillator(), g2 = ac.createGain();
+  o.type = kick ? 'sine' : 'square'; o.frequency.setValueAtTime(kick ? 120 : 6000, t); if (kick) o.frequency.exponentialRampToValueAtTime(45, t + .1);
+  g2.gain.setValueAtTime(kick ? .5 : .05, t); g2.gain.exponentialRampToValueAtTime(0.0001, t + (kick ? .12 : .03));
+  o.connect(g2); g2.connect(bgmGain); o.start(t); o.stop(t + .15);
+}
+function trackUnits(tr) { const u = []; let p = 0; tr.forEach(x => { u[p] = x.m === null ? null : { m: x.m, len: x.len }; p += x.len; }); u.length = p; return u; }
+function bgmSchedule() {
+  if (!ac || !bgmName) return;
+  const sg = SONGS[bgmName], spb = 60 / sg.bpm / 2;
+  if (!sg.melU) { sg.melU = trackUnits(sg.melT); sg.bassU = trackUnits(sg.bassT); sg.total = Math.max(sg.melU.length, sg.bassU.length); }
+  while (bgmNextT < ac.currentTime + .4) {
+    const u = bgmStep % sg.total, t = Math.max(bgmNextT, ac.currentTime);
+    const mel = sg.melU[u], bas = sg.bassU[u];
+    if (mel) bgmNote(t, mel.m, mel.len, spb, 'square', .16);
+    if (bas) bgmNote(t, bas.m, bas.len, spb, 'triangle', .3);
+    if (u % 4 === 0) bgmTick(t, true); else if (u % 2 === 1) bgmTick(t, false);
+    bgmNextT = t + spb; bgmStep++;
+  }
+}
+function bgmWantedName() {
+  if (!on('bgm')) return '';
+  if (cur === 'title' || cur === 'loading' || cur === 'name') return 'title';
+  if (cur === 'village') return 'village';
+  return '';
+}
+function bgmUpdate() {
+  const want = bgmWantedName(); bgmWant = want;
+  if (!ac) return;                                  // 아직 소리를 켜지 못했어요 (첫 누르기 뒤에 시작)
+  if (!bgmGain) { bgmGain = ac.createGain(); bgmGain.gain.value = 0; bgmGain.connect(ac.destination); }
+  const quiet = ovStack.some(o => o.el.id === 'ov-quiz' || o.el.id === 'ov-msg');
+  const vol = want ? (quiet ? .035 : .09) : 0;
+  bgmGain.gain.cancelScheduledValues(ac.currentTime); bgmGain.gain.setTargetAtTime(vol, ac.currentTime, .25);
+  if (want && want !== bgmName) { bgmName = want; bgmStep = 0; bgmNextT = ac.currentTime + .08; if (!bgmTimer) bgmTimer = setInterval(bgmSchedule, 120); }
+  else if (!want && bgmName) { setTimeout(() => { if (!bgmWant) { bgmName = ''; clearInterval(bgmTimer); bgmTimer = null; } }, 600); }
+}
+/* 브라우저는 소리를 처음 누르거나 키를 눌러야 켜 줘요 */
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { if (!ac || ac.state !== 'running') { ensureAudio(); bgmUpdate(); } }, { capture: true }));
+document.addEventListener('visibilitychange', () => { if (ac) { if (document.hidden) ac.suspend(); else ac.resume(); } });
+
 /* 읽어주기 (TTS) */
 function speak(text) {
   if (!('speechSynthesis' in window)) { toast('이 기기에서는 읽어주기를 쓸 수 없어요.'); return; }
@@ -715,13 +924,13 @@ function applySettings() {
 }
 
 /* ───────── 화면 전환 ───────── */
-const SC = { title: $('#sc-title'), loading: $('#sc-loading'), name: $('#sc-name'), village: $('#sc-village'), meal: $('#sc-meal') };
+const SC = { title: $('#sc-title'), loading: $('#sc-loading'), name: $('#sc-name'), village: $('#sc-village'), meal: $('#sc-meal'), guide: $('#sc-guide'), walk: $('#sc-walk') };
 let cur = 'title';
 const ovStack = [];
 function show(name) {
   cur = name;
   Object.keys(SC).forEach(k => { SC[k].hidden = k !== name; });
-  chrome();
+  chrome(); bgmUpdate();
 }
 function chrome() {
   const top = ovStack.length ? ovStack[ovStack.length - 1] : null;
@@ -738,13 +947,13 @@ function chrome() {
 function openOv(el, opts = {}) {
   const prev = document.activeElement;
   el.style.zIndex = 30 + ovStack.length; el.hidden = false; ovStack.push({ el, prev, onClose: opts.onClose });
-  chrome();
+  chrome(); bgmUpdate();
   if (opts.focus) setTimeout(() => { const f = typeof opts.focus === 'string' ? $(opts.focus, el) : opts.focus; f && f.focus(); }, 30);
 }
 function closeOv(el, silent) {
   const i = ovStack.findIndex(o => o.el === el); if (i < 0) return;
   const o = ovStack.splice(i, 1)[0]; el.hidden = true; stopSpeak();
-  chrome();
+  chrome(); bgmUpdate();
   if (!silent && o.onClose) o.onClose();
   try { if (o.prev && o.prev.focus && document.body.contains(o.prev) && cur !== 'village') o.prev.focus(); } catch (e) {}
 }
@@ -1085,8 +1294,10 @@ function enter(i) {
   if (!gateOpen(i)) { toast(`${gateReq(i)}번을 깨면 열려요.`); return; }
   sfx.door(); persistPos();
   if (st.quest === 3) { openMeal(); return; }
+  if (st.quest >= 5 && st.quest <= 7) { openGuide(st.quest); return; }
+  if (st.quest === 8) { openWalk(); return; }
   if (QUESTS[st.quest] && st.quest) { openQuiz(QUESTS[st.quest]); return; }
-  msgBox({ tag: `${st.num === '선택' ? '선택' : st.num + '번'} · ${st.name}`, title: '아직 준비 중이에요', text: '이 곳은 다음 단계에서 열려요. 지금은 1~4번까지 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] });
+  msgBox({ tag: `${st.num === '선택' ? '선택' : st.num + '번'} · ${st.name}`, title: '아직 준비 중이에요', text: '이 곳은 다음 단계에서 열려요. 지금은 1~8번까지 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] });
 }
 function persistPos() { save.x = Math.round(P.x); persist(); }
 
@@ -1214,12 +1425,12 @@ function finishQuest() {
   if (replay) { msgBox({ face: cfg.npc.face, tag: cfg.tag, title: '다시 해 봤어요!', text: '언제든 또 와서 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] }); return; }
   completeQuest(cfg);
 }
-function completeQuest(cfg) {
+function completeQuest(cfg, extra) {
   save.done[cfg.num] = true; delete save.qp[cfg.id]; persist();
   sfx.ok(); refreshWorld();
   const nxt = STOPS[cfg.num];       // 다음 정류장
   const opened = nxt ? `${nxt.num === '선택' ? '' : nxt.num + '번 '}${nxt.name} 가는 길이 열렸어요.` : '';
-  msgBox({ face: cfg.npc.face, tag: `${cfg.num}번 · ${cfg.tag}`, title: `${cfg.tag}${josa(cfg.tag, '을', '를')} 해냈어요!`, text: opened, buttons: [{ label: '마을로 ▶', primary: true }] });
+  msgBox({ face: cfg.npc.face, tag: `${cfg.num}번 · ${cfg.tag}`, title: `${cfg.tag}${josa(cfg.tag, '을', '를')} 해냈어요!`, text: [extra, opened].filter(Boolean).join(' '), buttons: [{ label: '마을로 ▶', primary: true }] });
 }
 function closeQuiz() { closeOv($('#ov-quiz')); }
 
@@ -1340,7 +1551,8 @@ function renderMeal() {
   $('#m-panel').innerHTML = `${top}<div style="font-size:12px">알려 준 반찬 · ${M.found.length} / 5</div><div class="chk">${checks}</div>${bottom}`;
   $('#m-row').hidden = M.done; $('#m-finish').hidden = !M.done;
   const nh = $('#m-nexthint'); if (nh) nh.addEventListener('click', mealNextHint);
-  $('#m-mic').hidden = !on('mic');
+  $('#m-mic').hidden = !on('mic'); $('#g-mic').hidden = !on('mic');
+  if (typeof bgmUpdate === 'function') bgmUpdate();
 }
 function mealNextHint() {
   if (!M || M.hint2) return;
@@ -1390,8 +1602,7 @@ $('#m-row').addEventListener('submit', e => { e.preventDefault(); submitMeal(); 
 $('#m-exit').addEventListener('click', exitMeal);
 $('#m-finish').addEventListener('click', finishMeal);
 let rec = null;
-$('#m-mic').addEventListener('click', () => {
-  const b = $('#m-mic');
+function startMic(b, inputEl) {
   if (rec) { try { rec.stop(); } catch (e) {} return; }          // 듣는 중에 다시 누르면 멈춰요
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) { toast('이 브라우저에서는 음성 입력을 쓸 수 없어요. 크롬이나 엣지에서 열어 주세요.'); return; }
@@ -1406,24 +1617,333 @@ $('#m-mic').addEventListener('click', () => {
     const r = new SR(); rec = r; r.lang = 'ko-KR'; r.interimResults = true; r.maxAlternatives = 1; r.continuous = false;
     let got = false, err = '';
     b.classList.add('pressed'); toast('듣고 있어요. 말해 보세요!');
-    r.onresult = e => { got = true; $('#m-in').value = [...e.results].map(x => x[0].transcript).join(' '); };
+    r.onresult = e => { got = true; inputEl.value = [...e.results].map(x => x[0].transcript).join(' '); inputEl.dispatchEvent(new Event('input')); };
     r.onspeechend = () => { try { r.stop(); } catch (e) {} };
     r.onerror = e => { err = e.error || ''; };
     r.onend = () => {
       rec = null; b.classList.remove('pressed');
       if (err && err !== 'aborted') toast(MSG[err] || '음성을 듣지 못했어요. 글자로 써 주세요.');
       else if (!got) toast(MSG['no-speech']);
-      else { toast('들은 말을 확인하고 "말해 주기"를 눌러요.'); $('#m-in').focus(); }
+      else { toast('들은 말을 확인하고 "말해 주기"를 눌러요.'); inputEl.focus(); }
     };
     r.start();
   } catch (e) { rec = null; b.classList.remove('pressed'); toast('음성 입력을 시작하지 못했어요. 글자로 써 주세요.'); }
+}
+$('#m-mic').addEventListener('click', () => startMic($('#m-mic'), $('#m-in')));
+$('#g-mic').addEventListener('click', () => startMic($('#g-mic'), $('#g-in')));
+
+
+/* ───────────────────────────────────────────
+   퀘스트 5·6·7 : 길 안내 (코딩 로봇처럼 말로 안내하기)
+   ─────────────────────────────────────────── */
+const CS_ = window.CaneSprites;
+const BLOCK = 'pbcaekhxWV', ARROW = ['▲', '▶', '▼', '◀'], DV = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const FXINFO = {
+  blur: { name: '가운데가 흐려 보여요', med: '황반변성 · 보이는 정도는 사람마다 달라요' },
+  haze: { name: '전체가 뿌옇게 보여요', med: '백내장 · 보이는 정도는 사람마다 달라요' },
+  tunnel: { name: '가운데만 보여요', med: '터널 시야 · 보이는 정도는 사람마다 달라요' }
+};
+/* 힌트 문구는 시안의 예시 문구를 바탕으로 제가 쓴 초안이에요 (확인 필요) */
+const GUIDE = {
+  5: { map: 1, color: '#2FB3A6', name: '길 안내 코딩', sub: '친구가 깃발까지 갈 수 있게 말로 안내해요', goal: '길 건너 깃발까지', fx: 'blur',
+    checks: [['공사콘 피하기', s => s.maxX >= 5], ['자전거 피하기', s => s.maxX >= 8], ['횡단보도가 있다고 말하기', s => s.said.has('횡단보도')]],
+    need: [['횡단보도', '#']], tell: ['횡단보도', '점자블록'],
+    hints: ['자전거 앞에서 왼쪽이나 오른쪽으로 돌아서 피해 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 앞으로 3걸음, 왼쪽으로 돌아서 1걸음, 오른쪽으로 돌아서 3걸음 처럼 이어서 써요.'] },
+  6: { map: 2, color: '#4C7BE0', name: '문과 계단', sub: '문 · 문턱 · 계단이 있다는 것도 말해 줘요', goal: '계단 지나 깃발까지', fx: 'haze',
+    checks: [['문이 있다고 말하기', s => s.said.has('문')], ['문턱이 있다고 말하기', s => s.said.has('문턱')], ['계단이 있다고 말하기', s => s.said.has('계단')]],
+    need: [['문', 'D'], ['문턱', 't'], ['계단', 's']], tell: ['문', '문턱', '계단'],
+    hints: ['문과 문턱, 계단이 있으면 가기 전에 꼭 말해 줘요.', '문을 지나면 바로 낮은 문턱이 있어요. 넘기 전에 "턱이 있어요"라고 말해 줘요.', '계단 앞에서도 "앞에 계단이 있어요"라고 말해 줘요.'] },
+  7: { map: 3, color: '#9CCB3B', name: '창문 찾기', sub: '친구가 창문 앞까지 갈 수 있게 안내해요', goal: '창문 앞 깃발까지', fx: 'tunnel',
+    checks: [['책상 사이로 걷기', s => s.maxX >= 8], ['가방 피하기', s => s.maxX >= 11], ['창문이 있다고 말하기', s => s.said.has('창문')]],
+    need: [['창문', 'G']], tell: ['창문', '책상', '가방'],
+    hints: ['책상과 의자가 없는 넓은 길로 걸어가면 부딪히지 않아요.', '가운데 줄로 쭉 걷다가 위쪽으로 올라가요.', '깃발에 도착하기 전에 "앞에 창문이 있어요"라고 말해 줘요.'] }
+};
+const WORDS = ['횡단보도', '점자블록', '문턱', '창문', '계단', '책상', '가방', '화분', '자전거', '공사콘', '소화기', '의자', '쓰레기통', '턱', '문'];
+const NUMW = { 한: 1, 하나: 1, 일: 1, 두: 2, 둘: 2, 이: 2, 세: 3, 셋: 3, 삼: 3, 네: 4, 넷: 4, 사: 4, 다섯: 5, 오: 5, 여섯: 6, 육: 6, 일곱: 7, 칠: 7, 여덟: 8, 팔: 8, 아홉: 9, 구: 9, 열: 10, 십: 10 };
+let GS = null;
+
+function gridOf(mapNo) {
+  const m = CS_.MAPS[mapNo], rows = m.rows.map(r => (r + '.'.repeat(14)).slice(0, 14).split(''));
+  let st = [0, 0], goal = [0, 0];
+  rows.forEach((r, y) => r.forEach((c, x) => { if (c === 'S') st = [x, y]; if (c === 'G') goal = [x, y]; }));
+  return { m, rows, st, goal };
+}
+/* 쓴 글을 단계(앞으로/돌기/알려 주기)로 바꿔요 */
+function parseProgram(text) {
+  const pre = text.replace(/(걸음|칸|있어요|있어|돌기)\s*/g, '$1, ');
+  const parts = pre.split(/[,.;\n·]+|\s그리고\s|\s다음에\s/).map(s => s.trim()).filter(Boolean);
+  const steps = [];
+  for (const p of parts) {
+    const w = WORDS.find(x => p.includes(x));
+    if (w && /있|앞에|조심|알려/.test(p) && !/걸음|칸/.test(p)) { steps.push({ t: 'tell', k: w === '턱' ? '문턱' : w }); continue; }
+    const dir = /오른/.test(p) ? 'r' : /왼/.test(p) ? 'l' : /뒤/.test(p) ? 'b' : /앞/.test(p) ? 'f' : null;
+    if (!dir) return { error: `이 말은 아직 몰라요: "${p}". 예) 앞으로 3걸음` };
+    const nm = p.match(/(\d+)\s*(?:걸음|칸)/) || p.match(/([가-힣]+?)\s*(?:걸음|칸)/);
+    let n = null;
+    if (nm) { n = /^\d+$/.test(nm[1]) ? +nm[1] : NUMW[nm[1].replace(/\s/g, '').slice(-2)] || NUMW[nm[1].slice(-1)] || null; if (n === null) return { error: `몇 걸음인지 모르겠어요: "${p}". 숫자로 써 주세요.` }; }
+    if (dir === 'f' && n === null) return { error: `몇 걸음인지 알려 주세요: "${p}". 예) 앞으로 3걸음` };
+    if (n !== null && (n < 0 || n > 14)) return { error: '걸음 수는 14걸음까지예요.' };
+    if (dir !== 'f') steps.push({ t: 'turn', d: dir });
+    if (n) steps.push({ t: 'move', n });
+  }
+  if (!steps.length) return { error: '명령을 써 주세요. 예) 앞으로 3걸음' };
+  return { steps };
+}
+function simulate(def, gd, steps) {
+  let [x, y] = gd.st, d = 1, maxX = x; const said = new Set(), ev = [];
+  const snap = () => ({ maxX, said: [...said] });
+  let result = 'end';
+  outer: for (let si = 0; si < steps.length; si++) {
+    const s = steps[si];
+    if (s.t === 'tell') { said.add(s.k); ev.push({ k: 'tell', si, w: s.k, st: snap() }); continue; }
+    if (s.t === 'turn') { d = (d + (s.d === 'r' ? 1 : s.d === 'l' ? 3 : 2)) % 4; ev.push({ k: 'turn', si, d, x, y, st: snap() }); continue; }
+    for (let i = 0; i < s.n; i++) {
+      const nx = x + DV[d][0], ny = y + DV[d][1];
+      if (nx < 0 || ny < 0 || nx >= 14 || ny >= 6) { ev.push({ k: 'stop', si, why: 'wall', x, y, st: snap() }); result = 'stop'; break outer; }
+      const ch = gd.rows[ny][nx];
+      if (BLOCK.includes(ch)) { ev.push({ k: 'stop', si, why: 'block', ch, x, y, st: snap() }); result = 'stop'; break outer; }
+      const nd = def.need.find(([key, chars]) => chars === ch && !said.has(key));
+      if (nd) { ev.push({ k: 'stop', si, why: 'need', key: nd[0], x, y, st: snap() }); result = 'stop'; break outer; }
+      x = nx; y = ny; maxX = Math.max(maxX, x);
+      ev.push({ k: 'move', si, x, y, d, st: snap() });
+      if (gd.rows[y][x] === 'G') { result = 'goal'; break outer; }
+    }
+  }
+  return { ev, result, said, maxX };
+}
+function openGuide(no) {
+  const def = GUIDE[no], gd = gridOf(def.map);
+  GS = { no, def, gd, replay: !!save.done[no], hint: 0, running: false, timer: null, n: 3, steps: [], state: { maxX: gd.st[0], said: new Set() }, fxOn: false, fx: on('fx') };
+  $('#g-badge').textContent = String(no); $('#g-badge').style.background = def.color; $('#g-name').textContent = def.name; $('#g-sub').textContent = def.sub;
+  $('#g-in').value = '';
+  // 지도
+  const bg = CS_.BG[gd.m.t], grid = $('#g-grid');
+  grid.innerHTML = gd.rows.map((r, y) => r.map((ch, x) => {
+    const img = A.ob[ch], tag = gd.m.tags[x + ',' + y];
+    return `<div class="gcell" data-c="${x},${y}" style="background:${bg(ch)}">${img ? `<img class="ob" src="${img}" alt="${esc(CS_.LB[ch] || '')}">` : ''}${tag ? `<div class="tg">${esc(tag)}</div>` : ''}</div>`;
+  }).join('')).join('');
+  const fr = document.createElement('div'); fr.id = 'g-friend'; fr.innerHTML = `<img src="${A.friendS.u}" alt="흰지팡이를 든 친구"><div class="dir">▶</div>`; grid.appendChild(fr);
+  grid.style.position = 'relative'; guidePlace(gd.st[0], gd.st[1], 1);
+  $('#g-bub').hidden = true;
+  $('#g-cards').innerHTML = [['f', '▲ 앞으로'], ['r', '▶ 오른쪽'], ['l', '◀ 왼쪽'], ['b', '▼ 뒤로 돌기']].map(([k, t]) => `<button type="button" class="btn gcard" data-k="${k}" style="height:52px">${t}</button>`).join('');
+  $('#g-tell').innerHTML = def.tell.map(w => `<button type="button" class="btn gtell" data-w="${w}">"앞에 ${w}${josa(w, '이', '가')} 있어요"</button>`).join('');
+  $('#g-n').textContent = GS.n + ' 걸음';
+  $$('.gfx').forEach(e => e.classList.remove('on'));
+  show('guide'); guideSide(); guideProg(-1); guideFxRefresh();
+  if (GS.fx) guideCard(); else setTimeout(() => $('#g-in').focus(), 60);
+  live(`${def.name}. ${def.sub}`);
+}
+function guidePlace(x, y, d) {
+  const f = $('#g-friend'); if (!f) return;
+  f.style.transform = `translate(${x * 48}px,${y * 48}px)`; $('.dir', f).textContent = ARROW[d];
+  GS.fpos = [x, y];
+  if (GS.fxOn && GS.def.fx === 'tunnel') $('#g-fxtun').style.background = `radial-gradient(circle at ${x * 48 + 24}px ${y * 48 + 24}px,transparent 0 70px,rgba(214,218,228,.7) 110px,rgba(214,218,228,.97) 160px)`;
+}
+function guideSide() {
+  const def = GS.def, s = GS.state, firstTodo = def.checks.findIndex(([, f]) => !f(s));
+  const checks = def.checks.map(([t, f], i) => { const ok = f(s), now = i === firstTodo; return `<div class="gc${ok || now ? '' : ' todo'}"><i class="${ok ? 'ok' : now ? 'now' : ''}">${ok ? `<img src="${A.ic.check}" width="12" height="12" alt="완료">` : now ? '▶' : ''}</i><span>${t}</span></div>`; }).join('');
+  const hint = GS.hint > 0
+    ? `<div style="margin-top:auto;background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 ${GS.hint} / 3</b><br>${esc(def.hints[GS.hint - 1])}${GS.hint < 3 ? ' <button type="button" id="g-nexth" class="btn" style="height:28px;font-size:12px;padding:0 8px;border-width:2px;margin-left:8px">다음 힌트</button>' : ''}</span></div>`
+    : `<button type="button" id="g-nexth" class="btn" style="margin-top:auto;align-self:flex-start;height:48px"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트 보기 <span style="font-size:12px">0 / 3</span></button>`;
+  $('#g-side').innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${A.ob.G}" width="24" height="24" alt=""><span style="font-size:24px;font-weight:700">도착 · ${def.goal}</span></div><div style="font-size:12px">말하고 해내야 할 것</div><div style="display:flex;flex-direction:column;gap:8px">${checks}</div>${hint}`;
+  const nb = $('#g-nexth'); if (nb) nb.addEventListener('click', guideNextHint);
+}
+function guideNextHint() { if (!GS || GS.hint >= 3) return; GS.hint++; if (!GS.replay) { save.hints++; persist(); } guideSide(); live('힌트 ' + GS.def.hints[GS.hint - 1]); }
+function stepLabel(s) { return s.t === 'tell' ? `알려 주기 · ${s.k}` : s.t === 'turn' ? ({ r: '오른쪽으로 돌기', l: '왼쪽으로 돌기', b: '뒤로 돌기' })[s.d] : `앞으로 ${s.n}`; }
+function guideProg(cur, stopAt) {
+  const steps = GS.steps;
+  $('#g-prog').innerHTML = steps.length ? steps.map((s, i) => `<div class="gstep${i === cur ? ' cur' : ''}${i === stopAt ? ' stop' : ''}"><b>${i + 1}</b>${esc(stepLabel(s))}${i === stopAt ? '<span class="st">멈춤</span>' : ''}</div>`).join('') : '<span style="font-size:12px;opacity:.7">명령을 쓰거나 카드를 누르면 순서가 여기에 나와요</span>';
+}
+function guideBubble(msg, x, y) {
+  const b = $('#g-bub'); b.hidden = false;
+  b.innerHTML = `<b>지호</b><br>${esc(msg)}`;
+  b.style.left = Math.max(4, Math.min(672 - 270, x * 48 + 52)) + 'px'; b.style.top = Math.max(4, Math.min(288 - 70, y * 48 - 20)) + 'px';
+  live('지호: ' + msg);
+}
+function guideRun() {
+  if (!GS || GS.running) return;
+  const text = $('#g-in').value.trim();
+  if (!text) { toast('명령을 써 주세요. 예) 앞으로 3걸음'); $('#g-in').focus(); return; }
+  const pr = parseProgram(text);
+  if (pr.error) { toast(pr.error); return; }
+  GS.steps = pr.steps; GS.running = true; $('#g-run').disabled = true;
+  const sim = simulate(GS.def, GS.gd, pr.steps), sx = GS.gd.st;
+  GS.state = { maxX: sx[0], said: new Set() }; $('#g-bub').hidden = true;
+  $$('.tr', $('#g-grid')).forEach(e => e.remove());
+  guidePlace(sx[0], sx[1], 1); guideSide(); guideProg(-1);
+  let i = 0;
+  const tickEv = () => {
+    if (!GS) return;
+    if (i >= sim.ev.length) { guideEnd(sim); return; }
+    const e = sim.ev[i++]; GS.state = { maxX: e.st.maxX, said: new Set(e.st.said) };
+    guideProg(e.si, e.k === 'stop' ? e.si : -1);
+    let delay = 260;
+    if (e.k === 'move') {
+      const prev = GS.fpos; const cell = $(`.gcell[data-c="${prev[0]},${prev[1]}"]`, $('#g-grid'));
+      if (cell && !$('.tr', cell) && !(prev[0] === sx[0] && prev[1] === sx[1])) { const d = document.createElement('div'); d.className = 'tr'; cell.appendChild(d); }
+      guidePlace(e.x, e.y, e.d); sfx.click();
+    } else if (e.k === 'turn') { guidePlace(e.x, e.y, e.d); delay = 320; }
+    else if (e.k === 'tell') { guideBubble(`${e.w}${josa(e.w, '이', '가')} 있군요. 고마워요!`, GS.fpos[0], GS.fpos[1]); delay = 650; sfx.ok(); }
+    else if (e.k === 'stop') {
+      const lab = e.why === 'block' ? (CS_.LB[e.ch] || (e.ch === 'W' ? '벽' : '장애물')) : e.key;
+      GS.stop = e;
+      guideBubble(e.why === 'wall' ? '멈췄어요! 더 갈 수 없어요.' : e.why === 'block' ? `멈췄어요! 앞에 ${lab}${josa(lab, '이', '가')} 있어요.` : `잠깐! 앞에 ${lab}${josa(lab, '이', '가')} 있다고 먼저 알려 주면 좋겠어요.`, e.x, e.y);
+      delay = 100;
+    }
+    guideSide();
+    GS.timer = setTimeout(tickEv, delay);
+  };
+  GS.timer = setTimeout(tickEv, 200);
+}
+function guideEnd(sim) {
+  if (!GS) return;
+  GS.running = false; $('#g-run').disabled = false;
+  const def = GS.def, missing = def.need.filter(([k]) => !sim.said.has(k)).map(([k]) => k);
+  const ok = sim.result === 'goal' && !missing.length;
+  if (ok) {
+    guideBubble('도착했어요! 알려 줘서 고마워요.', GS.fpos[0], GS.fpos[1]); sfx.ok(); guideSide();
+    GS.timer = setTimeout(guideFinish, 1500); return;
+  }
+  sfx.no(); if (!GS.replay) { save.wrong++; persist(); }
+  if (sim.result === 'goal') guideBubble(`깃발에 도착했어요! 그런데 ${missing.join(', ')}${josa(missing[missing.length - 1], '이', '가')} 있다는 것도 말해 줘야 해요.`, GS.fpos[0], GS.fpos[1]);
+  else if (sim.result === 'end') guideBubble('명령이 끝났어요. 아직 깃발에 도착하지 못했어요.', GS.fpos[0], GS.fpos[1]);
+  if (GS.hint < 3) { GS.hint++; if (!GS.replay) { save.hints++; persist(); } }   // 틀리면 힌트가 열려요
+  guideSide(); $('#g-in').focus();
+}
+function guideFinish() {
+  const no = GS.no, def = GS.def, replay = GS.replay; guideStop(); gotoVillage();
+  if (replay) { msgBox({ face: A.faceJiho.u, tag: def.name, title: '다시 해 봤어요!', text: '언제든 또 와서 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] }); return; }
+  completeQuest({ num: no, id: 'q' + no, tag: def.name, npc: { face: A.faceJiho.u } });
+}
+function guideStop() { if (GS && GS.timer) clearTimeout(GS.timer); GS = null; }
+function guideExit() { guideStop(); gotoVillage(); }
+/* 시야 효과 */
+function guideFxRefresh() {
+  if (!GS) return;
+  const fxOn = on('fx') && GS.fxOn, t = GS.def.fx;
+  $('#g-fxblur').classList.toggle('on', fxOn && t === 'blur'); $('#g-fxhaze').classList.toggle('on', fxOn && t === 'haze'); $('#g-fxtun').classList.toggle('on', fxOn && t === 'tunnel');
+  $('#g-grid').style.filter = fxOn && t === 'haze' ? 'blur(2.5px) contrast(.75) brightness(1.05)' : 'none';
+  $('#g-fxchip').hidden = !fxOn; $('#g-fxname').textContent = FXINFO[t].name;
+  if (fxOn && t === 'tunnel') guidePlace(GS.fpos[0], GS.fpos[1], 1);
+}
+function guideCard() {
+  const t = GS.def.fx, fi = FXINFO[t];
+  $('#gc-name').textContent = fi.name; $('#gc-med').textContent = fi.med;
+  const mask = t === 'blur' ? '<div style="position:absolute;inset:0;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);-webkit-mask-image:radial-gradient(ellipse 60px 44px at 50% 50%,#000 35%,transparent 100%);mask-image:radial-gradient(ellipse 60px 44px at 50% 50%,#000 35%,transparent 100%)"></div>'
+    : t === 'haze' ? '<div style="position:absolute;inset:0;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);background:rgba(255,253,242,.42)"></div>'
+    : '<div style="position:absolute;inset:0;background:radial-gradient(circle at 25% 75%,transparent 0 28px,rgba(214,218,228,.7) 44px,rgba(214,218,228,.97) 64px)"></div>';
+  $('#gc-prev').innerHTML = `<div style="position:absolute;left:24px;top:48px;width:168px;height:24px;background:radial-gradient(circle,#E3B52F 2.5px,transparent 3px) 0 0/12px 12px,#FFD84D"></div><img src="${A.ob.G}" width="48" height="48" style="position:absolute;left:144px;top:12px" alt=""><img src="${A.friendS.u}" width="48" height="48" style="position:absolute;left:48px;top:76px" alt="">${mask}`;
+  $('#g-card').hidden = false; ovStack.push({ el: $('#g-card'), prev: null, onClose: null }); chrome();
+  live(`시야 효과 안내. ${fi.name}. 이렇게 보이는 친구도 있어요. 보이는 정도는 사람마다 달라요.`);
+  setTimeout(() => $('#gc-ok').focus(), 40);
+}
+function guideCardClose(turnOff) {
+  const i = ovStack.findIndex(o => o.el.id === 'g-card'); if (i >= 0) ovStack.splice(i, 1);
+  $('#g-card').hidden = true; stopSpeak(); chrome();
+  if (turnOff) { set.fx = 1; persistSet(); toast('시야 효과를 껐어요. 설정에서 다시 켤 수 있어요.'); }
+  if (!GS) return;
+  GS.fxOn = !turnOff && on('fx'); guideFxRefresh();
+  $$('.gfx').forEach(e => { if (e.classList.contains('on')) { e.classList.remove('on'); void e.offsetWidth; e.classList.add('on'); } });
+  setTimeout(() => $('#g-in').focus(), 40);
+}
+$('#gc-ok').addEventListener('click', () => guideCardClose(false));
+$('#gc-off').addEventListener('click', () => guideCardClose(true));
+$('#gc-spk').addEventListener('click', () => { const t = GS.def.fx; speak(`${FXINFO[t].name}. ${FXINFO[t].med}. 이렇게 보이는 친구도 있어요. 보이는 정도는 사람마다 달라요. 모든 친구가 이렇게 보이는 건 아니에요. 그래서 말로 구체적으로 알려 주면 도움이 돼요.`); });
+$('#g-fxoff').addEventListener('click', () => { set.fx = 1; persistSet(); guideFxRefresh(); toast('시야 효과를 껐어요. 설정에서 다시 켤 수 있어요.'); if ($('#ov-settings') && !$('#ov-settings').hidden) buildSettings(); });
+/* 입력 · 카드 */
+const gAppend = txt => { const i = $('#g-in'); i.value = (i.value.trim() ? i.value.trim().replace(/[,\s]+$/, '') + ', ' : '') + txt; guideLive(); i.focus(); };
+function guideLive() { if (!GS || GS.running) return; const pr = parseProgram($('#g-in').value.trim() || ' '); GS.steps = pr.steps || []; guideProg(-1); }
+$('#g-in').addEventListener('input', guideLive);
+$('#g-form').addEventListener('submit', e => { e.preventDefault(); guideRun(); });
+$('#g-clear').addEventListener('click', () => { if (!GS || GS.running) return; $('#g-in').value = ''; GS.steps = []; guideProg(-1); $('#g-in').focus(); });
+$('#g-cards').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b || !GS) return; sfx.click();
+  const n = GS.n, k = b.dataset.k;
+  gAppend(k === 'f' ? `앞으로 ${n}걸음` : k === 'r' ? `오른쪽으로 돌아서 ${n}걸음` : k === 'l' ? `왼쪽으로 돌아서 ${n}걸음` : `뒤로 돌아서 ${n}걸음`);
 });
+$('#g-tell').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !GS) return; sfx.click(); const w = b.dataset.w; gAppend(`앞에 ${w}${josa(w, '이', '가')} 있어요`); });
+$('#g-minus').addEventListener('click', () => { if (GS && GS.n > 1) { GS.n--; $('#g-n').textContent = GS.n + ' 걸음'; } });
+$('#g-plus').addEventListener('click', () => { if (GS && GS.n < 9) { GS.n++; $('#g-n').textContent = GS.n + ' 걸음'; } });
+$('#g-exit').addEventListener('click', guideExit);
+
+/* ───────────────────────────────────────────
+   퀘스트 8 : 함께 걷기 (안내 순서 카드 5장 맞추기, 검토본 5번 그대로)
+   ─────────────────────────────────────────── */
+const WALKC = [
+  { b: `먼저 인사하고 이름을 말한 뒤 "도와드릴까요?" 하고 물어요.`, e: `먼저 인사하고 이름을 말해요. "도와드릴까요?" 하고 물어요.` },
+  { b: `도움이 필요하다고 하면 "제 팔꿈치(또는 어깨)를 잡으세요." 하고 팔을 내밀어요. 그리고 보행자의 손을 내 팔꿈치나 어깨에 둬요.`, e: `"제 팔꿈치를 잡으세요." 하고 팔을 내밀어요.` },
+  { b: `보행자보다 반 걸음 앞에서 보행자의 걸음에 맞춰 걸어요.`, e: `반 걸음 앞에서 걸어요.` },
+  { b: `계단·문·문턱(턱)·좁은 길 앞에서는 잠깐 멈춰서 앞에 무엇이 있는지 말해 주고 가요. 예를 들어 이렇게 말해요. "앞에 올라가는 계단이 있어요.", "앞에 문턱이 있어요."`, e: `계단이나 문 앞에서는 멈춰요. "앞에 계단이 있어요." 하고 말해요.` },
+  { b: `의자에 앉을 때는 의자 옆에 서서 보행자의 손을 의자에 올려 줘요.`, e: `의자 옆에 서요. 손을 의자에 올려 줘요.` }
+];
+const WALKX = { b: `도움은 먼저 묻고, 필요한 것을 친구와 확인하면서 구체적으로 설명하는 게 가장 중요해요.`, e: `먼저 묻고, 어디에 무엇이 있는지 구체적으로 말해 주세요.` };
+/* 힌트 문구는 제가 쓴 초안이에요 (확인 필요) */
+const WALKH = ['친구를 만나면 가장 먼저 무엇을 할까요?', '친구가 잡을 수 있게 내 몸의 어디를 내밀까요?', '친구가 나보다 앞서 가면 안 돼요. 누가 앞에서 걸을까요?', '길에 계단이나 문이 있으면 어떻게 해야 할까요?', '의자에 앉을 때는 어떻게 도와줄까요?'];
+const WSCENE = [{ a: 4, b: 44, mk: '?', mx: 30 }, { a: 30, b: 0, mk: '', mx: 0 }, { a: 36, b: 0, mk: '', mx: 0 }, { a: 30, b: 0, mk: '멈춤', mx: 22 }, { a: 20, b: 46, mk: '의자', mx: 40 }];
+let W = null;
+function openWalk() {
+  let order = [0, 1, 2, 3, 4];
+  do { order.sort(() => Math.random() - .5); } while (order.every((v, i) => v === i));
+  W = { replay: !!save.done[8], order, placed: [], sel: null, fails: [0, 0, 0, 0, 0], hint: false, note: '' };
+  show('walk'); renderWalk(); live('함께 걷기. 안내하는 순서대로 카드를 놓아요.');
+}
+function renderWalk() {
+  const fs = [12, 18, 24][set.size], me = (A.chars[save.ch] || A.chars[0]).a.u, fr = A.friendSide.u, n = W.placed.length;
+  const rows = [0, 1, 2, 3, 4].map(i => {
+    if (i < n) { const sc = WSCENE[i], c = WALKC[W.placed[i]]; return `<div class="wslot" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="sc"><img src="${me}" width="32" height="32" style="left:${sc.a}px" alt=""><img src="${fr}" width="46" height="32" style="left:${sc.b}px" alt="">${sc.mk ? `<div class="mk" style="left:${sc.mx}px">${sc.mk}</div>` : ''}<div class="gr"></div></div><div class="tx">${esc(T(c))}</div><img src="${icon('check')}" width="24" height="24" style="align-self:center" alt="맞았어요"></div>`; }
+    if (i === n) return `<div class="wslot active" data-slot="${i}" tabindex="0" role="button" aria-label="${i + 1}번 칸에 고른 카드 놓기" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">여기를 누르면 고른 카드가 들어가요</div></div>`;
+    return `<div class="wslot empty" style="font-size:${fs}px"><div class="n">${i + 1}</div><div class="tx" style="grid-column:2 / span 3">빈 칸</div></div>`;
+  }).join('');
+  $('#w-slots').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:24px;font-weight:700">안내 순서</span><span style="font-size:12px">${n} / 5 맞았어요</span></div>${rows}`;
+  const left = W.order.filter(i => !W.placed.includes(i));
+  const cards = left.map(i => `<button type="button" class="wcard${W.sel === i ? ' sel' : ''}" draggable="true" data-i="${i}" style="font-size:${fs}px">${esc(T(WALKC[i]))}</button>`).join('');
+  const hint = W.hint || W.note ? `<div style="background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span>${W.note ? `<b>정답을 같이 봐요</b><br>${esc(W.note)}` : `<b>힌트</b><br>${esc(WALKH[n])}`}</span></div>` : '';
+  $('#w-cards').innerHTML = `<div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:24px;font-weight:700">남은 카드</span><span style="font-size:12px">끌어 놓거나, 카드를 누른 다음 빈 칸을 눌러요</span></div><div style="display:flex;flex-direction:column;gap:14px;overflow:auto;padding:12px 6px 6px 4px;flex:1;min-height:0">${cards}</div>${hint}<div style="display:flex;gap:12px"><button type="button" class="btn" id="w-hint"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>${on('tts') ? `<button type="button" class="btn" id="w-spk"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : ''}</div>`;
+}
+function walkPlace(i) {
+  if (!W || W.placed.length >= 5) return;
+  const slot = W.placed.length;
+  if (i === slot) {
+    W.placed.push(i); W.sel = null; W.hint = false; W.note = ''; sfx.ok(); renderWalk();
+    if (W.placed.length === 5) setTimeout(walkFinish, 900); else live(`${slot + 1}번 맞았어요`);
+    return;
+  }
+  sfx.no(); W.fails[slot]++; W.sel = null;
+  if (!W.replay) { save.wrong++; persist(); }
+  if (W.fails[slot] >= 2) {                         // 힌트를 보고도 틀리면 정답을 같이 보여 줘요
+    W.placed.push(slot); W.hint = false; W.note = `${slot + 1}번은 이 카드예요: ${T(WALKC[slot])}`; renderWalk();
+    if (W.placed.length === 5) setTimeout(walkFinish, 1200);
+    return;
+  }
+  if (!W.hint && !W.replay) { save.hints++; persist(); }
+  W.hint = true; W.note = ''; renderWalk(); live('아쉬워요. 힌트 ' + WALKH[slot]);
+  const a = $('.wslot.active'); if (a) { a.classList.add('wshake'); setTimeout(() => a.classList.remove('wshake'), 320); }
+}
+function walkFinish() {
+  if (!W) return; const replay = W.replay; W = null; gotoVillage();
+  if (replay) { msgBox({ face: A.faceJiho.u, tag: '함께 걷기', title: '다시 해 봤어요!', text: '언제든 또 와서 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] }); return; }
+  completeQuest({ num: 8, id: 'q8', tag: '함께 걷기', npc: { face: A.faceJiho.u } }, T(WALKX));
+}
+$('#w-cards').addEventListener('click', e => {
+  const c = e.target.closest('.wcard');
+  if (c) { sfx.click(); const i = +c.dataset.i; W.sel = W.sel === i ? null : i; renderWalk(); return; }
+  if (e.target.closest('#w-hint')) { W.hint = true; W.note = ''; if (!W.replay && !W._hh) { save.hints++; persist(); W._hh = 1; } renderWalk(); live('힌트 ' + WALKH[W.placed.length]); return; }
+  if (e.target.closest('#w-spk')) speak(W.order.filter(i => !W.placed.includes(i)).map(i => T(WALKC[i])).join(' '));
+});
+$('#w-slots').addEventListener('click', e => { const s = e.target.closest('.wslot.active'); if (!s) return; if (W.sel === null) { toast('먼저 오른쪽에서 카드를 눌러 골라요.'); return; } walkPlace(W.sel); });
+$('#w-slots').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('active')) { e.preventDefault(); if (W.sel === null) toast('먼저 오른쪽에서 카드를 눌러 골라요.'); else walkPlace(W.sel); } });
+$('#w-cards').addEventListener('dragstart', e => { const c = e.target.closest('.wcard'); if (!c) return; try { e.dataTransfer.setData('text/plain', c.dataset.i); e.dataTransfer.effectAllowed = 'move'; } catch (x) {} W.sel = +c.dataset.i; });
+$('#w-slots').addEventListener('dragover', e => { const s = e.target.closest('.wslot.active'); if (s) { e.preventDefault(); s.classList.add('drop'); } });
+$('#w-slots').addEventListener('dragleave', e => { const s = e.target.closest('.wslot'); if (s) s.classList.remove('drop'); });
+$('#w-slots').addEventListener('drop', e => { const s = e.target.closest('.wslot.active'); if (!s) return; e.preventDefault(); const i = +(e.dataTransfer.getData('text/plain') || W.sel); walkPlace(i); });
+$('#w-exit').addEventListener('click', () => { W = null; gotoVillage(); });
+
 
 /* ───────────────────────────────────────────
    설정 창
    ─────────────────────────────────────────── */
 const OF = ['켜기', '끄기'];
-const SROWS = [['lvl', '글 난이도', '', ['쉬운 글', '기본 글']], ['size', '글씨 크기', '', ['가', '가', '가']], ['fx', '시야 효과', '길 안내에서 나와요', OF], ['hc', '고대비', '', OF], ['tts', '글자 읽어주기', '', OF], ['motion', '움직임 줄이기', '', OF], ['spd', '읽어주기 속도', '', ['느리게', '보통', '빠르게']], ['sfx', '효과음', '', OF], ['mic', '음성 입력 버튼 보이기', '', OF]];
+const SROWS = [['lvl', '글 난이도', '', ['쉬운 글', '기본 글']], ['size', '글씨 크기', '', ['가', '가', '가']], ['fx', '시야 효과', '길 안내에서 나와요', OF], ['hc', '고대비', '', OF], ['tts', '글자 읽어주기', '', OF], ['motion', '움직임 줄이기', '', OF], ['spd', '읽어주기 속도', '', ['느리게', '보통', '빠르게']], ['sfx', '효과음', '', OF], ['bgm', '배경음악', '', OF], ['mic', '음성 입력 버튼 보이기', '', OF]];
 const SIZES = ['글씨 작게', '글씨 보통', '글씨 크게'];
 function buildSettings() {
   $('#set-rows').innerHTML = SROWS.map(([k, t, sub, opts]) => `<div class="setrow"><div style="display:flex;flex-direction:column;gap:2px"><span class="t">${t}</span>${sub ? `<span class="s">${sub}</span>` : ''}</div><div class="seg" role="group" aria-label="${t}">${opts.map((o, i) => `<button type="button" data-k="${k}" data-i="${i}" aria-pressed="${set[k] === i}"${k === 'size' ? ` style="font-size:${[12, 24, 36][i]}px" aria-label="${SIZES[i]}"` : ''}>${o}</button>`).join('')}</div></div>`).join('');
@@ -1438,6 +1958,7 @@ $('#set-rows').addEventListener('click', e => {
   if (cur === 'village') refreshWorld();
   if (cur === 'name') drawName();
   if (kk === 'tts' && !on('tts')) stopSpeak();
+  if (cur === 'guide' && typeof guideFxRefresh === 'function') guideFxRefresh();
 });
 function openSettings() {
   if (topOv() && topOv().id === 'ov-settings') return;
@@ -1597,7 +2118,7 @@ addEventListener('keydown', e => {
   if (cur !== 'village' || typing()) return;
   if (k === 'ArrowLeft') { e.preventDefault(); releaseFocus(); keys.left = true; }
   else if (k === 'ArrowRight') { e.preventDefault(); releaseFocus(); keys.right = true; }
-  else if (k === 'ArrowDown') { e.preventDefault(); releaseFocus(); keys.down = true; }
+  else if (k === 'ArrowDown') { e.preventDefault(); releaseFocus(); keys.down = true; if (!e.repeat) dropReq = true; }   // ↓만 눌러도 아래 발판으로 내려가요
   else if (k === ' ' || k === 'Spacebar') { e.preventDefault(); releaseFocus(); if (!e.repeat) { jumpReq = true; jumpDown = keys.down; } }
   else if (k === 'ArrowUp' || k === 'Enter') {
     if (k === 'Enter' && document.activeElement && document.activeElement !== document.body && document.activeElement.closest && document.activeElement.closest('#stage') && document.activeElement.tagName === 'BUTTON') return;
@@ -1630,7 +2151,7 @@ function boot() {
   initTitle(); chrome();
   requestAnimationFrame(t => { last = t; frame(t); });
   show('title'); chrome();
-  window.CaneDo = { get save() { return save; }, get set() { return set; }, P, gotoVillage, enter, go: n => { if (n === 'village') gotoVillage(); }, STOPS, stopX, WW, PLATS };
+  window.CaneDo = { get bgm() { return bgmName; }, get save() { return save; }, get set() { return set; }, P, gotoVillage, enter, go: n => { if (n === 'village') gotoVillage(); }, STOPS, stopX, WW, PLATS };
 }
 const fontsReady = (document.fonts && document.fonts.load) ? Promise.race([Promise.all([document.fonts.load('24px Galmuri11'), document.fonts.load('700 24px Galmuri11')]), new Promise(r => setTimeout(r, 1500))]) : Promise.resolve();
 fit();
