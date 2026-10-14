@@ -1116,10 +1116,10 @@ function renderQuiz(initial) {
   const { cfg } = Q, it = cfg.items[Q.i], n = cfg.items.length, kind = cfg.kind, stg = Q.stage;
   const w = $('#qwin');
   const choices = kind === 'ox' ? [{ k: 1, t: 'O', v: 'O' }, { k: 2, t: 'X', v: 'X' }]
-    : it.choices.map((c, idx) => ({ k: idx + 1, t: '①②③④'[idx] + ' ' + T(c), v: idx }));
+    : it.choices.map((c, idx) => ({ k: idx + 1, t: T(c), v: idx }));
   const st = qStyle(kind, kind === 'mc' && (set.size === 2 || choices.some(c => c.t.length > 14)));
   w.style.gridTemplateColumns = `${st.pw} minmax(0,1fr)`;
-  const ansV = it.ans, ansLabel = kind === 'ox' ? ansV : choices.find(c => c.v === ansV).t;
+  const ansV = it.ans, ansLabel = kind === 'ox' ? ansV : choices.find(c => c.v === ansV).k + '번';
   const right = c => c.v === ansV;
   const tagText = cfg.npcId ? `${cfg.tag} · O X` : `${cfg.tag} · ${kind === 'ox' ? 'O X · ' : ''}${Q.i + 1} / ${n}`;
   const sizeBtn = st.bh;
