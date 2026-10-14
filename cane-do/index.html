@@ -577,7 +577,7 @@ let ac;
 function beep(f, d, type, vol, when, f2) {
   if (!on('sfx')) return;
   try {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
     const t = ac.currentTime + (when || 0), o = ac.createOscillator(), g = ac.createGain();
     o.type = type || 'square'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.linearRampToValueAtTime(f2, t + d);
     g.gain.setValueAtTime(vol || .04, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
@@ -589,7 +589,7 @@ const sfx = {
   jump2() { beep(660, .09, 'square', .035, 0, 990); },
   star() { beep(880, .07, 'square', .04); beep(1320, .12, 'square', .04, .07); },
   ok() { [523, 659, 784].forEach((f, i) => beep(f, .1, 'square', .04, i * .09)); },
-  no() { beep(260, .2, 'triangle', .05, 0, 180); },
+  no() { beep(330, .14, 'square', .07); beep(220, .3, 'square', .07, .13, 150); },
   door() { beep(330, .08, 'square', .04); beep(495, .14, 'square', .04, .08); },
   click() { beep(600, .05, 'square', .03); }
 };
@@ -678,7 +678,7 @@ function msgBox({ face, title, text, buttons, tag }) {
 const PD = window.CaneSprites.PD;
 const NAMES = ['알쏭달쏭 마을', '흰지팡이 가게', '같이 밥 먹기', '마음 대화 벤치', '길 안내 코딩', '문과 계단', '창문 찾기', '함께 걷기', '점자 가게', '해내다 광장'];
 const STOPS = PD.map((p, i) => ({ i, num: p[0], name: NAMES[i], type: p[2], color: p[3], quest: i < 8 ? i + 1 : 0 }));
-const STOP_GAP = 900, X0 = 100, GROUND = 600;
+const STOP_GAP = 900, X0 = 560, GROUND = 600, START_X = 120;
 const WW = X0 + 9 * STOP_GAP + 112 + 440;
 const stopX = i => X0 + i * STOP_GAP;
 const gateReq = i => (i <= 7 ? i : 8);                 // i번 정류장 앞 문: 이 번호의 퀘스트를 깨야 열려요
@@ -703,7 +703,7 @@ for (let s = 0; s < 9; s++) {
   PROPS.push(['tree', stopX(s) + 170 + (s % 3) * 20, 472], ['bush', stopX(s) + 262, 560], ['flower', stopX(s) + 440, 572], ['flower', stopX(s) + 760, 572]);
   if (s % 2 === 1) PROPS.push(['bush', stopX(s) + 600, 560]);
 }
-PROPS.push(['tree', 14, 472], ['flower', 300, 572]);
+PROPS.push(['tree', 14, 472], ['bush', 150, 560], ['flower', 236, 572], ['tree', 280, 472], ['flower', 400, 572]);
 for (let i = 1; i < 10; i++) PROPS.push(['lamp', gateLeft(i) - 44, 504]);
 
 /* 퀘스트 1 : 알쏭달쏭 마을 (문구는 퀴즈_해설_검토본.md 그대로) */
@@ -732,16 +732,16 @@ const NPCS = [
   { id: 'n4', sp: 0, seg: 0, name: '보미', role: '길 위 친구 · 점자블록',
     item: { q: { b: `점자블록 위에 자전거, 킥보드(씽씽이), 물건을 놓아도 괜찮다.`, e: `점자블록 위에 자전거나 킥보드, 물건을 놓아도 돼요.` }, ans: 'X',
       exp: { b: `아니에요. 점자블록은 시각장애인이 발끝과 지팡이로 느끼며 길을 확인하는 길이에요. 블록을 따라가며 길의 방향과 멈춰야 하는지 등을 알 수 있어요. 그 위에 물건이나 자전거, 킥보드가 있으면 걸려서 넘어질 수 있어 매우 위험해요. 점자블록 위에는 아무것도 두지 않아요.`, e: `아니에요. 시각장애인은 점자블록을 따라 길을 가요. 걸려 넘어지지 않게 점자블록 위에는 아무것도 놓지 않아요.` } } },
-  { id: 'n1', sp: 1, seg: 1, name: '다온', role: '길 위 친구 · 스마트폰',
+  { id: 'n1', sp: 1, seg: 1, name: '팡이', role: '길 위 친구 · 스마트폰',
     item: { q: { b: `시각장애인도 스마트폰을 쓸 수 있다.`, e: `시각장애인도 스마트폰을 써요.` }, ans: 'O',
       exp: { b: `화면의 글자와 버튼을 소리로 읽어 주는 기능을 이용하면 눈으로 화면을 보지 않아도 쓸 수 있어요. 이런 기능에는 글자를 사람의 목소리로 바꿔 읽어 주는 TTS(Text To Speech, 글자 음성 변환) 기술이 쓰여요. 이 기능은 스마트폰에 기본으로 들어 있어서 따로 설치하지 않아도 쓸 수 있어요. 예를 들어 이 앱의 '읽어주기' 버튼도 같은 TTS 기술이에요.`, e: `화면 글자를 소리로 읽어 주는 기능이 있어요.` } } },
-  { id: 'n2', sp: 2, seg: 2, name: '하준', role: '길 위 친구 · 물건 위치',
+  { id: 'n2', sp: 2, seg: 2, name: '존', role: '길 위 친구 · 물건 위치',
     item: { q: { b: `친구 책상 위 물건을 마음대로 옮겨도 괜찮다.`, e: `친구 책상 위 물건을 마음대로 옮겨요.` }, ans: 'X',
       exp: { b: `물건의 위치를 기억해서 찾기도 해요. 그러니 물건을 마음대로 옮기지 않아요. 옮겼다면 어디로 옮겼는지 위치를 구체적으로 설명해 주세요.`, e: `친구는 물건 자리를 기억해서 찾아요. 마음대로 옮기지 않아요. 옮겼다면 어디로 옮겼는지 구체적으로 말해 주세요.` } } },
-  { id: 'n3', sp: 3, seg: 3, name: '서아', role: '길 위 친구 · 안내견',
+  { id: 'n3', sp: 3, seg: 3, name: '이해니', role: '길 위 친구 · 안내견',
     item: { q: { b: `길에서 안내견을 만나면 이름을 부르며 쓰다듬는다.`, e: `길에서 안내견을 만나면 쓰다듬어요.` }, ans: 'X',
       exp: { b: `안내견은 시각장애인이 길을 안전하게 갈 수 있도록 안내하는 역할을 해요. 역할을 하는 중에 부르거나 관심을 주면 집중이 흐트러져요. 안내견이 역할을 해내고 있을 때는 부르거나 만지지 않아요.`, e: `안내견은 시각장애인이 길을 안전하게 가도록 도와줘요. 부르거나 관심을 주면 집중이 흐트러져요. 안내견이 역할을 해내고 있을 때는 부르거나 만지지 않아요.` } } },
-  { id: 'n5', sp: 4, seg: 4, name: '민재', role: '길 위 친구 · 식사',
+  { id: 'n5', sp: 4, seg: 4, name: '다르미', role: '길 위 친구 · 식사',
     item: { q: { b: `식사할 때 음식 위치를 "국 위에 김치", "밥에서 1시 방향에 계란말이"처럼 구체적으로 설명해 주면 좋다.`, e: `음식 위치를 "국 위에 김치"처럼 자세히 말해 줘요.` }, ans: 'O',
       exp: { b: `맞아요. "저기 있어"라고만 하면 어디인지 알기 어려워요. 어떤 음식을 기준으로 어디에 무엇이 있는지 자세하게 설명해 주면 눈으로 보지 않아도 음식의 위치를 알 수 있어요.`, e: `맞아요. "저기 있어"라고 하지 말고, "국 위에 김치", "밥에서 1시 방향에 계란말이"처럼 자세히 말해 주세요.` } } }
 ];
@@ -752,7 +752,7 @@ const npcCfg = n => ({ id: n.id, npcId: true, num: 0, tag: '길 위 퀴즈', kin
    마을 만들기
    ─────────────────────────────────────────── */
 const world = $('#world');
-const P = { x: 200, y: GROUND, vx: 0, vy: 0, on: true, jumps: 0, dir: 1, platform: null, dropFrom: null, ft: 0, fr: 0 };
+const P = { x: 120, y: GROUND, vx: 0, vy: 0, on: true, jumps: 0, dir: 1, platform: null, dropFrom: null, ft: 0, fr: 0 };
 const keys = { left: false, right: false, down: false };
 let jumpReq = false, jumpDown = false, dropReq = false, enterReq = false;
 let cam = 0, near = '';
@@ -979,7 +979,7 @@ function qStyle(kind) {
 }
 function openQuiz(cfg) {
   const replay = cfg.npcId ? !!save.npc[cfg.id] : !!save.done[cfg.num];
-  Q = { cfg, i: replay ? 0 : Math.min(save.qp[cfg.id] || 0, cfg.items.length - 1), stage: 'ask', pick: null, hint: false, replay, wrongNow: false, bonusNow: false };
+  Q = { cfg, i: replay ? 0 : Math.min(save.qp[cfg.id] || 0, cfg.items.length - 1), stage: 'ask', pick: null, hint: false, replay, wrongPicks: [], hadWrong: false, bonusNow: false };
   renderQuiz(true);
   openOv($('#ov-quiz'), { onClose: () => { Q = null; } });
   focusQuiz();
@@ -999,7 +999,8 @@ function renderQuiz(initial) {
   const ttsBtn = on('tts') ? `<button type="button" class="btn" data-a="speak" style="height:${sizeBtn};font-size:${st.body}"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : '';
   let head = '', mid = '', act = '';
   if (stg === 'ask') {
-    head = `<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tagchip">${esc(tagText)}</span>${Q.replay ? '<span class="tagchip">다시 해 보기</span>' : ''}</div>`;
+    head = Q.wrongPicks.length ? `<div class="q-okbadge"><div class="b" style="box-shadow:none"><img src="${icon('hint')}" width="24" height="24" alt="">아쉬워요! 다시 한 번 골라 봐요</div></div>`
+      : `<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tagchip">${esc(tagText)}</span>${Q.replay ? '<span class="tagchip">다시 해 보기</span>' : ''}</div>`;
     act = `${it.hint ? `<button type="button" class="btn" data-a="hint" style="height:${sizeBtn};font-size:${st.body}${Q.hint ? ';background:var(--c-hint);box-shadow:none' : ''}"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>` : ''}${ttsBtn}<span class="push note">숫자키 ${choices.map(c => c.k).join(' · ')}로도 골라요</span>`;
   } else if (stg === 'correct') {
     head = `<div class="q-okbadge"><div class="b"><img src="${icon('check')}" width="24" height="24" alt="">정답이에요!</div>${Q.bonusNow ? `<div class="st"><img src="${A.star.u}" width="33" height="33" alt="별">+1</div>` : ''}</div>`;
@@ -1015,8 +1016,10 @@ function renderQuiz(initial) {
   if (stg !== 'explain') {
     mid = `<div class="q-choices" style="grid-template-columns:${st.cols};gap:${st.cg}">${choices.map(c => {
       let cls = 'choice', extra = '';
+      const wp = stg === 'ask' && Q.wrongPicks.includes(c.v);
+      if (wp) { cls += ' mute'; extra = '<span class="pk">이건 아니에요</span>'; }
       if (stg === 'correct' || stg === 'wrong') { if (right(c)) { cls += ' right'; extra = `<img src="${icon('check')}" width="24" height="24" alt="정답">`; } else { cls += ' mute'; if (Q.pick === c.v) extra = '<span class="pk">내가 고른 답</span>'; } }
-      return `<button type="button" class="${cls}" data-v="${esc(c.v)}" ${stg === 'ask' ? '' : 'disabled'} style="height:${st.ch};font-size:${st.cf};justify-content:${st.jc}"><span class="chip">${c.k}</span><span style="padding-left:${st.cpl}">${esc(c.t)}</span>${extra}</button>`;
+      return `<button type="button" class="${cls}" data-v="${esc(c.v)}" ${stg === 'ask' && !wp ? '' : 'disabled'} style="height:${st.ch};font-size:${st.cf};justify-content:${st.jc}"><span class="chip">${c.k}</span><span style="padding-left:${st.cpl}">${esc(c.t)}</span>${extra}</button>`;
     }).join('')}</div>`;
   } else {
     mid = `<div class="q-exp" style="font-size:${st.body};line-height:${set.size === 2 ? '1.45' : '1.65'};max-height:${set.size === 2 ? '420px' : '300px'}">${esc(T(it.exp))}</div>`;
@@ -1046,24 +1049,24 @@ function quizText() {
   return T(it.q) + ch;
 }
 function answer(v) {
-  if (!Q || Q.stage !== 'ask') return;
+  if (!Q || Q.stage !== 'ask' || Q.wrongPicks.includes(v)) return;
   const it = Q.cfg.items[Q.i]; Q.pick = v;
   if (v === it.ans) {
     Q.stage = 'correct'; sfx.ok();
     const key = Q.cfg.id + '_' + Q.i;
-    Q.bonusNow = !Q.replay && !save.starred[key];
+    Q.bonusNow = !Q.replay && !Q.hadWrong && !save.starred[key];
     if (Q.bonusNow) { save.starred[key] = 1; save.bonus++; updateStars(); persist(); }
     live('정답이에요!');
   } else {
-    Q.stage = 'wrong'; sfx.no();
+    Q.wrongPicks.push(v); Q.hadWrong = true; sfx.no();
     if (!Q.replay && !Q.cfg.npcId) { save.wrong++; persist(); }
-    live('아쉬워요. 정답을 같이 봐요.');
+    live('아쉬워요. 다시 한 번 골라 봐요.');
   }
   renderQuiz();
 }
 function quizNext() {
   const n = Q.cfg.items.length;
-  if (Q.i < n - 1) { Q.i++; Q.stage = 'ask'; Q.pick = null; Q.hint = false; Q.bonusNow = false; if (!Q.replay) { save.qp[Q.cfg.id] = Q.i; persist(); } renderQuiz(); return; }
+  if (Q.i < n - 1) { Q.i++; Q.stage = 'ask'; Q.pick = null; Q.hint = false; Q.bonusNow = false; Q.wrongPicks = []; Q.hadWrong = false; if (!Q.replay) { save.qp[Q.cfg.id] = Q.i; persist(); } renderQuiz(); return; }
   finishQuest();
 }
 function finishQuest() {
@@ -1122,13 +1125,13 @@ $('#s-reset').addEventListener('click', () => {
   msgBox({ title: '처음부터 다시 할까요?', text: '지금까지 한 것이 모두 지워져요. 설정은 그대로 남아요.', buttons: [{ label: '아니요, 계속할래요', primary: true }, { label: '네, 처음부터', danger: true, cb: resetAll }] });
 });
 function resetWorldView() {
-  P.x = 200; P.y = GROUND; P.vx = P.vy = 0; P.on = true; P.platform = null; P.dropFrom = null; cam = 0;
+  P.x = START_X; P.y = GROUND; P.vx = P.vy = 0; P.on = true; P.platform = null; P.dropFrom = null; cam = 0;
   if (villageBuilt) { STARS.forEach(s => { const e = starEls[s.id]; if (e) { e.hidden = false; e.classList.remove('got'); } }); refreshWorld(); }
 }
 function resetAll() {
   closeSettings(); if (quizOpen()) closeQuiz();
   save = newSave(); persist(); stopSpeak();
-  P.x = 200; P.y = GROUND; P.vx = P.vy = 0; P.on = true; P.platform = null; P.dropFrom = null; cam = 0;
+  P.x = START_X; P.y = GROUND; P.vx = P.vy = 0; P.on = true; P.platform = null; P.dropFrom = null; cam = 0;
   resetWorldView(); gotoTitle(); toast('처음부터 다시 시작해요.');
 }
 
@@ -1229,7 +1232,7 @@ let villageBuilt = false;
 function gotoVillage() {
   if (!villageBuilt) { buildVillage(); villageBuilt = true; }
   P.vx = P.vy = 0; P.dropFrom = null;
-  if (save.x != null && save.x > 0 && save.x < WW) { P.x = save.x; } else P.x = 200;
+  if (save.x != null && save.x > 0 && save.x < WW) { P.x = save.x; } else P.x = START_X;
   P.y = GROUND; P.on = true; P.platform = null; P.jumps = 0; P.dir = 1;
   cam = clamp(P.x - 640, 0, WW - 1280);
   keys.left = keys.right = keys.down = false;
