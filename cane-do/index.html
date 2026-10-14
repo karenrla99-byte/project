@@ -239,6 +239,14 @@ body.touch #hud-keys{display:none}
 #msgwin .m-x{font-size:24px;line-height:1.6;text-wrap:pretty}
 #msgwin .m-b{display:flex;gap:12px;justify-content:flex-end;flex-wrap:wrap}
 
+/* ── 길 위 퀴즈 친구(NPC) ── */
+.npc{width:64px;height:64px;top:536px;z-index:3}
+.npc img.sp{width:64px;height:64px;cursor:pointer}
+.npcq{position:absolute;left:6px;top:-64px;width:52px;height:48px;background:var(--c-bg);color:var(--c-text);border:4px solid var(--c-line);box-shadow:inset 0 0 0 4px #FFD84D;display:grid;place-items:center;font-size:24px;font-weight:700;animation:cd-bob 1.6s ease-in-out infinite;pointer-events:none}
+.npcp{position:absolute;left:24px;top:-16px;width:16px;height:8px;background:var(--c-line);pointer-events:none}
+.npc.done .npcq{box-shadow:none}
+#stage.hc .npcq{box-shadow:inset 0 0 0 4px #FFD84D}
+
 </style>
 </head>
 <body>
@@ -434,6 +442,10 @@ body.touch #hud-keys{display:none}
     const faceBomi = S(g(charRows(bomiC, 0).slice(0, 12)), cpal(bomiC));
     const resC = { h: 'long', H: '#6B4226', B: '#E8A33D', S: '#FFD9B8' };
     const faceNari = S(g(charRows(resC, 0).slice(0, 12)), cpal(resC));
+    const NPCC = [bomiC,
+      { h: 'short', H: '#3A2A20', B: '#E8C547' }, { h: 'cap', H: '#2B2B3F', T: '#4CB5A8', B: '#4CB5A8', S: '#D9A27A' },
+      { h: 'long', H: '#A0663A', B: '#9C7BE0', S: '#F3C7A0' }, { h: 'short', H: '#6B4226', B: '#EF7A6A', S: '#D9A27A' }];
+    const npcs = NPCC.map(c => ({ a: S(g(charRows(c, 0)), cpal(c)), face: S(g(charRows(c, 0).slice(0, 12)), cpal(c)) }));
     const caneStick = S(g(['KKK', 'KKK', 'KKK', 'KKK', ...Array(19).fill('KWK'), 'KRK', 'KRK', 'KKK'], 3), base);
 
     const bld = (roof, lock) => {
@@ -512,7 +524,7 @@ body.touch #hud-keys{display:none}
       blit(x, n2.g, n2.pal, 100, 112, 2); blit(x, n1.g, n1.pal, -10, 120, 2); blit(x, n3.g, n3.pal, 220, 124, 2);
       [[156, 157, '#0B1230'], [157, 162, '#2E6B4E'], [162, 163, '#25594A'], [163, 180, '#1F4F3E']].forEach(([a, b, c]) => { x.fillStyle = c; x.fillRect(0, a, 320, b - a); });
     });
-    return { titleBg, friendBody, bomi, chars, friendSide, friendS, friendSit, faceJiho, bomi, faceBomi, faceNari, caneStick, portals, b1, b2, b3, shop, tree, bush, cloud, gate, star, lamp, flower, sign, ic, sprout, shield, villageBg, nightBg, hill1: hill(44, 16, dayHill), hill2: hill(52, 22, dayHill), hill3: hill(40, 14, dayHill) };
+    return { titleBg, friendBody, bomi, chars, friendSide, friendS, friendSit, faceJiho, bomi, faceBomi, faceNari, npcs, caneStick, portals, b1, b2, b3, shop, tree, bush, cloud, gate, star, lamp, flower, sign, ic, sprout, shield, villageBg, nightBg, hill1: hill(44, 16, dayHill), hill2: hill(52, 22, dayHill), hill3: hill(40, 14, dayHill) };
   }
   window.CaneSprites = { get() { return window.__caneA || (window.__caneA = build()); }, PD };
 })();
@@ -541,7 +553,7 @@ const DEF_SET = { lvl: 1, size: 1, fx: 0, hc: 1, tts: 0, motion: 1, spd: 1, sfx:
 const firstRun = !store.get(SKEY);
 let set = Object.assign({}, DEF_SET, store.get(SKEY) || {});
 try { if (firstRun && matchMedia('(prefers-reduced-motion: reduce)').matches) set.motion = 0; } catch (e) {}
-const newSave = () => ({ v: 1, name: '', ch: 0, done: {}, stars: [], bonus: 0, starred: {}, wrong: 0, hints: 0, qp: {}, x: null });
+const newSave = () => ({ v: 1, name: '', ch: 0, done: {}, stars: [], bonus: 0, starred: {}, wrong: 0, hints: 0, qp: {}, npc: {}, x: null });
 let save = Object.assign(newSave(), store.get(PKEY) || {});
 const persistSet = () => store.set(SKEY, set);
 const persist = () => store.set(PKEY, save);
@@ -715,6 +727,27 @@ const QUEST1 = {
 };
 const QUESTS = { 1: QUEST1 };
 
+/* 길 위 퀴즈 친구 5명 (문구는 퀴즈_해설_검토본.md 4번 그대로) */
+const NPCS = [
+  { id: 'n4', sp: 0, seg: 0, name: '보미', role: '길 위 친구 · 점자블록',
+    item: { q: { b: `점자블록 위에 자전거, 킥보드(씽씽이), 물건을 놓아도 괜찮다.`, e: `점자블록 위에 자전거나 킥보드, 물건을 놓아도 돼요.` }, ans: 'X',
+      exp: { b: `아니에요. 점자블록은 시각장애인이 발끝과 지팡이로 느끼며 길을 확인하는 길이에요. 블록을 따라가며 길의 방향과 멈춰야 하는지 등을 알 수 있어요. 그 위에 물건이나 자전거, 킥보드가 있으면 걸려서 넘어질 수 있어 매우 위험해요. 점자블록 위에는 아무것도 두지 않아요.`, e: `아니에요. 시각장애인은 점자블록을 따라 길을 가요. 걸려 넘어지지 않게 점자블록 위에는 아무것도 놓지 않아요.` } } },
+  { id: 'n1', sp: 1, seg: 1, name: '다온', role: '길 위 친구 · 스마트폰',
+    item: { q: { b: `시각장애인도 스마트폰을 쓸 수 있다.`, e: `시각장애인도 스마트폰을 써요.` }, ans: 'O',
+      exp: { b: `화면의 글자와 버튼을 소리로 읽어 주는 기능을 이용하면 눈으로 화면을 보지 않아도 쓸 수 있어요. 이런 기능에는 글자를 사람의 목소리로 바꿔 읽어 주는 TTS(Text To Speech, 글자 음성 변환) 기술이 쓰여요. 이 기능은 스마트폰에 기본으로 들어 있어서 따로 설치하지 않아도 쓸 수 있어요. 예를 들어 이 앱의 '읽어주기' 버튼도 같은 TTS 기술이에요.`, e: `화면 글자를 소리로 읽어 주는 기능이 있어요.` } } },
+  { id: 'n2', sp: 2, seg: 2, name: '하준', role: '길 위 친구 · 물건 위치',
+    item: { q: { b: `친구 책상 위 물건을 마음대로 옮겨도 괜찮다.`, e: `친구 책상 위 물건을 마음대로 옮겨요.` }, ans: 'X',
+      exp: { b: `물건의 위치를 기억해서 찾기도 해요. 그러니 물건을 마음대로 옮기지 않아요. 옮겼다면 어디로 옮겼는지 위치를 구체적으로 설명해 주세요.`, e: `친구는 물건 자리를 기억해서 찾아요. 마음대로 옮기지 않아요. 옮겼다면 어디로 옮겼는지 구체적으로 말해 주세요.` } } },
+  { id: 'n3', sp: 3, seg: 3, name: '서아', role: '길 위 친구 · 안내견',
+    item: { q: { b: `길에서 안내견을 만나면 이름을 부르며 쓰다듬는다.`, e: `길에서 안내견을 만나면 쓰다듬어요.` }, ans: 'X',
+      exp: { b: `안내견은 시각장애인이 길을 안전하게 갈 수 있도록 안내하는 역할을 해요. 역할을 하는 중에 부르거나 관심을 주면 집중이 흐트러져요. 안내견이 역할을 해내고 있을 때는 부르거나 만지지 않아요.`, e: `안내견은 시각장애인이 길을 안전하게 가도록 도와줘요. 부르거나 관심을 주면 집중이 흐트러져요. 안내견이 역할을 해내고 있을 때는 부르거나 만지지 않아요.` } } },
+  { id: 'n5', sp: 4, seg: 4, name: '민재', role: '길 위 친구 · 식사',
+    item: { q: { b: `식사할 때 음식 위치를 "국 위에 김치", "밥에서 1시 방향에 계란말이"처럼 구체적으로 설명해 주면 좋다.`, e: `음식 위치를 "국 위에 김치"처럼 자세히 말해 줘요.` }, ans: 'O',
+      exp: { b: `맞아요. "저기 있어"라고만 하면 어디인지 알기 어려워요. 어떤 음식을 기준으로 어디에 무엇이 있는지 자세하게 설명해 주면 눈으로 보지 않아도 음식의 위치를 알 수 있어요.`, e: `맞아요. "저기 있어"라고 하지 말고, "국 위에 김치", "밥에서 1시 방향에 계란말이"처럼 자세히 말해 주세요.` } } }
+];
+const npcX = n => stopX(n.seg) + 330;
+const npcCfg = n => ({ id: n.id, npcId: true, num: 0, tag: '길 위 퀴즈', kind: 'ox', npc: { name: n.name, role: n.role, face: A.npcs[n.sp].face.u }, items: [n.item] });
+
 /* ───────────────────────────────────────────
    마을 만들기
    ─────────────────────────────────────────── */
@@ -722,8 +755,8 @@ const world = $('#world');
 const P = { x: 200, y: GROUND, vx: 0, vy: 0, on: true, jumps: 0, dir: 1, platform: null, dropFrom: null, ft: 0, fr: 0 };
 const keys = { left: false, right: false, down: false };
 let jumpReq = false, jumpDown = false, dropReq = false, enterReq = false;
-let cam = 0, near = null;
-const starEls = {}, portalEls = [], gateEls = [], tagEls = [], lockEls = [];
+let cam = 0, near = '';
+const starEls = {}, portalEls = [], gateEls = [], tagEls = [], lockEls = [], npcEls = [], npcTags = [];
 let meEl, meImg;
 
 function buildVillage() {
@@ -761,6 +794,18 @@ function buildVillage() {
     const tp = document.createElement('div'); tp.className = 'tagptr'; tp.style.cssText = `left:${px + 56 - 8}px;top:496px`; tp.hidden = true;
     world.appendChild(tg); world.appendChild(tp); tagEls[i] = [tg, tp];
   }
+  // 길 위 퀴즈 친구
+  NPCS.forEach((n, k) => {
+    const x = npcX(n), d = document.createElement('div'); d.className = 'npc'; d.style.left = x + 'px';
+    d.innerHTML = `<img class="sp" src="${A.npcs[n.sp].a.u}" alt="${esc(n.name)} (${esc(n.role)})"><div class="npcq"></div><div class="npcp"></div>`;
+    d.addEventListener('click', () => { if (nearNpc() === k) enterNpc(k); else toast('가까이 가서 눌러요.'); });
+    world.appendChild(d); npcEls[k] = d;
+    const tg = document.createElement('div'); tg.className = 'tag'; tg.style.cssText = `left:${x + 32 - 150}px;top:352px`; tg.hidden = true; tg.tabIndex = -1;
+    tg.innerHTML = `<div class="h"><div class="nb" style="background:#1B2A5B">?</div><div class="nm">${esc(n.name)}</div></div><div class="r"><span>길 위 퀴즈 · O X</span><span class="keys"><span class="key">↑</span><span class="key">Enter</span><span>말 걸기</span></span><span class="go">말 걸기</span></div>`;
+    tg.addEventListener('click', () => enterNpc(k));
+    const tp = document.createElement('div'); tp.className = 'tagptr'; tp.style.cssText = `left:${x + 32 - 8}px;top:456px`; tp.hidden = true;
+    world.appendChild(tg); world.appendChild(tp); npcTags[k] = [tg, tp];
+  });
   // 나
   meEl = document.createElement('div'); meEl.id = 'me'; meImg = new Image(); meImg.width = 64; meImg.height = 64; meImg.alt = '나'; meEl.appendChild(meImg); world.appendChild(meEl);
   world.style.width = WW + 'px';
@@ -792,6 +837,7 @@ function refreshWorld() {
     if (gateEls[i]) { gateEls[i].classList.toggle('open', open); gateEls[i].style.pointerEvents = 'none'; }
   });
   STARS.forEach(s => { if (save.stars.includes(s.id)) starEls[s.id].hidden = true; });
+  NPCS.forEach((n, k) => { const d = npcEls[k], dn = !!save.npc[n.id]; d.classList.toggle('done', dn); $('.npcq', d).innerHTML = dn ? `<img data-ic="check" src="${icon('check')}" width="24" height="24" alt="다 했어요">` : '?'; });
   // 진행 표시줄
   const cq = currentQuest(), nodes = [];
   for (let q = 1; q <= 8; q++) {
@@ -858,6 +904,12 @@ function step(dt) {
   else if (!P.on) { P.fr = 1; P.ft = 0; } else { P.fr = 0; P.ft = 0; }
   if (set.motion === 0) P.fr = 0;
 }
+function nearNpc() {
+  if (P.y < GROUND - 6) return -1;
+  for (let k = 0; k < NPCS.length; k++) if (Math.abs(P.x - (npcX(NPCS[k]) + 32)) < 56 && gateOpen(NPCS[k].seg)) return k;
+  return -1;
+}
+function enterNpc(k) { if (ovStack.length) return; sfx.click(); persistPos(); openQuiz(npcCfg(NPCS[k])); }
 function nearIdx() {
   if (P.y < GROUND - 6) return -1;
   for (let i = 0; i < 10; i++) if (Math.abs(P.x - (stopX(i) + 56)) < 64 && gateOpen(i)) return i;
@@ -875,10 +927,13 @@ function render(dt) {
   const ch = A.chars[save.ch] || A.chars[0];
   const u = (P.fr ? ch.b : ch.a).u; if (meImg._u !== u) { meImg._u = u; meImg.src = u; }
   // 이름표
-  const n = nearIdx();
-  if (n !== near) {
-    if (near !== null && tagEls[near]) tagEls[near].forEach(e => { e.hidden = true; });
-    near = n; if (n >= 0) { tagEls[n].forEach(e => { e.hidden = false; }); live(`${STOPS[n].name}. 들어가려면 위쪽 화살표 또는 엔터`); }
+  const n = nearIdx(), m = n >= 0 ? -1 : nearNpc();
+  const key = n >= 0 ? 'p' + n : m >= 0 ? 'n' + m : '';
+  if (key !== near) {
+    if (near) (near[0] === 'p' ? tagEls : npcTags)[+near.slice(1)].forEach(e => { e.hidden = true; });
+    near = key;
+    if (n >= 0) { tagEls[n].forEach(e => { e.hidden = false; }); live(`${STOPS[n].name}. 들어가려면 위쪽 화살표 또는 엔터`); }
+    else if (m >= 0) { npcTags[m].forEach(e => { e.hidden = false; }); live(`${NPCS[m].name}. 말을 걸려면 위쪽 화살표 또는 엔터`); }
   }
   for (let i = 1; i < 10; i++) {
     const lockedHere = !gateOpen(i), gl = gateLeft(i);
@@ -893,7 +948,7 @@ function frame(t) {
   const dt = Math.min(.033, (t - last) / 1000 || 0); last = t;
   if (cur !== 'village') return;
   if (!ovStack.length) {
-    if (enterReq) { enterReq = false; const n = nearIdx(); if (n >= 0) enter(n); }
+    if (enterReq) { enterReq = false; const n = nearIdx(); if (n >= 0) enter(n); else { const m = nearNpc(); if (m >= 0) enterNpc(m); } }
     step(dt);
   } else { jumpReq = dropReq = enterReq = false; }
   render(dt);
@@ -923,7 +978,7 @@ function qStyle(kind) {
   return { top: ox ? '150px' : '140px', pw: '184px', ph: '160px', q, body, cols: ox ? '1fr 1fr' : '1fr 1fr 1fr', cg: '24px', ch: ox ? '128px' : '96px', cf: ox ? '72px' : body, jc: 'center', cpl: '0', bh: '52px', face: [144, 108] };
 }
 function openQuiz(cfg) {
-  const replay = !!save.done[cfg.num];
+  const replay = cfg.npcId ? !!save.npc[cfg.id] : !!save.done[cfg.num];
   Q = { cfg, i: replay ? 0 : Math.min(save.qp[cfg.id] || 0, cfg.items.length - 1), stage: 'ask', pick: null, hint: false, replay, wrongNow: false, bonusNow: false };
   renderQuiz(true);
   openOv($('#ov-quiz'), { onClose: () => { Q = null; } });
@@ -934,18 +989,18 @@ function renderQuiz(initial) {
   if (!Q) return;
   const { cfg } = Q, it = cfg.items[Q.i], n = cfg.items.length, kind = cfg.kind, st = qStyle(kind), stg = Q.stage;
   const w = $('#qwin');
-  w.style.top = st.top; w.style.gridTemplateColumns = `${st.pw} minmax(0,1fr)`;
+  w.style.top = (stg === 'explain' && set.size === 2) ? '40px' : st.top; w.style.gridTemplateColumns = `${st.pw} minmax(0,1fr)`;
   const choices = kind === 'ox' ? [{ k: 1, t: 'O', v: 'O' }, { k: 2, t: 'X', v: 'X' }]
     : it.choices.map((c, idx) => ({ k: idx + 1, t: '①②③④'[idx] + ' ' + T(c), v: idx }));
   const ansV = it.ans, ansLabel = kind === 'ox' ? ansV : choices.find(c => c.v === ansV).t;
   const right = c => c.v === ansV;
-  const tagText = `${cfg.tag} · ${kind === 'ox' ? 'O X · ' : ''}${Q.i + 1} / ${n}`;
+  const tagText = cfg.npcId ? `${cfg.tag} · O X` : `${cfg.tag} · ${kind === 'ox' ? 'O X · ' : ''}${Q.i + 1} / ${n}`;
   const sizeBtn = st.bh;
   const ttsBtn = on('tts') ? `<button type="button" class="btn" data-a="speak" style="height:${sizeBtn};font-size:${st.body}"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : '';
   let head = '', mid = '', act = '';
   if (stg === 'ask') {
     head = `<div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tagchip">${esc(tagText)}</span>${Q.replay ? '<span class="tagchip">다시 해 보기</span>' : ''}</div>`;
-    act = `<button type="button" class="btn" data-a="hint" style="height:${sizeBtn};font-size:${st.body}${Q.hint ? ';background:var(--c-hint);box-shadow:none' : ''}"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>${ttsBtn}<span class="push note">숫자키 ${choices.map(c => c.k).join(' · ')}로도 골라요</span>`;
+    act = `${it.hint ? `<button type="button" class="btn" data-a="hint" style="height:${sizeBtn};font-size:${st.body}${Q.hint ? ';background:var(--c-hint);box-shadow:none' : ''}"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트</button>` : ''}${ttsBtn}<span class="push note">숫자키 ${choices.map(c => c.k).join(' · ')}로도 골라요</span>`;
   } else if (stg === 'correct') {
     head = `<div class="q-okbadge"><div class="b"><img src="${icon('check')}" width="24" height="24" alt="">정답이에요!</div>${Q.bonusNow ? `<div class="st"><img src="${A.star.u}" width="33" height="33" alt="별">+1</div>` : ''}</div>`;
     act = `${ttsBtn}<button type="button" class="btn primary push" data-a="explain" style="height:${sizeBtn};font-size:${st.body}">해설 보기 ▶</button>`;
@@ -964,7 +1019,7 @@ function renderQuiz(initial) {
       return `<button type="button" class="${cls}" data-v="${esc(c.v)}" ${stg === 'ask' ? '' : 'disabled'} style="height:${st.ch};font-size:${st.cf};justify-content:${st.jc}"><span class="chip">${c.k}</span><span style="padding-left:${st.cpl}">${esc(c.t)}</span>${extra}</button>`;
     }).join('')}</div>`;
   } else {
-    mid = `<div class="q-exp" style="font-size:${st.body};max-height:${set.size === 2 ? '250px' : '300px'}">${esc(T(it.exp))}</div>`;
+    mid = `<div class="q-exp" style="font-size:${st.body};line-height:${set.size === 2 ? '1.45' : '1.65'};max-height:${set.size === 2 ? '420px' : '300px'}">${esc(T(it.exp))}</div>`;
   }
   const hintBox = (stg === 'ask' && Q.hint) ? `<div class="q-hint" style="font-size:${st.body}"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트</b> · ${esc(T(it.hint))}</span></div>` : '';
   w.innerHTML = `
@@ -972,7 +1027,7 @@ function renderQuiz(initial) {
       <div class="q-plate"><span style="font-size:24px;font-weight:700">${esc(cfg.npc.name)}</span><span style="font-size:12px">${esc(cfg.npc.role)}</span></div></div>
     <div class="q-main">
       <div class="q-head">${head}<button type="button" class="btn sq q-close" data-a="close" aria-label="닫기" title="닫기"><img src="${icon('close')}" width="24" height="24" alt=""></button></div>
-      <div class="q-q" style="font-size:${st.q}">${esc(T(it.q))}</div>
+      <div class="q-q" style="font-size:${st.q}"${stg === 'explain' && set.size === 2 ? ' hidden' : ''}>${esc(T(it.q))}</div>
       ${hintBox}${mid}
       <div class="q-act">${act}</div>
     </div>`;
@@ -1001,7 +1056,7 @@ function answer(v) {
     live('정답이에요!');
   } else {
     Q.stage = 'wrong'; sfx.no();
-    if (!Q.replay) { save.wrong++; persist(); }
+    if (!Q.replay && !Q.cfg.npcId) { save.wrong++; persist(); }
     live('아쉬워요. 정답을 같이 봐요.');
   }
   renderQuiz();
@@ -1014,6 +1069,7 @@ function quizNext() {
 function finishQuest() {
   const cfg = Q.cfg, replay = Q.replay, nextNum = cfg.num + 1;
   closeOv($('#ov-quiz'));            // Q = null
+  if (cfg.npcId) { if (!replay) { save.npc[cfg.id] = 1; persist(); refreshWorld(); } return; }
   if (replay) { msgBox({ face: cfg.npc.face, tag: cfg.tag, title: '다시 해 봤어요!', text: '언제든 또 와서 해 볼 수 있어요.', buttons: [{ label: '마을로', primary: true }] }); return; }
   save.done[cfg.num] = true; delete save.qp[cfg.id]; persist();
   sfx.ok(); refreshWorld();
