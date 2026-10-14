@@ -526,6 +526,12 @@ body.touch #hud-keys{display:none}
     <div id="qwin" class="win"></div>
   </div>
 
+  <!-- 점자 가게 안내판 -->
+  <div id="ov-shop" class="ov" hidden role="dialog" aria-modal="true" aria-label="점자 가게 영업 준비 중">
+    <div class="dim"></div>
+    <div id="shopwin" class="win" style="position:absolute;left:220px;top:150px;width:840px;padding:32px;display:grid;grid-template-columns:288px minmax(0,1fr);gap:32px;align-items:center"></div>
+  </div>
+
   <!-- 안내/확인 -->
   <div id="ov-msg" class="ov" hidden role="dialog" aria-modal="true">
     <div class="dim"></div>
@@ -1321,6 +1327,7 @@ function enter(i) {
   if (!gateOpen(i)) { toast(`${gateReq(i)}번을 깨면 열려요.`); return; }
   sfx.door(); persistPos();
   if (i === 9) { openLicense(); return; }
+  if (i === 8) { openShop(); return; }
   if (st.quest === 3) { openMeal(); return; }
   if (st.quest >= 5 && st.quest <= 7) { openGuide(st.quest); return; }
   if (st.quest === 8) { openWalk(); return; }
@@ -2149,6 +2156,17 @@ function openEnd() {
 $('#end-lic').addEventListener('click', () => { openLicense(); });
 $('#end-village').addEventListener('click', () => { gotoVillage(); });
 
+
+/* 점자 가게 : 점자 활동이 완성되기 전까지는 '영업 준비 중' 안내판만 보여 줘요 (CLAUDE.md 12번) */
+const SHOP_TXT = { b: '점자 가게는 11월 4일 한글 점자의 날을 맞이해 문을 열 준비를 하고 있어요. 조금만 기다려 주세요!', e: '점자 가게는 지금 준비 중이에요. 11월 4일 한글 점자의 날에 문을 열어요. 조금만 기다려 주세요!' };
+function openShop() {
+  $('#shopwin').innerHTML = `<div style="position:relative;width:288px;height:300px;background:#BFE6F7;border:4px solid #1B2A5B;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:36px;background:#6CC070;border-top:4px solid #1B2A5B"></div><img src="${A.shop.u}" width="224" height="184" style="position:absolute;left:28px;top:64px" alt="점자 가게"><div style="position:absolute;left:68px;top:150px;width:144px;height:96px"><img src="${A.sign.u}" width="144" height="96" alt=""><div style="position:absolute;left:16px;top:12px;width:112px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;line-height:1.3;text-align:center;color:#1B2A5B">영업<br>준비 중</div></div></div>
+    <div style="display:flex;flex-direction:column;gap:18px"><div><span class="tagchip">점자 가게 · 선택 활동</span></div><div style="font-size:36px;font-weight:700;line-height:1.3">영업 준비 중</div><div style="font-size:24px;line-height:1.6;text-wrap:pretty">${esc(T(SHOP_TXT))}</div>
+    <div style="display:flex;gap:12px"><button type="button" class="btn primary" data-shop="close" style="height:60px;padding:0 28px">다음에 올게요</button>${on('tts') ? `<button type="button" class="btn" data-shop="speak" style="height:60px"><img data-ic="spk" src="${icon('spk')}" width="24" height="24" alt="">읽어주기</button>` : ''}</div></div>`;
+  openOv($('#ov-shop'), { focus: '[data-shop=close]' }); live('점자 가게. 영업 준비 중. ' + T(SHOP_TXT));
+}
+$('#shopwin').addEventListener('click', e => { const b = e.target.closest('[data-shop]'); if (!b) return; if (b.dataset.shop === 'close') closeOv($('#ov-shop')); else speak('영업 준비 중. ' + T(SHOP_TXT)); });
+
 /* ───────────────────────────────────────────
    설정 창
    ─────────────────────────────────────────── */
@@ -2309,7 +2327,7 @@ addEventListener('keydown', e => {
   // 창이 열려 있을 때
   const top = topOv();
   if (top) {
-    if (k === 'Escape') { e.preventDefault(); if (top.id === 'ov-quiz') closeQuiz(); else if (top.id === 'ov-settings') closeSettings(); else if (top.id === 'ov-msg') { const b = $$('#msgwin .m-b button'); b.length && b[0].click(); } return; }
+    if (k === 'Escape') { e.preventDefault(); if (top.id === 'ov-quiz') closeQuiz(); else if (top.id === 'ov-settings') closeSettings(); else if (top.id === 'ov-shop') closeOv($('#ov-shop')); else if (top.id === 'ov-msg') { const b = $$('#msgwin .m-b button'); b.length && b[0].click(); } return; }
     if (top.id === 'ov-quiz' && Q && Q.stage === 'ask' && /^[1-4]$/.test(k) && !e.ctrlKey && !e.altKey && !e.metaKey) {
       const it = Q.cfg.items[Q.i];
       if (Q.cfg.kind === 'ox') { if (k === '1') answer('O'); else if (k === '2') answer('X'); }
