@@ -316,6 +316,8 @@ body.touch #hud-keys{display:none}
 
 #g-prog{max-height:84px;overflow:auto}
 .gstep{height:36px}
+#g-friend.bang::after{content:'!';position:absolute;left:-4px;top:-6px;width:18px;height:18px;background:#E5484D;color:#fff;border:2px solid #1B2A5B;font-size:12px;line-height:14px;text-align:center;font-weight:700}
+#g-side{gap:8px!important;padding:12px 18px!important}#g-side .gc{font-size:24px}
 
 </style>
 </head>
@@ -421,7 +423,7 @@ body.touch #hud-keys{display:none}
     <div id="g-cmd" class="abs panel" style="left:40px;top:404px;width:1200px;height:276px;padding:14px;display:flex;flex-direction:column;gap:12px">
       <form id="g-form" style="display:flex;gap:12px;align-items:center;height:56px" autocomplete="off">
         <span class="glab">명령</span>
-        <input id="g-in" type="text" maxlength="160" aria-label="길 안내 명령" placeholder="예) 앞으로 3걸음, 오른쪽으로 돌아서 2걸음" style="flex:1;min-width:0;height:56px;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);padding:0 14px;font:inherit;font-size:24px;border-radius:0">
+        <input id="g-in" type="text" maxlength="160" aria-label="길 안내 명령" placeholder="예) 오른쪽으로 3걸음, 위로 1걸음" style="flex:1;min-width:0;height:56px;background:var(--c-field);color:var(--c-text);border:4px solid var(--c-line);padding:0 14px;font:inherit;font-size:24px;border-radius:0">
         <button id="g-mic" type="button" class="btn" style="width:56px;height:56px;padding:0" title="음성 입력" aria-label="음성 입력"><img data-ic="mic" width="36" height="36" alt=""></button>
         <button id="g-clear" type="button" class="btn" style="height:56px;padding:0 16px">지우기</button>
         <button id="g-run" type="submit" class="btn primary" style="height:56px;padding:0 22px">실행 ▶</button>
@@ -1648,7 +1650,7 @@ const GUIDE = {
   5: { map: 1, color: '#2FB3A6', name: '길 안내 코딩', sub: '친구가 깃발까지 갈 수 있게 말로 안내해요', goal: '길 건너 깃발까지', fx: 'blur',
     checks: [['공사콘 피하기', s => s.maxX >= 5], ['자전거 피하기', s => s.maxX >= 8], ['횡단보도가 있다고 말하기', s => s.said.has('횡단보도')]],
     need: [['횡단보도', '#']], tell: ['횡단보도', '점자블록'],
-    hints: ['자전거 앞에서 왼쪽이나 오른쪽으로 돌아서 피해 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 앞으로 3걸음, 왼쪽으로 돌아서 1걸음, 오른쪽으로 돌아서 3걸음 처럼 이어서 써요.'] },
+    hints: ['자전거 앞에서 위나 아래로 비켜서 피해 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 오른쪽으로 3걸음, 위로 1걸음 처럼 이어서 써요.'] },
   6: { map: 2, color: '#4C7BE0', name: '문과 계단', sub: '문 · 문턱 · 계단이 있다는 것도 말해 줘요', goal: '계단 지나 깃발까지', fx: 'haze',
     checks: [['문이 있다고 말하기', s => s.said.has('문')], ['문턱이 있다고 말하기', s => s.said.has('문턱')], ['계단이 있다고 말하기', s => s.said.has('계단')]],
     need: [['문', 'D'], ['문턱', 't'], ['계단', 's']], tell: ['문', '문턱', '계단'],
@@ -1656,7 +1658,7 @@ const GUIDE = {
   7: { map: 3, color: '#9CCB3B', name: '창문 찾기', sub: '친구가 창문 앞까지 갈 수 있게 안내해요', goal: '창문 앞 깃발까지', fx: 'tunnel',
     checks: [['책상 사이로 걷기', s => s.maxX >= 8], ['가방 피하기', s => s.maxX >= 11], ['창문이 있다고 말하기', s => s.said.has('창문')]],
     need: [['창문', 'G']], tell: ['창문', '책상', '가방'],
-    hints: ['책상과 의자가 없는 넓은 길로 걸어가면 부딪히지 않아요.', '가운데 줄로 쭉 걷다가 위쪽으로 올라가요.', '깃발에 도착하기 전에 "앞에 창문이 있어요"라고 말해 줘요.'] }
+    hints: ['책상과 의자가 없는 넓은 길로 걸어가면 부딪히지 않아요. 먼저 위로 올라가 봐요.', '아래쪽 빈 길로 쭉 걷다가 위로 올라가요.', '깃발에 도착하기 전에 "앞에 창문이 있어요"라고 말해 줘요.'] }
 };
 const WORDS = ['횡단보도', '점자블록', '문턱', '창문', '계단', '책상', '가방', '화분', '자전거', '공사콘', '소화기', '의자', '쓰레기통', '턱', '문'];
 const NUMW = { 한: 1, 하나: 1, 일: 1, 두: 2, 둘: 2, 이: 2, 세: 3, 셋: 3, 삼: 3, 네: 4, 넷: 4, 사: 4, 다섯: 5, 오: 5, 여섯: 6, 육: 6, 일곱: 7, 칠: 7, 여덟: 8, 팔: 8, 아홉: 9, 구: 9, 열: 10, 십: 10 };
@@ -1668,25 +1670,25 @@ function gridOf(mapNo) {
   rows.forEach((r, y) => r.forEach((c, x) => { if (c === 'S') st = [x, y]; if (c === 'G') goal = [x, y]; }));
   return { m, rows, st, goal };
 }
-/* 쓴 글을 단계(앞으로/돌기/알려 주기)로 바꿔요 */
+/* 쓴 글을 단계로 바꿔요. 방향은 지도 기준이에요: 위로 / 아래로 / 왼쪽 / 오른쪽 (앞으로 = 가던 방향 그대로) */
 function parseProgram(text) {
-  const pre = text.replace(/(걸음|칸|있어요|있어|돌기)\s*/g, '$1, ');
+  const pre = text.replace(/(걸음|칸|있어요|있어)\s*/g, '$1, ');
   const parts = pre.split(/[,.;\n·]+|\s그리고\s|\s다음에\s/).map(s => s.trim()).filter(Boolean);
   const steps = [];
   for (const p of parts) {
     const w = WORDS.find(x => p.includes(x));
     if (w && /있|앞에|조심|알려/.test(p) && !/걸음|칸/.test(p)) { steps.push({ t: 'tell', k: w === '턱' ? '문턱' : w }); continue; }
-    const dir = /오른/.test(p) ? 'r' : /왼/.test(p) ? 'l' : /뒤/.test(p) ? 'b' : /앞/.test(p) ? 'f' : null;
-    if (!dir) return { error: `이 말은 아직 몰라요: "${p}". 예) 앞으로 3걸음` };
+    const q = p.replace(/위치/g, '');
+    const dir = /위/.test(q) ? 0 : /오른/.test(q) ? 1 : /아래|밑/.test(q) ? 2 : /왼/.test(q) ? 3 : /앞으로|앞/.test(q) ? 'f' : null;
+    if (dir === null) return { error: `이 말은 아직 몰라요: "${p}". 위로 / 아래로 / 왼쪽 / 오른쪽 중에서 골라 써요. 예) 오른쪽으로 3걸음` };
     const nm = p.match(/(\d+)\s*(?:걸음|칸)/) || p.match(/([가-힣]+?)\s*(?:걸음|칸)/);
     let n = null;
     if (nm) { n = /^\d+$/.test(nm[1]) ? +nm[1] : NUMW[nm[1].replace(/\s/g, '').slice(-2)] || NUMW[nm[1].slice(-1)] || null; if (n === null) return { error: `몇 걸음인지 모르겠어요: "${p}". 숫자로 써 주세요.` }; }
-    if (dir === 'f' && n === null) return { error: `몇 걸음인지 알려 주세요: "${p}". 예) 앞으로 3걸음` };
-    if (n !== null && (n < 0 || n > 14)) return { error: '걸음 수는 14걸음까지예요.' };
-    if (dir !== 'f') steps.push({ t: 'turn', d: dir });
-    if (n) steps.push({ t: 'move', n });
+    if (n === null) return { error: `몇 걸음인지 알려 주세요: "${p}". 예) 오른쪽으로 3걸음` };
+    if (n < 1 || n > 14) return { error: '걸음 수는 1~14걸음까지예요.' };
+    steps.push({ t: 'go', d: dir, n });
   }
-  if (!steps.length) return { error: '명령을 써 주세요. 예) 앞으로 3걸음' };
+  if (!steps.length) return { error: '명령을 써 주세요. 예) 오른쪽으로 3걸음' };
   return { steps };
 }
 function simulate(def, gd, steps) {
@@ -1696,7 +1698,7 @@ function simulate(def, gd, steps) {
   outer: for (let si = 0; si < steps.length; si++) {
     const s = steps[si];
     if (s.t === 'tell') { said.add(s.k); ev.push({ k: 'tell', si, w: s.k, st: snap() }); continue; }
-    if (s.t === 'turn') { d = (d + (s.d === 'r' ? 1 : s.d === 'l' ? 3 : 2)) % 4; ev.push({ k: 'turn', si, d, x, y, st: snap() }); continue; }
+    if (s.d !== 'f') d = s.d;
     for (let i = 0; i < s.n; i++) {
       const nx = x + DV[d][0], ny = y + DV[d][1];
       if (nx < 0 || ny < 0 || nx >= 14 || ny >= 6) { ev.push({ k: 'stop', si, why: 'wall', x, y, st: snap() }); result = 'stop'; break outer; }
@@ -1724,8 +1726,8 @@ function openGuide(no) {
   }).join('')).join('');
   const fr = document.createElement('div'); fr.id = 'g-friend'; fr.innerHTML = `<img src="${A.friendS.u}" alt="흰지팡이를 든 친구"><div class="dir">▶</div>`; grid.appendChild(fr);
   grid.style.position = 'relative'; guidePlace(gd.st[0], gd.st[1], 1);
-  $('#g-bub').hidden = true;
-  $('#g-cards').innerHTML = [['f', '▲ 앞으로'], ['r', '▶ 오른쪽'], ['l', '◀ 왼쪽'], ['b', '▼ 뒤로 돌기']].map(([k, t]) => `<button type="button" class="btn gcard" data-k="${k}" style="height:52px">${t}</button>`).join('');
+  GS.msg = '';
+  $('#g-cards').innerHTML = [['u', '▲ 위로'], ['d', '▼ 아래로'], ['l', '◀ 왼쪽'], ['r', '▶ 오른쪽']].map(([k, t]) => `<button type="button" class="btn gcard" data-k="${k}" style="height:52px">${t}</button>`).join('');
   $('#g-tell').innerHTML = def.tell.map(w => `<button type="button" class="btn gtell" data-w="${w}">"앞에 ${w}${josa(w, '이', '가')} 있어요"</button>`).join('');
   $('#g-n').textContent = GS.n + ' 걸음';
   $$('.gfx').forEach(e => e.classList.remove('on'));
@@ -1742,23 +1744,21 @@ function guidePlace(x, y, d) {
 function guideSide() {
   const def = GS.def, s = GS.state, firstTodo = def.checks.findIndex(([, f]) => !f(s));
   const checks = def.checks.map(([t, f], i) => { const ok = f(s), now = i === firstTodo; return `<div class="gc${ok || now ? '' : ' todo'}"><i class="${ok ? 'ok' : now ? 'now' : ''}">${ok ? `<img src="${A.ic.check}" width="12" height="12" alt="완료">` : now ? '▶' : ''}</i><span>${t}</span></div>`; }).join('');
+  const msg = GS.msg ? `<div style="margin-top:auto;background:#FFFFFF;color:#1B2A5B;border:4px solid #1B2A5B;box-shadow:0 4px 0 rgba(27,42,91,.25);padding:6px 10px;font-size:12px;line-height:1.6"><b>지호</b> ${esc(GS.msg)}</div>` : '';
   const hint = GS.hint > 0
-    ? `<div style="margin-top:auto;background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 ${GS.hint} / 3</b><br>${esc(def.hints[GS.hint - 1])}${GS.hint < 3 ? ' <button type="button" id="g-nexth" class="btn" style="height:28px;font-size:12px;padding:0 8px;border-width:2px;margin-left:8px">다음 힌트</button>' : ''}</span></div>`
-    : `<button type="button" id="g-nexth" class="btn" style="margin-top:auto;align-self:flex-start;height:48px"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트 보기 <span style="font-size:12px">0 / 3</span></button>`;
-  $('#g-side').innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${A.ob.G}" width="24" height="24" alt=""><span style="font-size:24px;font-weight:700">도착 · ${def.goal}</span></div><div style="font-size:12px">말하고 해내야 할 것</div><div style="display:flex;flex-direction:column;gap:8px">${checks}</div>${hint}`;
+    ? `<div style="${GS.msg ? '' : 'margin-top:auto;'}background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 ${GS.hint} / 3</b><br>${esc(def.hints[GS.hint - 1])}${GS.hint < 3 ? ' <button type="button" id="g-nexth" class="btn" style="height:28px;font-size:12px;padding:0 8px;border-width:2px;margin-left:8px">다음 힌트</button>' : ''}</span></div>`
+    : `<button type="button" id="g-nexth" class="btn" style="${GS.msg ? '' : 'margin-top:auto;'}align-self:flex-start;height:48px"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트 보기 <span style="font-size:12px">0 / 3</span></button>`;
+  $('#g-side').innerHTML = `<div style="display:flex;align-items:center;gap:10px"><img src="${A.ob.G}" width="24" height="24" alt=""><span style="font-size:24px;font-weight:700">도착 · ${def.goal}</span></div><div style="display:flex;flex-direction:column;gap:6px" aria-label="말하고 해내야 할 것">${checks}</div>${msg}${hint}`;
   const nb = $('#g-nexth'); if (nb) nb.addEventListener('click', guideNextHint);
 }
 function guideNextHint() { if (!GS || GS.hint >= 3) return; GS.hint++; if (!GS.replay) { save.hints++; persist(); } guideSide(); live('힌트 ' + GS.def.hints[GS.hint - 1]); }
-function stepLabel(s) { return s.t === 'tell' ? `알려 주기 · ${s.k}` : s.t === 'turn' ? ({ r: '오른쪽으로 돌기', l: '왼쪽으로 돌기', b: '뒤로 돌기' })[s.d] : `앞으로 ${s.n}`; }
+function stepLabel(s) { return s.t === 'tell' ? `알려 주기 · ${s.k}` : `${s.d === 'f' ? '앞으로' : ['위로', '오른쪽', '아래로', '왼쪽'][s.d]} ${s.n}`; }
 function guideProg(cur, stopAt) {
   const steps = GS.steps;
   $('#g-prog').innerHTML = steps.length ? steps.map((s, i) => `<div class="gstep${i === cur ? ' cur' : ''}${i === stopAt ? ' stop' : ''}"><b>${i + 1}</b>${esc(stepLabel(s))}${i === stopAt ? '<span class="st">멈춤</span>' : ''}</div>`).join('') : '<span style="font-size:12px;opacity:.7">명령을 쓰거나 카드를 누르면 순서가 여기에 나와요</span>';
 }
-function guideBubble(msg, x, y) {
-  const b = $('#g-bub'); b.hidden = false;
-  b.innerHTML = `<b>지호</b><br>${esc(msg)}`;
-  b.style.left = Math.max(4, Math.min(672 - 270, x * 48 + 52)) + 'px'; b.style.top = Math.max(4, Math.min(288 - 70, y * 48 - 20)) + 'px';
-  live('지호: ' + msg);
+function guideBubble(msg) {
+  GS.msg = msg; guideSide(); live('지호: ' + msg);   // 지도를 가리지 않게 오른쪽 패널에 보여 줘요
 }
 function guideRun() {
   if (!GS || GS.running) return;
@@ -1768,8 +1768,8 @@ function guideRun() {
   if (pr.error) { toast(pr.error); return; }
   GS.steps = pr.steps; GS.running = true; $('#g-run').disabled = true;
   const sim = simulate(GS.def, GS.gd, pr.steps), sx = GS.gd.st;
-  GS.state = { maxX: sx[0], said: new Set() }; $('#g-bub').hidden = true;
-  $$('.tr', $('#g-grid')).forEach(e => e.remove());
+  GS.state = { maxX: sx[0], said: new Set() }; GS.msg = '';
+  $$('.tr', $('#g-grid')).forEach(e => e.remove()); $('#g-friend').classList.remove('bang');
   guidePlace(sx[0], sx[1], 1); guideSide(); guideProg(-1);
   let i = 0;
   const tickEv = () => {
@@ -1786,7 +1786,7 @@ function guideRun() {
     else if (e.k === 'tell') { guideBubble(`${e.w}${josa(e.w, '이', '가')} 있군요. 고마워요!`, GS.fpos[0], GS.fpos[1]); delay = 650; sfx.ok(); }
     else if (e.k === 'stop') {
       const lab = e.why === 'block' ? (CS_.LB[e.ch] || (e.ch === 'W' ? '벽' : '장애물')) : e.key;
-      GS.stop = e;
+      GS.stop = e; $('#g-friend').classList.add('bang');
       guideBubble(e.why === 'wall' ? '멈췄어요! 더 갈 수 없어요.' : e.why === 'block' ? `멈췄어요! 앞에 ${lab}${josa(lab, '이', '가')} 있어요.` : `잠깐! 앞에 ${lab}${josa(lab, '이', '가')} 있다고 먼저 알려 주면 좋겠어요.`, e.x, e.y);
       delay = 100;
     }
@@ -1859,7 +1859,7 @@ $('#g-clear').addEventListener('click', () => { if (!GS || GS.running) return; $
 $('#g-cards').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b || !GS) return; sfx.click();
   const n = GS.n, k = b.dataset.k;
-  gAppend(k === 'f' ? `앞으로 ${n}걸음` : k === 'r' ? `오른쪽으로 돌아서 ${n}걸음` : k === 'l' ? `왼쪽으로 돌아서 ${n}걸음` : `뒤로 돌아서 ${n}걸음`);
+  gAppend(k === 'u' ? `위로 ${n}걸음` : k === 'd' ? `아래로 ${n}걸음` : k === 'l' ? `왼쪽으로 ${n}걸음` : `오른쪽으로 ${n}걸음`);
 });
 $('#g-tell').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !GS) return; sfx.click(); const w = b.dataset.w; gAppend(`앞에 ${w}${josa(w, '이', '가')} 있어요`); });
 $('#g-minus').addEventListener('click', () => { if (GS && GS.n > 1) { GS.n--; $('#g-n').textContent = GS.n + ' 걸음'; } });
