@@ -324,6 +324,7 @@ body.touch #hud-keys{display:none}
 .wcard.sel::after{top:-18px}
 #foot.night2{background:#0B1230}
 #g-side .gc{line-height:1.15}#g-side > div:nth-child(2){gap:3px!important}
+#g-side{height:308px!important}
 
 </style>
 </head>
@@ -1687,15 +1688,15 @@ const FXINFO = {
 };
 /* 힌트 문구는 시안의 예시 문구를 바탕으로 제가 쓴 초안이에요 (확인 필요) */
 const GUIDE = {
-  5: { map: 1, color: '#2FB3A6', name: '길 안내 코딩', sub: '친구가 깃발까지 갈 수 있게 말로 안내해요', goal: '길 건너 깃발까지', fx: 'blur',
+  5: { map: 1, ref: '위로 1걸음, 오른쪽으로 11걸음, 앞에 횡단보도가 있어요, 위로 3걸음, 오른쪽으로 2걸음', color: '#2FB3A6', name: '길 안내 코딩', sub: '친구가 깃발까지 갈 수 있게 말로 안내해요', goal: '길 건너 깃발까지', fx: 'blur',
     checks: [['공사콘 피하기', s => s.maxX >= 4], ['횡단보도가 있다고 말하기', s => s.said.has('횡단보도')], ['깃발까지 가기', s => s.maxX >= 13]],
     need: [['횡단보도', '#']], tell: ['횡단보도', '점자블록'],
     hints: ['공사콘 앞에서는 위로 비켜서 가요.', '길을 건너기 전에 "앞에 횡단보도가 있어요"라고 말해 줘요.', '예) 위로 1걸음, 오른쪽으로 11걸음 처럼 한 줄씩 이어서 써요.'] },
-  6: { map: 2, color: '#4C7BE0', name: '문과 계단', sub: '문 · 문턱 · 계단이 있다는 것도 말해 줘요', goal: '계단 지나 깃발까지', fx: 'haze',
+  6: { map: 2, ref: '앞에 문, 문턱, 계단이 있어요, 오른쪽으로 13걸음', color: '#4C7BE0', name: '문과 계단', sub: '문 · 문턱 · 계단이 있다는 것도 말해 줘요', goal: '계단 지나 깃발까지', fx: 'haze',
     checks: [['문이 있다고 말하기', s => s.said.has('문')], ['문턱이 있다고 말하기', s => s.said.has('문턱')], ['계단이 있다고 말하기', s => s.said.has('계단')]],
     need: [['문', 'D'], ['문턱', 't'], ['계단', 's']], tell: ['문', '문턱', '계단'],
     hints: ['문과 문턱, 계단이 있으면 가기 전에 꼭 말해 줘요.', '문을 지나면 바로 낮은 문턱이 있어요. 넘기 전에 "턱이 있어요"라고 말해 줘요.', '계단 앞에서도 "앞에 계단이 있어요"라고 말해 줘요.'] },
-  7: { map: 3, color: '#9CCB3B', name: '창문 찾기', sub: '친구가 창문 앞까지 갈 수 있게 안내해요', goal: '창문 앞 깃발까지', fx: 'tunnel',
+  7: { map: 3, ref: '위로 2걸음, 오른쪽으로 11걸음, 앞에 창문이 있어요, 위로 2걸음', color: '#9CCB3B', name: '창문 찾기', sub: '친구가 창문 앞까지 갈 수 있게 안내해요', goal: '창문 앞 깃발까지', fx: 'tunnel',
     checks: [['책상 사이로 걷기', s => s.maxX >= 8], ['가방 피하기', s => s.maxX >= 11], ['창문이 있다고 말하기', s => s.said.has('창문')]],
     need: [['창문', 'G']], tell: ['창문', '책상', '가방'],
     hints: ['책상과 의자가 없는 넓은 길로 걸어가면 부딪히지 않아요. 먼저 위로 올라가 봐요.', '아래쪽 빈 길로 쭉 걷다가 위로 올라가요.', '깃발에 도착하기 전에 "앞에 창문이 있어요"라고 말해 줘요.'] }
@@ -1758,6 +1759,26 @@ function simulate(def, gd, steps) {
   }
   return { ev, result, said, maxX };
 }
+const DIRW = ['위로', '오른쪽으로', '아래로', '왼쪽으로'];
+function refPathOf(def, gd) {
+  const sim = simulate(def, gd, parseProgram(def.ref).steps), path = [gd.st.slice()];
+  sim.ev.forEach(e => { if (e.k === 'move') path.push([e.x, e.y]); });
+  return path;
+}
+function smartHint(kind) {
+  const def = GS.def, gd = GS.gd, path = GS.refPath || (GS.refPath = refPathOf(def, gd)), pos = GS.fpos;
+  const dist = c => Math.abs(c[0] - pos[0]) + Math.abs(c[1] - pos[1]);
+  let k = 0; path.forEach((c, i) => { if (dist(c) < dist(path[k]) || (dist(c) === dist(path[k]) && i > k)) k = i; });
+  const here = path[k]; let d;
+  if (dist(here) === 0) {
+    if (k >= path.length - 1) return '';
+    const nx = path[k + 1]; d = nx[0] > here[0] ? 1 : nx[0] < here[0] ? 3 : nx[1] > here[1] ? 2 : 0;
+    return `이 자리에서 ${DIRW[d]} ( )걸음 가요. 지도에서 칸을 세어 봐요.`;
+  }
+  const dx = here[0] - pos[0], dy = here[1] - pos[1];
+  d = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? 1 : 3) : (dy > 0 ? 2 : 0);
+  return `${DIRW[d]} ( )걸음 가 봐요. 지도에서 칸을 세어 봐요.`;
+}
 function openGuide(no) {
   const def = GUIDE[no], gd = gridOf(def.map);
   GS = { no, def, gd, replay: !!save.done[no], hint: 0, running: false, timer: null, n: 3, steps: [], state: { maxX: gd.st[0], said: new Set() }, fxOn: false, fx: on('fx') };
@@ -1789,7 +1810,7 @@ function guidePlace(x, y, d) {
 function guideSide() {
   const def = GS.def, s = GS.state, firstTodo = def.checks.findIndex(([, f]) => !f(s));
   const checks = def.checks.map(([t, f], i) => { const ok = f(s), now = i === firstTodo; return `<div class="gc${ok || now ? '' : ' todo'}"><i class="${ok ? 'ok' : now ? 'now' : ''}">${ok ? `<img src="${A.ic.check}" width="12" height="12" alt="완료">` : now ? '▶' : ''}</i><span>${t}</span></div>`; }).join('');
-  const msg = GS.msg ? `<div style="margin-top:auto;background:#FFFFFF;color:#1B2A5B;border:4px solid #1B2A5B;box-shadow:0 4px 0 rgba(27,42,91,.25);padding:6px 10px;font-size:12px;line-height:1.6"><b>지호</b> ${esc(GS.msg)}</div>` : '';
+  const msg = GS.msg ? `<div style="margin-top:auto;background:#FFFFFF;color:#1B2A5B;border:4px solid #1B2A5B;box-shadow:0 4px 0 rgba(27,42,91,.25);padding:6px 10px;font-size:12px;line-height:1.6"><b>지호</b> ${esc(GS.msg)}${GS.extra ? `<br><b>▶ 이렇게 해 봐요</b> ${esc(GS.extra)}` : ''}</div>` : '';
   const hint = GS.hint > 0
     ? `<div style="${GS.msg ? '' : 'margin-top:auto;'}background:var(--c-hint);border:4px solid var(--c-line);padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.7"><img src="${icon('hint')}" width="24" height="24" alt=""><span><b>힌트 ${GS.hint} / 3</b><br>${esc(def.hints[GS.hint - 1])}${GS.hint < 3 ? ' <button type="button" id="g-nexth" class="btn" style="height:28px;font-size:12px;padding:0 8px;border-width:2px;margin-left:8px">다음 힌트</button>'  : ''}</span></div>`
     : `<button type="button" id="g-nexth" class="btn" style="${GS.msg ? '' : 'margin-top:auto;'}align-self:flex-start;height:48px"><img data-ic="hint" src="${icon('hint')}" width="24" height="24" alt="">힌트 보기 <span style="font-size:12px">0 / 3</span></button>`;
@@ -1803,7 +1824,7 @@ function guideProg(cur, stopAt) {
   $('#g-prog').innerHTML = steps.length ? steps.map((s, i) => `<div class="gstep${i === cur ? ' cur' : ''}${i === stopAt ? ' stop' : ''}"><b>${i + 1}</b>${esc(stepLabel(s))}${i === stopAt ? '<span class="st">멈춤</span>' : ''}</div>`).join('') : '<span style="font-size:12px;opacity:.7">명령을 쓰거나 카드를 누르면 순서가 여기에 나와요</span>';
 }
 function guideBubble(msg) {
-  GS.msg = msg; guideSide(); live('지호: ' + msg);   // 지도를 가리지 않게 오른쪽 패널에 보여 줘요
+  GS.msg = msg; guideSide(); live('지호: ' + msg + (GS.extra ? ' ' + GS.extra : ''));   // 지도를 가리지 않게 오른쪽 패널에 보여 줘요
 }
 function guideRun() {
   if (!GS || GS.running) return;
@@ -1813,7 +1834,7 @@ function guideRun() {
   if (pr.error) { toast(pr.error); return; }
   GS.steps = pr.steps; GS.running = true; $('#g-run').disabled = true;
   const sim = simulate(GS.def, GS.gd, pr.steps), sx = GS.gd.st;
-  GS.state = { maxX: sx[0], said: new Set() }; GS.msg = '';
+  GS.state = { maxX: sx[0], said: new Set() }; GS.msg = ''; GS.extra = ''; GS.stop = null;
   $$('.tr', $('#g-grid')).forEach(e => e.remove()); $('#g-friend').classList.remove('bang');
   guidePlace(sx[0], sx[1], 1); guideSide(); guideProg(-1);
   let i = 0;
@@ -1850,10 +1871,11 @@ function guideEnd(sim) {
     GS.timer = setTimeout(guideFinish, 1500); return;
   }
   sfx.no(); if (!GS.replay) { save.gscore = save.gscore || {}; save.gscore[GS.no] = (save.gscore[GS.no] || 0) + 1; persist(); }
+  if (sim.result !== 'goal' && !(GS.stop && GS.stop.why === 'need')) GS.extra = smartHint(sim.result);
   if (sim.result === 'goal') guideBubble(`깃발에 도착했어요! 그런데 ${missing.join(', ')}${josa(missing[missing.length - 1], '이', '가')} 있다는 것도 말해 줘야 해요.`, GS.fpos[0], GS.fpos[1]);
   else if (sim.result === 'end') guideBubble('명령이 끝났어요. 아직 깃발에 도착하지 못했어요.', GS.fpos[0], GS.fpos[1]);
   if (GS.hint < 3) GS.hint++;   // 틀리면 힌트가 열려요 (자동으로 열린 힌트는 점수에 넣지 않아요)
-  guideSide(); $('#g-in').focus();
+  guideSide(); live(GS.extra ? '이렇게 해 봐요. ' + GS.extra : ''); $('#g-in').focus();
 }
 function guideFinish() {
   const no = GS.no, def = GS.def, replay = GS.replay; guideStop(); gotoVillage();
