@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 <style>
+
   :root {
     --yellow: #ffd400;
     --yellow-d: #f2c200;
@@ -118,8 +119,6 @@
   .toast b { color: var(--yellow); }
 
   /* ---------- 내 메뉴판 / 인쇄 ---------- */
-  .print-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
-  .print-bar .hint { color: var(--mute); font-size: 14px; flex: 1; min-width: 200px; }
   .name-in { padding: 10px 12px; border: 2px solid #ccc; border-radius: 10px; font-size: 16px; font-family: inherit; }
 
   .sheet {
@@ -136,7 +135,8 @@
   .card .head .t { font-size: 4cqw; font-weight: 900; white-space: nowrap; }
   .card .head .logo { white-space: nowrap; background: var(--yellow); font-size: 2cqw; font-weight: 800; padding: .4cqw 1.6cqw; border-radius: 99px; }
   .card .who { font-size: 2.6cqw; margin: 1.4cqw 0 .6cqw; display: flex; align-items: baseline; gap: 1cqw; }
-  .card .who span.ln { flex: 1; border-bottom: .3cqw solid #555; height: 3cqw; font-weight: 700; }
+  .card .who { align-items: flex-end; }
+  .card .who span.ln { flex: 1; border-bottom: .3cqw solid #555; min-height: 4.4cqw; font-size: 3.8cqw; line-height: 1.2; padding-left: 1cqw; }
   .card .rows { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 1.2cqw; margin-top: 1cqw; min-height: 0; }
   .card .row { display: grid; grid-template-columns: 15cqw minmax(0, 1fr); gap: 2cqw; align-items: center; }
   .card .row .photo { font-size: 8cqw; border-radius: 1.6cqw; }
@@ -149,11 +149,11 @@
   .card .row .tt.hot { background: #e5532d; }
   .card .row .tt.ice { background: #2d8fe5; }
   .card[data-n="1"] .rows { justify-content: center; }
-  .card[data-n="1"] .row { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 2.2cqw; }
-  .card[data-n="1"] .row .photo { width: 31cqw; font-size: 16cqw; border-radius: 3cqw; }
+  .card[data-n="1"] .row { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 1.4cqw; }
+  .card[data-n="1"] .row .photo { width: 25cqw; font-size: 13cqw; border-radius: 2.6cqw; }
   .card[data-n="1"] .row .nm, .card[data-n="1"] .row .meta { width: 100%; }
-  .card[data-n="1"] .row .nm { font-size: calc(5cqw * var(--fit, 1)); }
-  .card[data-n="1"] .row .meta { font-size: calc(3.8cqw * var(--fit, 1)); }
+  .card[data-n="1"] .row .nm { font-size: calc(4.6cqw * var(--fit, 1)); }
+  .card[data-n="1"] .row .meta { font-size: calc(3.4cqw * var(--fit, 1)); }
   .card[data-n="1"] .row .tt { font-size: calc(3cqw * var(--fit, 1)); }
   .card[data-n="2"] .row { grid-template-columns: 20cqw minmax(0, 1fr); }
   .card[data-n="2"] .rows { justify-content: space-evenly; }
@@ -182,18 +182,54 @@
     .tab { padding: 8px 10px; font-size: 14px; }
   }
 
-  /* ---------- 인쇄: A4 한 장에 4개 ---------- */
+  /* ---------- 학생 / 시작 화면 ---------- */
+  .start-box { background: #fff; border-radius: 20px; padding: 26px 22px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,.08); max-width: 640px; margin: 10px auto 26px; }
+  .start-box h2 { margin: 0 0 14px; font-size: 24px; }
+  #nameForm { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .name-in.big { font-size: 22px; padding: 12px 16px; width: min(100%, 280px); text-align: center; }
+  .sub-title { font-size: 18px; margin: 4px 2px 10px; }
+  .stu-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .stu { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 6px; }
+  .stu.cur { outline: 3px solid var(--yellow-d); }
+  .stu .nm { font-size: 20px; }
+  .stu .sm { color: var(--mute); font-size: 14px; min-height: 1.4em; }
+  .stu .tt { font-size: 18px; color: #c47a00; }
+  .stu .btns { display: flex; gap: 6px; margin-top: 4px; }
+  .stu .btns .btn { padding: 9px 12px; font-size: 14px; }
+  .stu .btns .btn:first-child { flex: 1; }
+  .who-banner { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; padding: 10px 14px; margin-bottom: 12px; font-size: 18px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .who-banner b { background: var(--yellow); padding: 2px 12px; border-radius: 999px; }
+  .who-banner .btn { margin-left: auto; padding: 8px 12px; font-size: 14px; }
+
+  /* ---------- 인쇄 설정 ---------- */
+  .print-panel { background: #fff; border-radius: 16px; padding: 14px 16px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+  .print-panel h3 { margin: 0 0 8px; font-size: 18px; }
+  .picks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .pick { display: flex; align-items: center; gap: 6px; border: 2px solid #ddd; border-radius: 999px; padding: 7px 14px 7px 10px; font-size: 16px; cursor: pointer; background: #fff; }
+  .pick.on { border-color: var(--yellow-d); background: #fff8d6; }
+  .pick.off { opacity: .45; cursor: default; }
+  .pick input { width: 18px; height: 18px; accent-color: #222; }
+  .print-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .print-actions .btn { padding: 11px 16px; }
+  .print-actions .hint { color: var(--mute); font-size: 14px; flex: 1; min-width: 220px; }
+  #sheets .sheet { margin: 0 auto 18px; }
+  #sheets .sheet-no { text-align: center; color: var(--mute); font-size: 13px; margin: 0 0 4px; }
+  .card.blank { border-color: transparent; }
+
+  /* ---------- 인쇄: A4 한 장에 4명 ---------- */
   @page { size: A4 portrait; margin: 0; }
   @media print {
     body { background: #fff; }
-    header.top, .view:not(#view-print), .print-bar, .toast, .no-print { display: none !important; }
+    header.top, .view:not(#view-print), .print-panel, .sheet-no, .toast, .no-print { display: none !important; }
     main { padding: 0; max-width: none; }
     #view-print { display: block !important; }
-    .sheet {
+    #sheets .sheet {
       width: 210mm; height: 297mm; aspect-ratio: auto; box-shadow: none; margin: 0;
-      break-inside: avoid;
+      break-after: page; page-break-after: always;
     }
-    .card { border: .2mm dashed #999; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    #sheets .sheet:last-child { break-after: auto; page-break-after: auto; }
+    .card { border: .2mm dashed #999; }
+    .card.blank { border-color: transparent; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
@@ -203,22 +239,37 @@
 <header class="top">
   <h1>☕ 메가커피 키오스크 실습</h1>
   <nav class="tabs">
-    <button class="tab on" data-view="order">주문하기</button>
-    <button class="tab" data-view="print">내 메뉴판<span class="badge" id="badge" hidden>0</span></button>
+    <button class="tab on" data-view="start">처음 화면</button>
+    <button class="tab" data-view="order">주문하기</button>
+    <button class="tab" data-view="print">인쇄</button>
     <button class="tab" data-view="edit">메뉴 편집</button>
   </nav>
 </header>
 
 <main>
+  <!-- 처음 화면: 이름 입력 + 학생 목록 -->
+  <section class="view on" id="view-start">
+    <div class="start-box">
+      <h2>👋 이름을 입력하고 주문을 시작해요</h2>
+      <form id="nameForm">
+        <input class="name-in big" id="nameIn" placeholder="이름" maxlength="10" autocomplete="off">
+        <button class="btn yellow" type="submit">주문 시작 ▶</button>
+      </form>
+    </div>
+    <h3 class="sub-title">학생 목록 (<span id="stuCount">0</span>명)</h3>
+    <div class="stu-list" id="stuList"></div>
+  </section>
+
   <!-- 주문 -->
-  <section class="view on" id="view-order">
+  <section class="view" id="view-order">
     <div class="order-layout">
       <div>
+        <div class="who-banner" id="whoBanner"></div>
         <div class="cats" id="cats"></div>
         <div class="grid" id="grid"></div>
       </div>
       <aside class="cart">
-        <h2>🛒 내가 담은 메뉴</h2>
+        <h2 id="cartTitle">🛒 내가 담은 메뉴</h2>
         <div id="cartLines"></div>
         <div class="gauge" id="gauge"><i></i></div>
         <div class="sum"><span>사용 가능 금액</span><span>5,000원</span></div>
@@ -226,20 +277,26 @@
         <div class="sum big"><span>합계</span><span id="total">0원</span></div>
         <div class="actions">
           <button class="btn gray" id="clear">비우기</button>
-          <button class="btn yellow" id="toPrint" disabled>내 메뉴판 보기 ▶</button>
+          <button class="btn yellow" id="done" disabled>주문 완료 ▶</button>
         </div>
       </aside>
     </div>
   </section>
 
-  <!-- 내 메뉴판 -->
+  <!-- 인쇄 설정 -->
   <section class="view" id="view-print">
-    <div class="print-bar">
-      <input class="name-in" id="who" placeholder="이름 (비워두면 직접 쓰는 칸)" maxlength="10">
-      <button class="btn dark" id="printBtn">🖨 인쇄하기 (A4 한 장 · 4장)</button>
-      <div class="hint">A4 한 장에 같은 메뉴판이 4개 나와요. 인쇄 창에서 용지 <b>A4</b>, 배율 <b>100%</b>, 여백 <b>없음</b>으로 맞춰 주세요.</div>
+    <div class="print-panel">
+      <h3>🖨 인쇄할 학생 선택</h3>
+      <div class="picks" id="picks"></div>
+      <div class="print-actions">
+        <button class="btn gray" id="selAll">전체 선택</button>
+        <button class="btn gray" id="selNone">전체 해제</button>
+        <button class="btn dark" id="printBtn">🖨 인쇄하기</button>
+        <button class="btn yellow" id="saveImgBtn">🖼 이미지 저장</button>
+        <div class="hint" id="pageInfo"></div>
+      </div>
     </div>
-    <div class="sheet" id="sheet"></div>
+    <div id="sheets"></div>
   </section>
 
   <!-- 메뉴 편집 -->
@@ -274,26 +331,32 @@ const store = {
 };
 
 let menu = store.get('mc_menu4', null) || DEFAULT_MENU;
-let cart = store.get('mc_cart4', {});          // id -> qty
+let students = store.get('mc_students', []);   // [{id, name, cart: {메뉴id: 수량}}]
+let curId = store.get('mc_cur', null);
+let sel = store.get('mc_sel', {});             // 학생id -> 인쇄 선택 여부
 let curCat = '전체';
-let who = store.get('mc_who', '');
 
 const $ = s => document.querySelector(s);
 const won = n => n.toLocaleString('ko-KR') + '원';
 const byId = id => menu.find(m => m.id === id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tempLabel = t => t === 'hot' ? 'HOT' : t === 'ice' ? 'ICE' : '';
+const photoSrc = m => m.photo || (m.pk && PHOTOS[m.pk]) || '';
 
-function cartEntries() {
-  return Object.entries(cart).map(([id, q]) => ({m: byId(id), q})).filter(e => e.m && e.q > 0);
-}
-const total = () => cartEntries().reduce((s, e) => s + e.m.price * e.q, 0);
-const count = () => cartEntries().reduce((s, e) => s + e.q, 0);
+const cur = () => students.find(s => s.id === curId);
+const entriesOf = st => Object.entries(st.cart).map(([id, q]) => ({m: byId(id), q})).filter(e => e.m && e.q > 0);
+const totalOf = st => entriesOf(st).reduce((s, e) => s + e.m.price * e.q, 0);
+const total = () => cur() ? totalOf(cur()) : 0;
+const hasOrder = st => entriesOf(st).length > 0;
 
 function photoHTML(m) {
-  const src = m.photo || (m.pk && PHOTOS[m.pk]);
+  const src = photoSrc(m);
   return `<div class="photo">${src ? `<img src="${src}" alt="">` : esc(m.emoji || '☕')}</div>`;
 }
-const tempLabel = t => t === 'hot' ? 'HOT' : t === 'ice' ? 'ICE' : '';
+
+function save() {
+  store.set('mc_students', students); store.set('mc_cur', curId); store.set('mc_sel', sel);
+}
 
 /* ---------- 토스트 ---------- */
 let tt;
@@ -302,22 +365,37 @@ function toast(html) {
   clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600);
 }
 
+/* ---------- 학생 ---------- */
+function startStudent(name) {
+  name = name.trim();
+  if (!name) return toast('이름을 입력해 주세요');
+  let st = students.find(s => s.name === name);
+  if (!st) { st = {id: 's' + Date.now(), name, cart: {}}; students.push(st); }
+  curId = st.id; save(); render(); showView('order');
+}
+function summary(st) {
+  const es = entriesOf(st);
+  if (!es.length) return '아직 주문하지 않았어요';
+  const first = es[0].m.name + (es[0].q > 1 ? ' ×' + es[0].q : '');
+  const cnt = es.reduce((s, e) => s + e.q, 0);
+  return cnt > 1 && es.length > 1 ? `${first} 외 ${cnt - es[0].q}개` : first;
+}
+
 /* ---------- 담기 ---------- */
 function add(id) {
-  const m = byId(id);
+  const st = cur(), m = byId(id); if (!st || !m) return;
   if (total() + m.price > LIMIT) {
     toast(`🚫 <b>5,000원</b>이 넘어서 더 담을 수 없어요!<br><small>(담으면 ${won(total() + m.price)} · 남은 금액 ${won(LIMIT - total())})</small>`);
     return;
   }
-  cart[id] = (cart[id] || 0) + 1;
-  save(); render();
+  st.cart[id] = (st.cart[id] || 0) + 1; save(); render();
 }
 function dec(id) {
-  cart[id] = (cart[id] || 0) - 1;
-  if (cart[id] <= 0) delete cart[id];
+  const st = cur(); if (!st) return;
+  st.cart[id] = (st.cart[id] || 0) - 1;
+  if (st.cart[id] <= 0) delete st.cart[id];
   save(); render();
 }
-function save() { store.set('mc_cart4', cart); }
 
 /* ---------- 렌더 ---------- */
 function renderCats() {
@@ -336,7 +414,11 @@ function renderGrid() {
     </button>`).join('') || '<p>메뉴가 없어요. “메뉴 편집”에서 추가해 주세요.</p>';
 }
 function renderCart() {
-  const es = cartEntries();
+  const st = cur(), es = st ? entriesOf(st) : [];
+  $('#whoBanner').innerHTML = st
+    ? `👤 <b>${esc(st.name)}</b> 님이 주문 중 <button class="btn gray" data-go="start">다른 학생 ▶</button>`
+    : `먼저 처음 화면에서 이름을 입력해 주세요 <button class="btn yellow" data-go="start">처음 화면 ▶</button>`;
+  $('#cartTitle').textContent = st ? `🛒 ${st.name} 님이 담은 메뉴` : '🛒 내가 담은 메뉴';
   $('#cartLines').innerHTML = es.length ? es.map(({m, q}) => `
     <div class="line">
       ${photoHTML(m)}
@@ -349,26 +431,61 @@ function renderCart() {
   $('#left').textContent = won(LIMIT - t);
   $('#gauge > i').style.width = Math.min(100, t / LIMIT * 100) + '%';
   $('#gauge').classList.toggle('full', t >= LIMIT);
-  $('#toPrint').disabled = !es.length;
-  const b = $('#badge'); b.hidden = !count(); b.textContent = count();
+  $('#done').disabled = !es.length;
+  $('#clear').disabled = !st;
 }
-function cardHTML() {
-  const es = cartEntries();
+function renderStart() {
+  $('#stuCount').textContent = students.length;
+  $('#stuList').innerHTML = students.map(st => `
+    <div class="stu ${st.id === curId ? 'cur' : ''}">
+      <div class="nm">👤 ${esc(st.name)}</div>
+      <div class="sm">${esc(summary(st))}</div>
+      <div class="tt">${hasOrder(st) ? won(totalOf(st)) : '&nbsp;'}</div>
+      <div class="btns">
+        <button class="btn yellow" data-open="${st.id}">${hasOrder(st) ? '주문 수정' : '주문하기'}</button>
+        <button class="btn gray" data-delstu="${st.id}">삭제</button>
+      </div>
+    </div>`).join('') || '<p style="color:var(--mute)">아직 입력한 학생이 없어요. 위에 이름을 입력해 주세요.</p>';
+}
+
+/* ---------- 인쇄: 선택한 학생, A4 한 장에 4명 ---------- */
+const isSel = st => hasOrder(st) && sel[st.id] !== false;
+const selected = () => students.filter(isSel);
+const chunk = (a, n) => a.length ? [a.slice(0, n), ...chunk(a.slice(n), n)] : [];
+
+function cardHTML(st) {
+  const es = entriesOf(st);
   return `<div class="card" data-n="${es.length}">
     <div class="head"><span class="t">내가 구매할 메뉴</span><span class="logo">MEGA COFFEE</span></div>
-    <div class="who">이름<span class="ln">${esc(who)}</span></div>
-    <div class="rows">${es.length ? es.map(({m, q}) => `
+    <div class="who">이름<span class="ln">${esc(st.name)}</span></div>
+    <div class="rows">${es.map(({m, q}) => `
       <div class="row">${photoHTML(m)}
         <div><div class="nm"><span class="fx">${m.temp ? `<span class="tt ${m.temp}">${tempLabel(m.temp)}</span>` : ''}${esc(m.name)}</span></div>
         <div class="meta"><span class="fx">${won(m.price)} × ${q}개 = <b>${won(m.price * q)}</b></span></div></div>
-      </div>`).join('') : '<div class="empty">담은 메뉴가 없어요</div>'}
+      </div>`).join('')}
     </div>
-    <div class="foot"><span class="l">합계 (한도 5,000원)</span><span class="v">${won(total())}</span></div>
+    <div class="foot"><span class="l">합계 (한도 5,000원)</span><span class="v">${won(totalOf(st))}</span></div>
   </div>`;
 }
+function renderPrint() {
+  $('#picks').innerHTML = students.map(st => {
+    const ok = hasOrder(st), on = isSel(st);
+    return `<label class="pick ${on ? 'on' : ''} ${ok ? '' : 'off'}">
+      <input type="checkbox" data-pick="${st.id}" ${on ? 'checked' : ''} ${ok ? '' : 'disabled'}>
+      ${esc(st.name)} <small>${ok ? won(totalOf(st)) : '주문 없음'}</small></label>`;
+  }).join('') || '<span style="color:var(--mute)">학생이 없어요. 처음 화면에서 이름을 입력해 주세요.</span>';
+  const pages = chunk(selected(), 4);
+  $('#sheets').innerHTML = pages.map((pg, i) => `
+    <div class="sheet-no">${i + 1}쪽</div>
+    <div class="sheet">${pg.map(cardHTML).join('')}${'<div class="card blank"></div>'.repeat(4 - pg.length)}</div>`).join('');
+  const n = selected().length;
+  $('#pageInfo').textContent = n ? `${n}명 선택 · A4 ${pages.length}장 (${pages.map(p => p.length + '명').join(' + ')})` : '인쇄할 학생을 선택해 주세요';
+  $('#printBtn').disabled = $('#saveImgBtn').disabled = !n;
+}
+
 // 메뉴 이름·가격이 줄바꿈 없이 한 줄에 들어가도록 글자 크기를 줄임
 function fitText() {
-  document.querySelectorAll('#sheet .nm, #sheet .meta, #grid .nm, #cartLines .nm').forEach(el => {
+  document.querySelectorAll('#sheets .nm, #sheets .meta, #grid .nm, #cartLines .nm').forEach(el => {
     el.style.removeProperty('--fit');
     const fx = el.firstElementChild;
     if (!el.clientWidth || !fx) return;
@@ -376,8 +493,117 @@ function fitText() {
     while (fx.offsetWidth > el.clientWidth && f > 0.4) { f = Math.round((f - 0.03) * 100) / 100; el.style.setProperty('--fit', f); }
   });
 }
-function renderSheet() { $('#sheet').innerHTML = cardHTML().repeat(4); fitText(); }
-function render() { renderGrid(); renderCart(); renderSheet(); fitText(); }
+function render() { renderGrid(); renderCart(); renderStart(); renderPrint(); fitText(); }
+
+/* ---------- 이미지 저장 (A4 한 장 = PNG 한 장) ---------- */
+const FONT = '"Jua", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif';
+const loadImg = src => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src; });
+function rrPath(c, x, y, w, h, r) {
+  c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath();
+}
+function fit(c, text, maxW, size) {
+  let s = size; c.font = `${s}px ${FONT}`;
+  while (c.measureText(text).width > maxW && s > size * 0.4) { s -= 1; c.font = `${s}px ${FONT}`; }
+  return s;
+}
+function drawPhoto(c, m, imgs, x, y, s) {
+  c.save(); rrPath(c, x, y, s, s, s * 0.1); c.clip();
+  const img = imgs[photoSrc(m)];
+  if (img) {
+    c.fillStyle = '#f6f6f6'; c.fillRect(x, y, s, s);
+    const k = Math.max(s / img.width, s / img.height), w = img.width * k, h = img.height * k;
+    c.drawImage(img, x + (s - w) / 2, y + (s - h) / 2, w, h);
+  } else {
+    c.fillStyle = '#fff3b0'; c.fillRect(x, y, s, s);
+    c.font = `${s * 0.55}px ${FONT}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillStyle = '#222';
+    c.fillText(m.emoji || '☕', x + s / 2, y + s / 2);
+  }
+  c.restore();
+}
+// 이름(온도 표시 포함)을 maxW 안에 한 줄로 그림. align: 'left' | 'center'
+function drawName(c, m, x, y, maxW, size, align) {
+  const tag = tempLabel(m.temp), gap = size * 0.3;
+  let tagSize = size * 0.55, tagW = 0;
+  if (tag) { c.font = `${tagSize}px ${FONT}`; tagW = c.measureText(tag).width + tagSize * 0.9; }
+  const s = fit(c, m.name, maxW - (tag ? tagW + gap : 0), size), nameW = c.measureText(m.name).width;
+  if (tag) { tagSize = s * 0.55; c.font = `${tagSize}px ${FONT}`; tagW = c.measureText(tag).width + tagSize * 0.9; }
+  const total = (tag ? tagW + gap : 0) + nameW;
+  let sx = align === 'center' ? x + (maxW - total) / 2 : x;
+  c.textBaseline = 'middle'; c.textAlign = 'left';
+  if (tag) {
+    const th = tagSize * 1.45;
+    c.fillStyle = m.temp === 'hot' ? '#e5532d' : '#2d8fe5'; rrPath(c, sx, y - th / 2, tagW, th, th / 2); c.fill();
+    c.fillStyle = '#fff'; c.font = `${tagSize}px ${FONT}`; c.fillText(tag, sx + tagSize * 0.45, y + tagSize * 0.04);
+    sx += tagW + gap;
+  }
+  c.fillStyle = '#222'; c.font = `${s}px ${FONT}`; c.fillText(m.name, sx, y);
+}
+function drawMeta(c, text, x, y, maxW, size, align) {
+  const s = fit(c, text, maxW, size);
+  c.fillStyle = '#444'; c.textBaseline = 'middle'; c.textAlign = align === 'center' ? 'center' : 'left';
+  c.fillText(text, align === 'center' ? x + maxW / 2 : x, y);
+}
+function drawCard(c, x, y, w, h, st, imgs) {
+  const P = w * 0.06, es = entriesOf(st);
+  c.save(); c.translate(x, y);
+  c.setLineDash([8, 8]); c.strokeStyle = '#999'; c.lineWidth = 2; c.strokeRect(1, 1, w - 2, h - 2); c.setLineDash([]);
+  // 머리글
+  c.fillStyle = '#222'; c.textBaseline = 'middle'; c.textAlign = 'left';
+  c.font = `${w * 0.085}px ${FONT}`; c.fillText('내가 구매할 메뉴', P, P + w * 0.04);
+  c.font = `${w * 0.036}px ${FONT}`;
+  const pw = c.measureText('MEGA COFFEE').width + w * 0.06, ph = w * 0.065;
+  c.fillStyle = '#ffd400'; rrPath(c, w - P - pw, P + w * 0.04 - ph / 2, pw, ph, ph / 2); c.fill();
+  c.fillStyle = '#222'; c.textAlign = 'center'; c.fillText('MEGA COFFEE', w - P - pw / 2, P + w * 0.04 + 1); c.textAlign = 'left';
+  const hl = P + w * 0.1; c.fillRect(P, hl, w - 2 * P, w * 0.008);
+  // 이름
+  const ny = hl + w * 0.075;
+  c.font = `${w * 0.05}px ${FONT}`; c.fillStyle = '#222'; c.fillText('이름', P, ny);
+  const lx = P + w * 0.13; c.fillStyle = '#555'; c.fillRect(lx, ny + w * 0.035, w - P - lx, 2);
+  c.fillStyle = '#222'; const ns = fit(c, st.name, w - P - lx - 8, w * 0.07); c.font = `${ns}px ${FONT}`; c.fillText(st.name, lx + 6, ny);
+  // 합계
+  const fy = h - P - w * 0.13;
+  c.fillStyle = '#222'; c.fillRect(P, fy, w - 2 * P, w * 0.008);
+  c.font = `${w * 0.045}px ${FONT}`; c.textBaseline = 'alphabetic'; c.fillText('합계 (한도 5,000원)', P, fy + w * 0.095);
+  c.font = `${w * 0.09}px ${FONT}`; c.textAlign = 'right'; c.fillText(won(totalOf(st)), w - P, fy + w * 0.105); c.textAlign = 'left';
+  // 메뉴
+  const top = ny + w * 0.07, bot = fy - w * 0.02, rh = bot - top, tw = w - 2 * P, n = es.length;
+  if (n === 1) {
+    const { m, q } = es[0], s = Math.min(w * 0.62, rh * 0.7), blk = s + w * 0.04 + w * 0.17;
+    const y0 = top + (rh - blk) / 2;
+    drawPhoto(c, m, imgs, P + (tw - s) / 2, y0, s);
+    drawName(c, m, P, y0 + s + w * 0.065, tw, w * 0.075, 'center');
+    drawMeta(c, `${won(m.price)} × ${q}개 = ${won(m.price * q)}`, P, y0 + s + w * 0.145, tw, w * 0.055, 'center');
+  } else {
+    const each = rh / n, s = Math.min(each * 0.88, w * 0.4), tx = P + s + w * 0.04, tmax = w - P - tx;
+    es.forEach(({ m, q }, i) => {
+      const cy = top + each * i + each / 2, nsz = n === 2 ? w * 0.068 : w * 0.056;
+      drawPhoto(c, m, imgs, P, cy - s / 2, s);
+      drawName(c, m, tx, cy - nsz * 0.55, tmax, nsz, 'left');
+      drawMeta(c, `${won(m.price)} × ${q}개 = ${won(m.price * q)}`, tx, cy + nsz * 0.7, tmax, nsz * 0.75, 'left');
+    });
+  }
+  c.restore();
+}
+function download(canvas, name) {
+  const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function saveImages() {
+  const pages = chunk(selected(), 4); if (!pages.length) return;
+  toast('이미지를 만들고 있어요…');
+  try { await document.fonts.load(`40px ${FONT}`, '가나다0123'); } catch {}
+  const imgs = {};
+  for (const st of selected()) for (const { m } of entriesOf(st)) { const s = photoSrc(m); if (s && !(s in imgs)) imgs[s] = await loadImg(s); }
+  const PW = 1654, PH = 2339;  // A4 200dpi
+  for (let i = 0; i < pages.length; i++) {
+    const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH;
+    const c = cv.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, PW, PH);
+    pages[i].forEach((st, k) => drawCard(c, (k % 2) * PW / 2, Math.floor(k / 2) * PH / 2, PW / 2, PH / 2, st, imgs));
+    setTimeout(() => download(cv, pages.length > 1 ? `megacoffee_menu_${i + 1}.png` : 'megacoffee_menu.png'), i * 500);
+  }
+  toast(`🖼 이미지 ${pages.length}장을 저장했어요`);
+}
 
 /* ---------- 메뉴 편집 ---------- */
 function renderEdit() {
@@ -420,30 +646,41 @@ function resizeImage(file, max = 360) {
 document.addEventListener('click', e => {
   const t = e.target.closest('button, [data-photo]'); if (!t) return;
   if (t.classList.contains('tab')) return showView(t.dataset.view);
+  if (t.dataset.go) return showView(t.dataset.go);
   if (t.classList.contains('cat')) { curCat = t.dataset.c; renderCats(); renderGrid(); return fitText(); }
   if (t.classList.contains('item')) return add(t.dataset.id);
   if (t.dataset.inc) return add(t.dataset.inc);
   if (t.dataset.dec) return dec(t.dataset.dec);
+  if (t.dataset.open) { curId = t.dataset.open; save(); render(); return showView('order'); }
+  if (t.dataset.delstu) {
+    const st = students.find(s => s.id === t.dataset.delstu);
+    if (!st || !confirm(`${st.name} 학생과 주문 내용을 삭제할까요?`)) return;
+    students = students.filter(s => s.id !== st.id); delete sel[st.id]; if (curId === st.id) curId = null;
+    save(); return render();
+  }
   if (t.dataset.photo) { photoTarget = t.dataset.photo; $('#file').click(); return; }
   if (t.dataset.del) {
     if (!confirm('이 메뉴를 삭제할까요?')) return;
-    menu = menu.filter(m => m.id !== t.dataset.del); delete cart[t.dataset.del];
+    menu = menu.filter(m => m.id !== t.dataset.del); students.forEach(s => delete s.cart[t.dataset.del]);
     saveMenu(); save(); renderEdit(); render(); return;
   }
 });
-$('#clear').onclick = () => { cart = {}; save(); render(); };
-$('#toPrint').onclick = () => showView('print');
+$('#nameForm').onsubmit = e => { e.preventDefault(); const v = $('#nameIn').value; $('#nameIn').value = ''; startStudent(v); };
+$('#clear').onclick = () => { const st = cur(); if (st) { st.cart = {}; save(); render(); } };
+$('#done').onclick = () => { sel[curId] = true; save(); render(); showView('start'); toast('✅ 주문이 저장됐어요. 다음 학생 이름을 입력해 주세요'); $('#nameIn').focus(); };
+$('#picks').addEventListener('change', e => { const id = e.target.dataset.pick; if (!id) return; sel[id] = e.target.checked; save(); renderPrint(); fitText(); });
+$('#selAll').onclick = () => { students.forEach(s => sel[s.id] = true); save(); renderPrint(); fitText(); };
+$('#selNone').onclick = () => { students.forEach(s => sel[s.id] = false); save(); renderPrint(); fitText(); };
 $('#printBtn').onclick = () => window.print();
-$('#who').value = who;
-$('#who').oninput = e => { who = e.target.value; store.set('mc_who', who); renderSheet(); };
+$('#saveImgBtn').onclick = saveImages;
 $('#addItem').onclick = () => {
   menu.push({id: 'u' + Date.now(), name: '새 메뉴', temp: 'ice', cat: curCat === '전체' ? CATS[0] : curCat, price: 3000, emoji: '☕', photo: ''});
   saveMenu(); renderEdit(); render();
   window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
 };
 $('#resetMenu').onclick = () => {
-  if (!confirm('수정한 메뉴와 사진이 모두 사라지고 기본 메뉴로 돌아가요. 계속할까요?')) return;
-  menu = DEFAULT_MENU.map(m => ({...m})); cart = {};
+  if (!confirm('수정한 메뉴와 사진이 모두 사라지고, 학생들이 담은 메뉴도 비워져요. 계속할까요?')) return;
+  menu = DEFAULT_MENU.map(m => ({...m})); students.forEach(s => s.cart = {});
   saveMenu(); save(); renderEdit(); render();
 };
 $('#editList').addEventListener('change', e => {
@@ -460,11 +697,12 @@ $('#file').onchange = async e => {
 };
 
 function showView(v) {
+  if (v === 'order' && !cur()) { toast('먼저 이름을 입력하거나 학생을 골라 주세요'); v = 'start'; }
   document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.view === v));
   if (v === 'edit') renderEdit();
-  if (v === 'print') renderSheet();
-  if (v === 'order') fitText();
+  if (v === 'print') renderPrint();
+  render();
   window.scrollTo(0, 0);
 }
 
