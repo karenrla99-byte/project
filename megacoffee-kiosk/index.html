@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>메가커피 키오스크 실습</title>
+<style>
+  :root {
+    --yellow: #ffd400;
+    --yellow-d: #f2c200;
+    --ink: #222;
+    --mute: #777;
+    --line: #e5e5e5;
+    --bg: #f6f4ee;
+    --red: #e5322d;
+    --green: #1f9d55;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    background: var(--bg); color: var(--ink);
+    min-height: 100vh;
+  }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ---------- 상단 ---------- */
+  header.top {
+    background: var(--yellow); display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; position: sticky; top: 0; z-index: 10;
+    box-shadow: 0 2px 6px rgba(0,0,0,.12);
+  }
+  header.top h1 { font-size: 22px; margin: 0; flex: 1; letter-spacing: -.5px; }
+  .tabs { display: flex; gap: 6px; }
+  .tab {
+    border: 0; background: rgba(255,255,255,.55); padding: 10px 16px;
+    border-radius: 999px; font-size: 16px; font-weight: 700; color: var(--ink);
+  }
+  .tab.on { background: #222; color: #fff; }
+  .tab .badge {
+    background: var(--red); color: #fff; border-radius: 999px; font-size: 12px;
+    padding: 1px 7px; margin-left: 4px;
+  }
+
+  main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* ---------- 주문 화면 ---------- */
+  .order-layout { display: grid; grid-template-columns: 1fr 340px; gap: 16px; align-items: start; }
+  .cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cat {
+    border: 2px solid #222; background: #fff; padding: 9px 18px; border-radius: 12px;
+    font-size: 16px; font-weight: 700;
+  }
+  .cat.on { background: #222; color: #fff; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .item {
+    background: #fff; border: 2px solid transparent; border-radius: 16px; padding: 10px;
+    text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.08); position: relative;
+    transition: transform .08s;
+  }
+  .item:active { transform: scale(.97); }
+  .item.dim { opacity: .45; }
+  .photo {
+    width: 100%; aspect-ratio: 1; border-radius: 12px; display: grid; place-items: center;
+    font-size: 52px; overflow: hidden; background: #fff3b0;
+  }
+  .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .item .nm { font-weight: 700; margin-top: 8px; font-size: 15px; line-height: 1.25; min-height: 2.5em; }
+  .item .pr { color: #c47a00; font-weight: 800; font-size: 17px; }
+  .temp {
+    position: absolute; top: 8px; left: 8px; font-size: 12px; font-weight: 800;
+    padding: 2px 8px; border-radius: 999px; color: #fff;
+  }
+  .temp.hot { background: #e5532d; }
+  .temp.ice { background: #2d8fe5; }
+
+  .cart {
+    background: #fff; border-radius: 16px; padding: 14px; position: sticky; top: 72px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.1);
+  }
+  .cart h2 { margin: 0 0 8px; font-size: 18px; }
+  .cart-empty { color: var(--mute); text-align: center; padding: 24px 0; }
+  .line { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .line .photo { font-size: 24px; border-radius: 8px; }
+  .line .nm { font-weight: 700; font-size: 14px; }
+  .line .sub { color: var(--mute); font-size: 13px; }
+  .qty { display: flex; align-items: center; gap: 6px; }
+  .qty button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #bbb; background: #fff; font-size: 16px; line-height: 1; }
+  .qty b { min-width: 16px; text-align: center; }
+
+  .gauge { height: 14px; background: #eee; border-radius: 999px; overflow: hidden; margin: 12px 0 6px; }
+  .gauge > i { display: block; height: 100%; background: var(--green); width: 0; transition: width .2s; }
+  .gauge.full > i { background: var(--red); }
+  .sum { display: flex; justify-content: space-between; font-size: 15px; margin: 2px 0; }
+  .sum.big { font-size: 22px; font-weight: 800; }
+  .actions { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 12px; }
+  .btn { border: 0; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 800; }
+  .btn.gray { background: #e8e8e8; }
+  .btn.yellow { background: var(--yellow); }
+  .btn.dark { background: #222; color: #fff; }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  /* 한도 초과 안내 */
+  .toast {
+    position: fixed; left: 50%; bottom: 36px; transform: translate(-50%, 30px);
+    background: #222; color: #fff; padding: 16px 26px; border-radius: 16px;
+    font-size: 18px; font-weight: 700; opacity: 0; pointer-events: none;
+    transition: all .2s; z-index: 50; text-align: center; max-width: 92vw;
+  }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+  .toast b { color: var(--yellow); }
+
+  /* ---------- 내 메뉴판 / 인쇄 ---------- */
+  .print-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .print-bar .hint { color: var(--mute); font-size: 14px; flex: 1; min-width: 200px; }
+  .name-in { padding: 10px 12px; border: 2px solid #ccc; border-radius: 10px; font-size: 16px; font-family: inherit; }
+
+  .sheet {
+    container-type: inline-size;
+    width: min(100%, 560px); aspect-ratio: 210 / 297; margin: 0 auto;
+    background: #fff; box-shadow: 0 2px 12px rgba(0,0,0,.2);
+    display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  }
+  .card {
+    border: 1px dashed #aaa; padding: 3.2cqw 3cqw; display: flex; flex-direction: column;
+    overflow: hidden; background: #fff;
+  }
+  .card .head { display: flex; align-items: center; justify-content: space-between; border-bottom: .5cqw solid #222; padding-bottom: 1.4cqw; }
+  .card .head .t { font-size: 3.8cqw; font-weight: 900; white-space: nowrap; }
+  .card .head .logo { white-space: nowrap; background: var(--yellow); font-size: 2cqw; font-weight: 800; padding: .4cqw 1.6cqw; border-radius: 99px; }
+  .card .who { font-size: 2.6cqw; margin: 1.4cqw 0 .6cqw; display: flex; align-items: baseline; gap: 1cqw; }
+  .card .who span.ln { flex: 1; border-bottom: .3cqw solid #555; height: 3cqw; font-weight: 700; }
+  .card .rows { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 1.2cqw; margin-top: 1cqw; min-height: 0; }
+  .card .row { display: grid; grid-template-columns: 15cqw 1fr; gap: 2cqw; align-items: center; }
+  .card .row .photo { font-size: 8cqw; border-radius: 1.6cqw; }
+  .card .row .nm { font-size: 3.4cqw; font-weight: 800; line-height: 1.2; }
+  .card .row .meta { font-size: 2.8cqw; color: #444; margin-top: .3cqw; }
+  .card .row .tt { font-size: 2.2cqw; font-weight: 800; color: #fff; padding: 0 1cqw; border-radius: 99px; margin-right: .8cqw; }
+  .card .row .tt.hot { background: #e5532d; }
+  .card .row .tt.ice { background: #2d8fe5; }
+  .card .empty { margin: auto; color: #999; font-size: 3cqw; }
+  .card .foot { border-top: .5cqw solid #222; padding-top: 1.2cqw; display: flex; justify-content: space-between; align-items: baseline; font-weight: 900; }
+  .card .foot .l { font-size: 2.6cqw; }
+  .card .foot .v { font-size: 4.4cqw; white-space: nowrap; }
+
+  /* ---------- 메뉴 편집 ---------- */
+  .edit-note { background: #fff8d6; border: 1px solid #f0d96b; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.6; margin-bottom: 14px; }
+  .edit-list { display: grid; gap: 8px; }
+  .erow {
+    background: #fff; border-radius: 12px; padding: 8px 10px; display: grid;
+    grid-template-columns: 56px 1.6fr 100px 100px 90px auto; gap: 8px; align-items: center;
+  }
+  .erow input, .erow select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 8px; font-size: 15px; font-family: inherit; }
+  .erow .photo { font-size: 26px; border-radius: 8px; cursor: pointer; }
+  .erow .x { background: #fde8e8; color: var(--red); border: 0; border-radius: 8px; padding: 8px 10px; font-weight: 800; }
+  .edit-tools { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+
+  @media (max-width: 860px) {
+    .order-layout { grid-template-columns: 1fr; }
+    .cart { position: static; }
+    .erow { grid-template-columns: 56px 1fr 1fr; }
+    header.top h1 { font-size: 17px; }
+    .tab { padding: 8px 10px; font-size: 14px; }
+  }
+
+  /* ---------- 인쇄: A4 한 장에 4개 ---------- */
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    header.top, .view:not(#view-print), .print-bar, .toast, .no-print { display: none !important; }
+    main { padding: 0; max-width: none; }
+    #view-print { display: block !important; }
+    .sheet {
+      width: 210mm; height: 297mm; aspect-ratio: auto; box-shadow: none; margin: 0;
+      break-inside: avoid;
+    }
+    .card { border: .2mm dashed #999; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>☕ 메가커피 키오스크 실습</h1>
+  <nav class="tabs">
+    <button class="tab on" data-view="order">주문하기</button>
+    <button class="tab" data-view="print">내 메뉴판<span class="badge" id="badge" hidden>0</span></button>
+    <button class="tab" data-view="edit">메뉴 편집</button>
+  </nav>
+</header>
+
+<main>
+  <!-- 주문 -->
+  <section class="view on" id="view-order">
+    <div class="order-layout">
+      <div>
+        <div class="cats" id="cats"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <aside class="cart">
+        <h2>🛒 내가 담은 메뉴</h2>
+        <div id="cartLines"></div>
+        <div class="gauge" id="gauge"><i></i></div>
+        <div class="sum"><span>사용 가능 금액</span><span>5,000원</span></div>
+        <div class="sum"><span>남은 금액</span><span id="left">5,000원</span></div>
+        <div class="sum big"><span>합계</span><span id="total">0원</span></div>
+        <div class="actions">
+          <button class="btn gray" id="clear">비우기</button>
+          <button class="btn yellow" id="toPrint" disabled>내 메뉴판 보기 ▶</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- 내 메뉴판 -->
+  <section class="view" id="view-print">
+    <div class="print-bar">
+      <input class="name-in" id="who" placeholder="이름 (비워두면 직접 쓰는 칸)" maxlength="10">
+      <button class="btn dark" id="printBtn">🖨 인쇄하기 (A4 한 장 · 4장)</button>
+      <div class="hint">A4 한 장에 같은 메뉴판이 4개 나와요. 인쇄 창에서 용지 <b>A4</b>, 배율 <b>100%</b>, 여백 <b>없음</b>으로 맞춰 주세요.</div>
+    </div>
+    <div class="sheet" id="sheet"></div>
+  </section>
+
+  <!-- 메뉴 편집 -->
+  <section class="view" id="view-edit">
+    <div class="edit-note">
+      ⚠️ 기본으로 들어 있는 메뉴·가격은 <b>참고용</b>이에요. 공식 앱/홈페이지에서 확인한 가격으로 고쳐서 사용하세요.<br>
+      사진 칸(동그란 그림)을 누르면 사진을 올릴 수 있어요. 수정한 내용은 이 브라우저에 자동 저장됩니다.
+    </div>
+    <div class="edit-tools">
+      <button class="btn yellow" id="addItem">＋ 메뉴 추가</button>
+      <button class="btn gray" id="resetMenu">기본 메뉴로 되돌리기</button>
+    </div>
+    <div class="edit-list" id="editList"></div>
+    <input type="file" id="file" accept="image/*" hidden>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LIMIT = 5000;
+const CATS = ['커피', '라떼', '에이드·티', '스무디·프라페', '디저트'];
+
+// 참고용 기본 메뉴 (공식 가격과 다를 수 있음 → 메뉴 편집에서 수정)
+const DEFAULT_MENU = [
+  {name:'아메리카노', temp:'hot', cat:'커피', price:1700, emoji:'☕'},
+  {name:'아메리카노', temp:'ice', cat:'커피', price:2000, emoji:'🧊'},
+  {name:'메가리카노', temp:'ice', cat:'커피', price:3300, emoji:'🥤'},
+  {name:'바닐라 아메리카노', temp:'ice', cat:'커피', price:3000, emoji:'🥤'},
+  {name:'헤이즐넛 아메리카노', temp:'ice', cat:'커피', price:3000, emoji:'🥤'},
+  {name:'할메가커피', temp:'ice', cat:'커피', price:2300, emoji:'🥤'},
+  {name:'카페라떼', temp:'hot', cat:'라떼', price:3000, emoji:'☕'},
+  {name:'카페라떼', temp:'ice', cat:'라떼', price:3500, emoji:'🥛'},
+  {name:'바닐라라떼', temp:'ice', cat:'라떼', price:3800, emoji:'🥛'},
+  {name:'딸기라떼', temp:'ice', cat:'라떼', price:3700, emoji:'🍓'},
+  {name:'큐브라떼', temp:'ice', cat:'라떼', price:4200, emoji:'🧊'},
+  {name:'초코라떼', temp:'ice', cat:'라떼', price:3800, emoji:'🍫'},
+  {name:'복숭아 아이스티', temp:'ice', cat:'에이드·티', price:2500, emoji:'🍑'},
+  {name:'레몬에이드', temp:'ice', cat:'에이드·티', price:3500, emoji:'🍋'},
+  {name:'자몽에이드', temp:'ice', cat:'에이드·티', price:3900, emoji:'🍊'},
+  {name:'유자차', temp:'hot', cat:'에이드·티', price:3300, emoji:'🍵'},
+  {name:'수박주스', temp:'ice', cat:'스무디·프라페', price:4500, emoji:'🍉'},
+  {name:'플레인 퐁크러쉬', temp:'ice', cat:'스무디·프라페', price:3900, emoji:'🥣'},
+  {name:'딸기 요거트 스무디', temp:'ice', cat:'스무디·프라페', price:4000, emoji:'🍓'},
+  {name:'쿠키프라페', temp:'ice', cat:'스무디·프라페', price:4300, emoji:'🍪'},
+  {name:'크로크무슈', temp:'', cat:'디저트', price:3500, emoji:'🥪'},
+  {name:'쌀과자', temp:'', cat:'디저트', price:1500, emoji:'🍘'},
+].map((m, i) => ({id: 'd' + i, photo: '', ...m}));
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast('사진이 너무 커서 저장하지 못했어요'); } },
+};
+
+let menu = store.get('mc_menu', null) || DEFAULT_MENU;
+let cart = store.get('mc_cart', {});          // id -> qty
+let curCat = '전체';
+let who = store.get('mc_who', '');
+
+const $ = s => document.querySelector(s);
+const won = n => n.toLocaleString('ko-KR') + '원';
+const byId = id => menu.find(m => m.id === id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function cartEntries() {
+  return Object.entries(cart).map(([id, q]) => ({m: byId(id), q})).filter(e => e.m && e.q > 0);
+}
+const total = () => cartEntries().reduce((s, e) => s + e.m.price * e.q, 0);
+const count = () => cartEntries().reduce((s, e) => s + e.q, 0);
+
+function photoHTML(m) {
+  return `<div class="photo">${m.photo ? `<img src="${m.photo}" alt="">` : esc(m.emoji || '☕')}</div>`;
+}
+const tempLabel = t => t === 'hot' ? 'HOT' : t === 'ice' ? 'ICE' : '';
+
+/* ---------- 토스트 ---------- */
+let tt;
+function toast(html) {
+  const t = $('#toast'); t.innerHTML = html; t.classList.add('on');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600);
+}
+
+/* ---------- 담기 ---------- */
+function add(id) {
+  const m = byId(id);
+  if (total() + m.price > LIMIT) {
+    toast(`🚫 <b>5,000원</b>이 넘어서 더 담을 수 없어요!<br><small>(담으면 ${won(total() + m.price)} · 남은 금액 ${won(LIMIT - total())})</small>`);
+    return;
+  }
+  cart[id] = (cart[id] || 0) + 1;
+  save(); render();
+}
+function dec(id) {
+  cart[id] = (cart[id] || 0) - 1;
+  if (cart[id] <= 0) delete cart[id];
+  save(); render();
+}
+function save() { store.set('mc_cart', cart); }
+
+/* ---------- 렌더 ---------- */
+function renderCats() {
+  $('#cats').innerHTML = ['전체', ...CATS].map(c =>
+    `<button class="cat ${c === curCat ? 'on' : ''}" data-c="${c}">${c}</button>`).join('');
+}
+function renderGrid() {
+  const left = LIMIT - total();
+  const list = menu.filter(m => curCat === '전체' || m.cat === curCat);
+  $('#grid').innerHTML = list.map(m => `
+    <button class="item ${m.price > left ? 'dim' : ''}" data-id="${m.id}">
+      ${m.temp ? `<span class="temp ${m.temp}">${tempLabel(m.temp)}</span>` : ''}
+      ${photoHTML(m)}
+      <div class="nm">${esc(m.name)}</div>
+      <div class="pr">${won(m.price)}</div>
+    </button>`).join('') || '<p>메뉴가 없어요. “메뉴 편집”에서 추가해 주세요.</p>';
+}
+function renderCart() {
+  const es = cartEntries();
+  $('#cartLines').innerHTML = es.length ? es.map(({m, q}) => `
+    <div class="line">
+      ${photoHTML(m)}
+      <div><div class="nm">${esc(m.name)} ${m.temp ? `<small>(${tempLabel(m.temp)})</small>` : ''}</div>
+      <div class="sub">${won(m.price)} × ${q} = ${won(m.price * q)}</div></div>
+      <div class="qty"><button data-dec="${m.id}">−</button><b>${q}</b><button data-inc="${m.id}">＋</button></div>
+    </div>`).join('') : '<div class="cart-empty">메뉴를 눌러서 담아 보세요</div>';
+  const t = total();
+  $('#total').textContent = won(t);
+  $('#left').textContent = won(LIMIT - t);
+  $('#gauge > i').style.width = Math.min(100, t / LIMIT * 100) + '%';
+  $('#gauge').classList.toggle('full', t >= LIMIT);
+  $('#toPrint').disabled = !es.length;
+  const b = $('#badge'); b.hidden = !count(); b.textContent = count();
+}
+function cardHTML() {
+  const es = cartEntries();
+  return `<div class="card">
+    <div class="head"><span class="t">내 주문 메뉴</span><span class="logo">MEGA COFFEE</span></div>
+    <div class="who">이름<span class="ln">${esc(who)}</span></div>
+    <div class="rows">${es.length ? es.map(({m, q}) => `
+      <div class="row">${photoHTML(m)}
+        <div><div class="nm">${m.temp ? `<span class="tt ${m.temp}">${tempLabel(m.temp)}</span>` : ''}${esc(m.name)}</div>
+        <div class="meta">${won(m.price)} × ${q}개 = <b>${won(m.price * q)}</b></div></div>
+      </div>`).join('') : '<div class="empty">담은 메뉴가 없어요</div>'}
+    </div>
+    <div class="foot"><span class="l">합계 (한도 5,000원)</span><span class="v">${won(total())}</span></div>
+  </div>`;
+}
+function renderSheet() { $('#sheet').innerHTML = cardHTML().repeat(4); }
+function render() { renderGrid(); renderCart(); renderSheet(); }
+
+/* ---------- 메뉴 편집 ---------- */
+function renderEdit() {
+  $('#editList').innerHTML = menu.map(m => `
+    <div class="erow" data-id="${m.id}">
+      <div data-photo="${m.id}">${photoHTML(m)}</div>
+      <input data-f="name" value="${esc(m.name)}" placeholder="메뉴 이름">
+      <input data-f="price" type="number" step="100" min="0" value="${m.price}" placeholder="가격">
+      <select data-f="cat">${CATS.map(c => `<option ${c === m.cat ? 'selected' : ''}>${c}</option>`).join('')}</select>
+      <select data-f="temp">
+        <option value="" ${!m.temp ? 'selected' : ''}>-</option>
+        <option value="hot" ${m.temp === 'hot' ? 'selected' : ''}>HOT</option>
+        <option value="ice" ${m.temp === 'ice' ? 'selected' : ''}>ICE</option>
+      </select>
+      <button class="x" data-del="${m.id}">삭제</button>
+    </div>`).join('');
+}
+function saveMenu() { store.set('mc_menu', menu); }
+
+let photoTarget = null;
+function resizeImage(file, max = 360) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const s = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = img.width * s; c.height = img.height * s;
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', .85));
+      };
+      img.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+/* ---------- 이벤트 ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, [data-photo]'); if (!t) return;
+  if (t.classList.contains('tab')) return showView(t.dataset.view);
+  if (t.classList.contains('cat')) { curCat = t.dataset.c; renderCats(); return renderGrid(); }
+  if (t.classList.contains('item')) return add(t.dataset.id);
+  if (t.dataset.inc) return add(t.dataset.inc);
+  if (t.dataset.dec) return dec(t.dataset.dec);
+  if (t.dataset.photo) { photoTarget = t.dataset.photo; $('#file').click(); return; }
+  if (t.dataset.del) {
+    if (!confirm('이 메뉴를 삭제할까요?')) return;
+    menu = menu.filter(m => m.id !== t.dataset.del); delete cart[t.dataset.del];
+    saveMenu(); save(); renderEdit(); render(); return;
+  }
+});
+$('#clear').onclick = () => { cart = {}; save(); render(); };
+$('#toPrint').onclick = () => showView('print');
+$('#printBtn').onclick = () => window.print();
+$('#who').value = who;
+$('#who').oninput = e => { who = e.target.value; store.set('mc_who', who); renderSheet(); };
+$('#addItem').onclick = () => {
+  menu.push({id: 'u' + Date.now(), name: '새 메뉴', temp: 'ice', cat: curCat === '전체' ? CATS[0] : curCat, price: 3000, emoji: '☕', photo: ''});
+  saveMenu(); renderEdit(); render();
+  window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+};
+$('#resetMenu').onclick = () => {
+  if (!confirm('수정한 메뉴와 사진이 모두 사라지고 기본 메뉴로 돌아가요. 계속할까요?')) return;
+  menu = DEFAULT_MENU.map(m => ({...m})); cart = {};
+  saveMenu(); save(); renderEdit(); render();
+};
+$('#editList').addEventListener('change', e => {
+  const row = e.target.closest('.erow'); if (!row) return;
+  const m = byId(row.dataset.id), f = e.target.dataset.f; if (!m || !f) return;
+  m[f] = f === 'price' ? Math.max(0, parseInt(e.target.value) || 0) : e.target.value;
+  saveMenu(); render();
+});
+$('#file').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = '';
+  if (!f || !photoTarget) return;
+  byId(photoTarget).photo = await resizeImage(f);
+  saveMenu(); renderEdit(); render();
+};
+
+function showView(v) {
+  document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'view-' + v));
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.view === v));
+  if (v === 'edit') renderEdit();
+  if (v === 'print') renderSheet();
+  window.scrollTo(0, 0);
+}
+
+renderCats(); render();
+</script>
+</body>
+</html>
