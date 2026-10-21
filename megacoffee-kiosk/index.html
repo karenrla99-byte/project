@@ -150,12 +150,12 @@
   .card .row .tt.ice { background: #2d8fe5; }
   .card[data-n="1"] .rows { justify-content: center; }
   .card[data-n="1"] .row { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 1.4cqw; }
-  .card[data-n="1"] .row .photo { width: 25cqw; font-size: 13cqw; border-radius: 2.6cqw; }
+  .card[data-n="1"] .row .photo { width: 19cqw; font-size: 10cqw; border-radius: 2.2cqw; }
   .card[data-n="1"] .row .nm, .card[data-n="1"] .row .meta { width: 100%; }
   .card[data-n="1"] .row .nm { font-size: calc(4.6cqw * var(--fit, 1)); }
   .card[data-n="1"] .row .meta { font-size: calc(3.4cqw * var(--fit, 1)); }
   .card[data-n="1"] .row .tt { font-size: calc(3cqw * var(--fit, 1)); }
-  .card[data-n="2"] .row { grid-template-columns: 20cqw minmax(0, 1fr); }
+  .card[data-n="2"] .row { grid-template-columns: 15cqw minmax(0, 1fr); }
   .card[data-n="2"] .rows { justify-content: space-evenly; }
   .card .empty { margin: auto; color: #999; font-size: 3cqw; }
   .card .foot { border-top: .5cqw solid #222; padding-top: 1.2cqw; display: flex; justify-content: space-between; align-items: baseline; font-weight: 900; }
@@ -569,13 +569,13 @@ function drawCard(c, x, y, w, h, st, imgs) {
   // 메뉴
   const top = ny + w * 0.07, bot = fy - w * 0.02, rh = bot - top, tw = w - 2 * P, n = es.length;
   if (n === 1) {
-    const { m, q } = es[0], s = Math.min(w * 0.62, rh * 0.7), blk = s + w * 0.04 + w * 0.17;
+    const { m, q } = es[0], s = Math.min(w * 0.46, rh * 0.55), blk = s + w * 0.04 + w * 0.17;
     const y0 = top + (rh - blk) / 2;
     drawPhoto(c, m, imgs, P + (tw - s) / 2, y0, s);
     drawName(c, m, P, y0 + s + w * 0.065, tw, w * 0.075, 'center');
     drawMeta(c, `${won(m.price)} × ${q}개 = ${won(m.price * q)}`, P, y0 + s + w * 0.145, tw, w * 0.055, 'center');
   } else {
-    const each = rh / n, s = Math.min(each * 0.88, w * 0.4), tx = P + s + w * 0.04, tmax = w - P - tx;
+    const each = rh / n, s = Math.min(each * 0.7, w * 0.3), tx = P + s + w * 0.04, tmax = w - P - tx;
     es.forEach(({ m, q }, i) => {
       const cy = top + each * i + each / 2, nsz = n === 2 ? w * 0.068 : w * 0.056;
       drawPhoto(c, m, imgs, P, cy - s / 2, s);
