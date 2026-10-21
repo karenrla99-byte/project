@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>메가커피 키오스크 실습</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
 <style>
   :root {
     --yellow: #ffd400;
@@ -18,7 +21,8 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; }
   body {
-    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-family: "Jua", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    font-synthesis: none;
     background: var(--bg); color: var(--ink);
     min-height: 100vh;
   }
@@ -128,18 +132,29 @@
     overflow: hidden; background: #fff;
   }
   .card .head { display: flex; align-items: center; justify-content: space-between; border-bottom: .5cqw solid #222; padding-bottom: 1.4cqw; }
-  .card .head .t { font-size: 3.8cqw; font-weight: 900; white-space: nowrap; }
+  .card .head .t { font-size: 4cqw; font-weight: 900; white-space: nowrap; }
   .card .head .logo { white-space: nowrap; background: var(--yellow); font-size: 2cqw; font-weight: 800; padding: .4cqw 1.6cqw; border-radius: 99px; }
   .card .who { font-size: 2.6cqw; margin: 1.4cqw 0 .6cqw; display: flex; align-items: baseline; gap: 1cqw; }
   .card .who span.ln { flex: 1; border-bottom: .3cqw solid #555; height: 3cqw; font-weight: 700; }
   .card .rows { flex: 1; display: flex; flex-direction: column; justify-content: flex-start; gap: 1.2cqw; margin-top: 1cqw; min-height: 0; }
-  .card .row { display: grid; grid-template-columns: 15cqw 1fr; gap: 2cqw; align-items: center; }
+  .card .row { display: grid; grid-template-columns: 15cqw minmax(0, 1fr); gap: 2cqw; align-items: center; }
   .card .row .photo { font-size: 8cqw; border-radius: 1.6cqw; }
-  .card .row .nm { font-size: 3.4cqw; font-weight: 800; line-height: 1.2; }
-  .card .row .meta { font-size: 2.8cqw; color: #444; margin-top: .3cqw; }
+  .card .row .nm { font-size: calc(3.6cqw * var(--fit, 1)); line-height: 1.2; white-space: nowrap; overflow: hidden; }
+  .card .row .meta { font-size: calc(2.8cqw * var(--fit, 1)); color: #444; margin-top: .3cqw; white-space: nowrap; overflow: hidden; }
+  .card .row > div:not(.photo) { min-width: 0; width: 100%; }
+  .card .fx { display: inline-block; white-space: nowrap; }
   .card .row .tt { font-size: 2.2cqw; font-weight: 800; color: #fff; padding: 0 1cqw; border-radius: 99px; margin-right: .8cqw; }
   .card .row .tt.hot { background: #e5532d; }
   .card .row .tt.ice { background: #2d8fe5; }
+  .card[data-n="1"] .rows { justify-content: center; }
+  .card[data-n="1"] .row { grid-template-columns: minmax(0, 1fr); justify-items: center; text-align: center; gap: 2.2cqw; }
+  .card[data-n="1"] .row .photo { width: 31cqw; font-size: 16cqw; border-radius: 3cqw; }
+  .card[data-n="1"] .row .nm, .card[data-n="1"] .row .meta { width: 100%; }
+  .card[data-n="1"] .row .nm { font-size: calc(5cqw * var(--fit, 1)); }
+  .card[data-n="1"] .row .meta { font-size: calc(3.8cqw * var(--fit, 1)); }
+  .card[data-n="1"] .row .tt { font-size: calc(3cqw * var(--fit, 1)); }
+  .card[data-n="2"] .row { grid-template-columns: 20cqw minmax(0, 1fr); }
+  .card[data-n="2"] .rows { justify-content: space-evenly; }
   .card .empty { margin: auto; color: #999; font-size: 3cqw; }
   .card .foot { border-top: .5cqw solid #222; padding-top: 1.2cqw; display: flex; justify-content: space-between; align-items: baseline; font-weight: 900; }
   .card .foot .l { font-size: 2.6cqw; }
@@ -337,19 +352,29 @@ function renderCart() {
 }
 function cardHTML() {
   const es = cartEntries();
-  return `<div class="card">
+  return `<div class="card" data-n="${es.length}">
     <div class="head"><span class="t">내 주문 메뉴</span><span class="logo">MEGA COFFEE</span></div>
     <div class="who">이름<span class="ln">${esc(who)}</span></div>
     <div class="rows">${es.length ? es.map(({m, q}) => `
       <div class="row">${photoHTML(m)}
-        <div><div class="nm">${m.temp ? `<span class="tt ${m.temp}">${tempLabel(m.temp)}</span>` : ''}${esc(m.name)}</div>
-        <div class="meta">${won(m.price)} × ${q}개 = <b>${won(m.price * q)}</b></div></div>
+        <div><div class="nm"><span class="fx">${m.temp ? `<span class="tt ${m.temp}">${tempLabel(m.temp)}</span>` : ''}${esc(m.name)}</span></div>
+        <div class="meta"><span class="fx">${won(m.price)} × ${q}개 = <b>${won(m.price * q)}</b></span></div></div>
       </div>`).join('') : '<div class="empty">담은 메뉴가 없어요</div>'}
     </div>
     <div class="foot"><span class="l">합계 (한도 5,000원)</span><span class="v">${won(total())}</span></div>
   </div>`;
 }
-function renderSheet() { $('#sheet').innerHTML = cardHTML().repeat(4); }
+// 메뉴 이름·가격이 줄바꿈 없이 한 줄에 들어가도록 글자 크기를 줄임
+function fitText() {
+  document.querySelectorAll('#sheet .nm, #sheet .meta').forEach(el => {
+    el.style.removeProperty('--fit');
+    const fx = el.firstElementChild;
+    if (!el.clientWidth || !fx) return;
+    let f = 1;
+    while (fx.offsetWidth > el.clientWidth && f > 0.4) { f = Math.round((f - 0.03) * 100) / 100; el.style.setProperty('--fit', f); }
+  });
+}
+function renderSheet() { $('#sheet').innerHTML = cardHTML().repeat(4); fitText(); }
 function render() { renderGrid(); renderCart(); renderSheet(); }
 
 /* ---------- 메뉴 편집 ---------- */
@@ -441,6 +466,7 @@ function showView(v) {
 }
 
 renderCats(); render();
+if (document.fonts) document.fonts.ready.then(fitText);
 </script>
 </body>
 </html>
