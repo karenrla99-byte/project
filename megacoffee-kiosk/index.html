@@ -475,8 +475,13 @@ function renderPrint() {
       ${esc(st.name)} <small>${ok ? won(totalOf(st)) : '주문 없음'}</small></label>`;
   }).join('') || '<span style="color:var(--mute)">학생이 없어요. 처음 화면에서 이름을 입력해 주세요.</span>';
   const pages = chunk(selected(), 4);
+  const sample = !pages.length;   // 선택된 학생이 없으면 예시 미리보기를 보여줌
+  if (sample) {
+    const m = menu.find(x => x.name === '아메리카노' && x.temp === 'ice') || menu[0];
+    pages.push([{id: 'sample', name: '홍길동', cart: m ? {[m.id]: 1} : {}}]);
+  }
   $('#sheets').innerHTML = pages.map((pg, i) => `
-    <div class="sheet-no">${i + 1}쪽</div>
+    <div class="sheet-no">${sample ? '예시 미리보기 · 학생이 주문하면 이렇게 나와요' : `${i + 1}쪽`}</div>
     <div class="sheet">${pg.map(cardHTML).join('')}${'<div class="card blank"></div>'.repeat(4 - pg.length)}</div>`).join('');
   const n = selected().length;
   $('#pageInfo').textContent = n ? `${n}명 선택 · A4 ${pages.length}장 (${pages.map(p => p.length + '명').join(' + ')})` : '인쇄할 학생을 선택해 주세요';
