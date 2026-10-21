@@ -32,7 +32,7 @@
   /* ---------- 상단 ---------- */
   header.top {
     background: var(--yellow); display: flex; align-items: center; gap: 12px;
-    padding: 10px 18px; position: sticky; top: 0; z-index: 10;
+    padding: 10px max(18px, env(safe-area-inset-right, 0px)) 10px max(18px, env(safe-area-inset-left, 0px)); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
     box-shadow: 0 2px 6px rgba(0,0,0,.12);
   }
   header.top h1 { font-size: 22px; margin: 0; flex: 1; letter-spacing: -.5px; }
@@ -47,7 +47,8 @@
     padding: 1px 7px; margin-left: 4px;
   }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 16px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right, 0px)) 16px max(16px, env(safe-area-inset-left, 0px)); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 11; background: var(--yellow); }
   .view { display: none; }
   .view.on { display: block; }
 
@@ -110,7 +111,7 @@
 
   /* 한도 초과 안내 */
   .toast {
-    position: fixed; left: 50%; bottom: 36px; transform: translate(-50%, 30px);
+    position: fixed; left: 50%; bottom: calc(36px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 30px);
     background: #222; color: #fff; padding: 16px 26px; border-radius: 16px;
     font-size: 18px; font-weight: 700; opacity: 0; pointer-events: none;
     transition: all .2s; z-index: 50; text-align: center; max-width: 92vw;
@@ -208,6 +209,7 @@
   .pick { display: flex; align-items: center; gap: 6px; border: 2px solid #ddd; border-radius: 999px; padding: 7px 14px 7px 10px; font-size: 16px; cursor: pointer; background: #fff; }
   .pick.on { border-color: var(--yellow-d); background: #fff8d6; }
   .pick.off { opacity: .45; cursor: default; }
+  .btn.warn { background: var(--red); color: #fff; }
   .pick input { width: 18px; height: 18px; accent-color: #222; }
   .print-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .print-actions .btn { padding: 11px 16px; }
@@ -294,6 +296,7 @@
         <button class="btn dark" id="printBtn">🖨 인쇄하기</button>
         <button class="btn yellow" id="saveImgBtn">🖼 이미지 저장</button>
         <div class="hint" id="pageInfo"></div>
+        <div class="hint" id="printTip"></div>
       </div>
     </div>
     <div id="sheets"></div>
@@ -354,6 +357,13 @@ function photoHTML(m) {
   return `<div class="photo">${src ? `<img src="${src}" alt="">` : esc(m.emoji || '☕')}</div>`;
 }
 
+// 앱 안(아티팩트)에서는 confirm() 창이 뜨지 않아, 같은 버튼을 한 번 더 눌러야 실행되게 함
+function armed(btn, text) {
+  if (btn.dataset.armed) return true;
+  const orig = btn.textContent; btn.dataset.armed = '1'; btn.textContent = text; btn.classList.add('warn');
+  setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = orig; btn.classList.remove('warn'); } }, 3000);
+  return false;
+}
 function save() {
   store.set('mc_students', students); store.set('mc_cur', curId); store.set('mc_sel', sel);
 }
@@ -486,6 +496,7 @@ function renderPrint() {
   const n = selected().length;
   $('#pageInfo').textContent = n ? `${n}명 선택 · A4 ${pages.length}장 (${pages.map(p => p.length + '명').join(' + ')})` : '인쇄할 학생을 선택해 주세요';
   $('#printBtn').disabled = $('#saveImgBtn').disabled = !n;
+  $('#printBtn').hidden = IN_VIEWER;   // 앱 안에서는 인쇄 창을 열 수 없음
 }
 
 // 메뉴 이름·가격이 줄바꿈 없이 한 줄에 들어가도록 글자 크기를 줄임
@@ -590,12 +601,15 @@ function drawCard(c, x, y, w, h, st, imgs) {
   }
   c.restore();
 }
+const IN_VIEWER = !!(window.claude && typeof window.claude.use === 'function');
 function download(canvas, name) {
   const a = document.createElement('a'); a.href = canvas.toDataURL('image/png'); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
 }
 async function saveImages() {
   const pages = chunk(selected(), 4); if (!pages.length) return;
+  let dl = null;
+  if (IN_VIEWER) { try { dl = await window.claude.use('downloads'); } catch {} if (!dl) return toast('이 화면에서는 이미지를 저장할 수 없어요. 파일로 열어서 사용해 주세요'); }
   toast('이미지를 만들고 있어요…');
   try { await document.fonts.load(`40px ${FONT}`, '가나다0123'); } catch {}
   const imgs = {};
@@ -605,7 +619,11 @@ async function saveImages() {
     const cv = document.createElement('canvas'); cv.width = PW; cv.height = PH;
     const c = cv.getContext('2d'); c.fillStyle = '#fff'; c.fillRect(0, 0, PW, PH);
     pages[i].forEach((st, k) => drawCard(c, (k % 2) * PW / 2, Math.floor(k / 2) * PH / 2, PW / 2, PH / 2, st, imgs));
-    setTimeout(() => download(cv, pages.length > 1 ? `megacoffee_menu_${i + 1}.png` : 'megacoffee_menu.png'), i * 500);
+    const fname = pages.length > 1 ? `megacoffee_menu_${i + 1}.png` : 'megacoffee_menu.png';
+    if (dl) {
+      const blob = await new Promise(r => cv.toBlob(r, 'image/png'));
+      try { await dl.save({filename: fname, data: blob}); } catch (err) { if (err && err.code === 'declined') return toast('저장을 취소했어요'); return toast('이미지를 저장하지 못했어요'); }
+    } else setTimeout(() => download(cv, fname), i * 500);
   }
   toast(`🖼 이미지 ${pages.length}장을 저장했어요`);
 }
@@ -659,13 +677,13 @@ document.addEventListener('click', e => {
   if (t.dataset.open) { curId = t.dataset.open; save(); render(); return showView('order'); }
   if (t.dataset.delstu) {
     const st = students.find(s => s.id === t.dataset.delstu);
-    if (!st || !confirm(`${st.name} 학생과 주문 내용을 삭제할까요?`)) return;
+    if (!st || !armed(t, '한 번 더 누르면 삭제')) return;
     students = students.filter(s => s.id !== st.id); delete sel[st.id]; if (curId === st.id) curId = null;
     save(); return render();
   }
   if (t.dataset.photo) { photoTarget = t.dataset.photo; $('#file').click(); return; }
   if (t.dataset.del) {
-    if (!confirm('이 메뉴를 삭제할까요?')) return;
+    if (!armed(t, '한 번 더 누르면 삭제')) return;
     menu = menu.filter(m => m.id !== t.dataset.del); students.forEach(s => delete s.cart[t.dataset.del]);
     saveMenu(); save(); renderEdit(); render(); return;
   }
@@ -683,8 +701,8 @@ $('#addItem').onclick = () => {
   saveMenu(); renderEdit(); render();
   window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
 };
-$('#resetMenu').onclick = () => {
-  if (!confirm('수정한 메뉴와 사진이 모두 사라지고, 학생들이 담은 메뉴도 비워져요. 계속할까요?')) return;
+$('#resetMenu').onclick = e => {
+  if (!armed(e.currentTarget, '메뉴·사진·주문이 모두 초기화돼요. 한 번 더 누르세요')) return;
   menu = DEFAULT_MENU.map(m => ({...m})); students.forEach(s => s.cart = {});
   saveMenu(); save(); renderEdit(); render();
 };
@@ -711,6 +729,7 @@ function showView(v) {
   window.scrollTo(0, 0);
 }
 
+$('#printTip').textContent = IN_VIEWER ? '앱에서는 인쇄 대신 “이미지 저장”을 눌러 저장한 뒤, 그 이미지를 A4로 인쇄해 주세요.' : '인쇄 창에서 용지 A4, 배율 100%, 여백 없음으로 맞춰 주세요.';
 renderCats(); render();
 if (document.fonts) document.fonts.ready.then(fitText);
 </script>
