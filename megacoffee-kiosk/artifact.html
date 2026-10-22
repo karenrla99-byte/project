@@ -184,6 +184,9 @@
   .start-box h2 { margin: 0 0 14px; font-size: 24px; }
   #nameForm { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
   .name-in.big { font-size: 22px; padding: 12px 16px; width: min(100%, 280px); text-align: center; }
+  .limit-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; margin: -8px auto 22px; font-size: 17px; }
+  .limit-row .name-in { width: 120px; text-align: right; font-size: 18px; }
+  .limit-row small { color: var(--mute); font-size: 13px; flex-basis: 100%; text-align: center; }
   .sub-title { font-size: 18px; margin: 4px 2px 10px; }
   .stu-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
   .stu { background: #fff; border-radius: 16px; padding: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 6px; }
@@ -253,6 +256,12 @@
         <button class="btn yellow" type="submit">주문 시작 ▶</button>
       </form>
     </div>
+    <div class="limit-row">
+      <label for="limitIn">💰 한도 금액</label>
+      <input class="name-in" id="limitIn" type="number" min="500" max="100000" step="500" inputmode="numeric">
+      <span>원</span>
+      <small>학생마다 이 금액 안에서 담을 수 있어요. 바꾸기 전에 담은 메뉴는 그대로 남아요.</small>
+    </div>
     <h3 class="sub-title">학생 목록 (<span id="stuCount">0</span>명)</h3>
     <div class="stu-list" id="stuList"></div>
   </section>
@@ -269,8 +278,8 @@
         <h2 id="cartTitle">🛒 내가 담은 메뉴</h2>
         <div id="cartLines"></div>
         <div class="gauge" id="gauge"><i></i></div>
-        <div class="sum"><span>사용 가능 금액</span><span>5,000원</span></div>
-        <div class="sum"><span>남은 금액</span><span id="left">5,000원</span></div>
+        <div class="sum"><span>사용 가능 금액</span><span id="limitTxt">4,000원</span></div>
+        <div class="sum"><span>남은 금액</span><span id="left">4,000원</span></div>
         <div class="sum big"><span>합계</span><span id="total">0원</span></div>
         <div class="actions">
           <button class="btn gray" id="clear">비우기</button>
@@ -315,7 +324,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const LIMIT = 5000;
 const CATS = ["커피", "라떼", "논커피", "프라페·스무디", "에이드", "티", "디저트"];
 
 // 매장 앱(메가MGC커피 강릉포남점) 캡처 가격 기준, 5,000원 이하만. 실제 키오스크와 다르면 '메뉴 편집'에서 수정
@@ -328,6 +336,7 @@ const store = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { toast('사진이 너무 커서 저장하지 못했어요'); } },
 };
 
+let limit = store.get('mc_limit', 4000);       // 학생 한 명이 쓸 수 있는 금액
 let menu = store.get('mc_menu4', null) || DEFAULT_MENU;
 let students = store.get('mc_students', []);   // [{id, name, cart: {메뉴id: 수량}}]
 let curId = store.get('mc_cur', null);
@@ -389,8 +398,8 @@ function summary(st) {
 /* ---------- 담기 ---------- */
 function add(id) {
   const st = cur(), m = byId(id); if (!st || !m) return;
-  if (total() + m.price > LIMIT) {
-    toast(`🚫 <b>5,000원</b>이 넘어서 더 담을 수 없어요!<br><small>(담으면 ${won(total() + m.price)} · 남은 금액 ${won(LIMIT - total())})</small>`);
+  if (total() + m.price > limit) {
+    toast(`🚫 한도 <b>${won(limit)}</b>을 넘어서 더 담을 수 없어요!<br><small>지금 ${won(total())} · 남은 금액 ${won(limit - total())} · 이 메뉴 ${won(m.price)}</small>`);
     return;
   }
   st.cart[id] = (st.cart[id] || 0) + 1; save(); render();
@@ -408,7 +417,7 @@ function renderCats() {
     `<button class="cat ${c === curCat ? 'on' : ''}" data-c="${c}">${c}</button>`).join('');
 }
 function renderGrid() {
-  const left = LIMIT - total();
+  const left = limit - total();
   const list = menu.filter(m => curCat === '전체' || m.cat === curCat);
   $('#grid').innerHTML = list.map(m => `
     <button class="item ${m.price > left ? 'dim' : ''}" data-id="${m.id}">
@@ -433,9 +442,10 @@ function renderCart() {
     </div>`).join('') : '<div class="cart-empty">메뉴를 눌러서 담아 보세요</div>';
   const t = total();
   $('#total').textContent = won(t);
-  $('#left').textContent = won(LIMIT - t);
-  $('#gauge > i').style.width = Math.min(100, t / LIMIT * 100) + '%';
-  $('#gauge').classList.toggle('full', t >= LIMIT);
+  $('#limitTxt').textContent = won(limit);
+  $('#left').textContent = won(limit - t);
+  $('#gauge > i').style.width = Math.min(100, t / limit * 100) + '%';
+  $('#gauge').classList.toggle('full', t >= limit);
   $('#done').disabled = !es.length;
   $('#clear').disabled = !st;
 }
@@ -469,7 +479,7 @@ function cardHTML(st) {
         <div class="meta"><span class="fx">${won(m.price)} × ${q}개 = <b>${won(m.price * q)}</b></span></div></div>
       </div>`).join('')}
     </div>
-    <div class="foot"><span class="l">합계 (한도 5,000원)</span><span class="v">${won(totalOf(st))}</span></div>
+    <div class="foot"><span class="l">합계 (한도 ${won(limit)})</span><span class="v">${won(totalOf(st))}</span></div>
   </div>`;
 }
 function renderPrint() {
@@ -575,7 +585,7 @@ function drawCard(c, x, y, w, h, st, imgs) {
   // 합계
   const fy = h - P - w * 0.13;
   c.fillStyle = '#222'; c.fillRect(P, fy, w - 2 * P, w * 0.008);
-  c.font = `${w * 0.045}px ${FONT}`; c.textBaseline = 'alphabetic'; c.fillText('합계 (한도 5,000원)', P, fy + w * 0.095);
+  c.font = `${w * 0.045}px ${FONT}`; c.textBaseline = 'alphabetic'; c.fillText(`합계 (한도 ${won(limit)})`, P, fy + w * 0.095);
   c.font = `${w * 0.09}px ${FONT}`; c.textAlign = 'right'; c.fillText(won(totalOf(st)), w - P, fy + w * 0.105); c.textAlign = 'left';
   // 메뉴
   const top = ny + w * 0.07, bot = fy - w * 0.02, rh = bot - top, tw = w - 2 * P, n = es.length;
@@ -684,6 +694,12 @@ document.addEventListener('click', e => {
   }
 });
 $('#nameForm').onsubmit = e => { e.preventDefault(); const v = $('#nameIn').value; $('#nameIn').value = ''; startStudent(v); };
+$('#limitIn').value = limit;
+$('#limitIn').onchange = e => {
+  const v = Math.round(parseInt(e.target.value) / 100) * 100;
+  limit = v >= 500 && v <= 100000 ? v : limit; e.target.value = limit;
+  store.set('mc_limit', limit); render(); toast(`한도를 ${won(limit)}으로 바꿨어요`);
+};
 $('#clear').onclick = () => { const st = cur(); if (st) { st.cart = {}; save(); render(); } };
 $('#done').onclick = () => { sel[curId] = true; save(); render(); showView('start'); toast('✅ 주문이 저장됐어요. 다음 학생 이름을 입력해 주세요'); $('#nameIn').focus(); };
 $('#picks').addEventListener('change', e => { const id = e.target.dataset.pick; if (!id) return; sel[id] = e.target.checked; save(); renderPrint(); fitText(); });
