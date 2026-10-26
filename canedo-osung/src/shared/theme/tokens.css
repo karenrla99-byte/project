@@ -1,0 +1,29 @@
+/* 공통 디자인 토큰 — 정은만 수정 (shared/) */
+:root {
+  --navy: #1b2a5b;
+  --white: #ffffff;
+  --cream: #fffdf2;
+  --cream-sh: #ede6cf;
+  --yellow: #ffd84d;
+  --red: #e5484d;
+  --sky: #8fd3f4;
+  --green: #6cc070;
+  --stage-w: 1280px;
+  --stage-h: 720px;
+  --font-scale: 1;
+}
+html, body, #root { margin: 0; height: 100%; background: #0d1530; }
+body { font-family: 'Galmuri11', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: var(--navy); }
+* { box-sizing: border-box; }
+img, canvas { image-rendering: pixelated; }
+
+.stage-outer { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.stage { position: relative; width: var(--stage-w); height: var(--stage-h); background: var(--cream); overflow: hidden; transform-origin: center center; }
+.stage-footer { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; font-size: calc(14px * var(--font-scale)); color: var(--navy); opacity: .85; pointer-events: none; }
+.rotate-hint { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: var(--navy); color: var(--white); font-size: 24px; z-index: 99; }
+@media (orientation: portrait) { .rotate-hint { display: flex; } }
+
+.win { background: var(--cream); border: 6px solid var(--navy); box-shadow: 0 0 0 3px var(--white) inset; padding: 20px 24px; font-size: calc(22px * var(--font-scale)); }
+.btn { font: inherit; font-size: calc(20px * var(--font-scale)); color: var(--navy); background: var(--white); border: 4px solid var(--navy); padding: 10px 20px; cursor: pointer; }
+.btn:hover, .btn:focus-visible { background: var(--yellow); outline: 3px solid var(--navy); outline-offset: 2px; }
+.btn.accent { border-color: var(--red); }

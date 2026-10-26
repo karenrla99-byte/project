@@ -1,0 +1,15 @@
+# 폴더별 담당자. 아이디를 알게 되면 @OWNER 등을 실제 GitHub 아이디로 바꾸세요.
+# (브랜치 보호에서 "Code owners 승인 필요"를 켜야 실제로 막힙니다.)
+*                       @OWNER
+/src/shared/            @OWNER
+/src/flow/              @OWNER
+/docs/                  @OWNER
+/src/parts/opening/       @OWNER
+/src/parts/stage-loading/ @OWNER
+/src/parts/bridge/        @OWNER
+/src/parts/ending/        @OWNER
+/src/parts/ranking/       @OWNER
+/src/parts/game-1/      @MEMBER1
+/src/parts/game-2/      @MEMBER2
+/src/parts/game-3/      @MEMBER3
+/src/parts/game-4/      @MEMBER4
